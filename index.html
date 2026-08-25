@@ -70,9 +70,18 @@
       cursor: pointer;
     }
 
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
     .secondary-button {
       background: #e9e9ee;
       color: #1d1d1f;
+    }
+
+    .danger-button {
+      background: #ff3b30;
     }
 
     #projectArea {
@@ -87,6 +96,14 @@
       border-radius: 10px;
       background: #f2f2f7;
       margin-top: 12px;
+    }
+
+    #storageStatus {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      background: #eef6ff;
+      font-size: 14px;
     }
 
     #imageCount {
@@ -112,22 +129,16 @@
 
     .preview-item {
       position: relative;
-
       overflow: hidden;
-
       border-radius: 8px;
-
       background: #eee;
-
       aspect-ratio: 9 / 16;
     }
 
     .preview-item img {
       width: 100%;
       height: 100%;
-
       object-fit: cover;
-
       display: block;
     }
 
@@ -141,11 +152,9 @@
       color: white;
 
       padding: 4px 8px;
-
       border-radius: 20px;
 
       font-size: 12px;
-
       font-weight: 600;
     }
 
@@ -169,7 +178,10 @@
         與 AI 分析。
       </p>
 
-      <button onclick="createProject()">
+      <button
+        id="createProjectButton"
+        onclick="createProject()"
+      >
         ＋ 建立新報告
       </button>
 
@@ -181,12 +193,19 @@
           ✅ 專案已建立
         </div>
 
-        <button onclick="selectImages()">
+        <div id="storageStatus">
+          正在開啟本機資料庫…
+        </div>
+
+        <button
+          id="addButton"
+          onclick="selectImages()"
+        >
           ＋ 加入一批截圖
         </button>
 
         <button
-          class="secondary-button"
+          class="danger-button"
           onclick="clearImages()"
         >
           清除全部截圖
@@ -218,50 +237,233 @@
 
   <script>
 
-    const fileInput =
-      document.getElementById("fileInput");
-
-    const imageCount =
-      document.getElementById("imageCount");
-
-    const batchInfo =
-      document.getElementById("batchInfo");
-
-    const previewGrid =
-      document.getElementById("previewGrid");
-
-
     /*
-      目前所有已加入的截圖
-      Phase 1-B 只存在記憶體。
-
-      下一階段才會改成 IndexedDB。
+      =========================
+      IndexedDB 基本設定
+      =========================
     */
+
+    const DB_NAME =
+      "ScreenshotReportDB";
+
+    const DB_VERSION =
+      1;
+
+    const IMAGE_STORE =
+      "images";
+
+
+    let db = null;
+
     let projectImages = [];
 
-
-    /*
-      記錄加入了幾個批次。
-    */
     let batchCount = 0;
 
 
-    function createProject() {
+    /*
+      =========================
+      DOM
+      =========================
+    */
 
+    const fileInput =
+      document.getElementById(
+        "fileInput"
+      );
+
+    const projectArea =
       document.getElementById(
         "projectArea"
-      ).style.display = "block";
+      );
+
+    const imageCount =
+      document.getElementById(
+        "imageCount"
+      );
+
+    const batchInfo =
+      document.getElementById(
+        "batchInfo"
+      );
+
+    const previewGrid =
+      document.getElementById(
+        "previewGrid"
+      );
+
+    const storageStatus =
+      document.getElementById(
+        "storageStatus"
+      );
+
+    const addButton =
+      document.getElementById(
+        "addButton"
+      );
+
+
+    /*
+      =========================
+      網頁啟動
+      =========================
+    */
+
+    window.addEventListener(
+      "DOMContentLoaded",
+      startApp
+    );
+
+
+    async function startApp() {
+
+      try {
+
+        db =
+          await openDatabase();
+
+        storageStatus.textContent =
+          "✅ 本機資料庫已啟用";
+
+        await loadImagesFromDatabase();
+
+      }
+      catch (error) {
+
+        console.error(error);
+
+        storageStatus.textContent =
+          "❌ 無法開啟本機資料庫";
+
+        alert(
+          "IndexedDB 啟動失敗：" +
+          error.message
+        );
+
+      }
 
     }
 
 
+    /*
+      =========================
+      建立 / 開啟 IndexedDB
+      =========================
+    */
+
+    function openDatabase() {
+
+      return new Promise(
+        (resolve, reject) => {
+
+          const request =
+            indexedDB.open(
+              DB_NAME,
+              DB_VERSION
+            );
+
+
+          request.onupgradeneeded =
+            function(event) {
+
+              const database =
+                event.target.result;
+
+
+              if (
+                !database.objectStoreNames
+                  .contains(IMAGE_STORE)
+              ) {
+
+                const store =
+                  database.createObjectStore(
+                    IMAGE_STORE,
+                    {
+                      keyPath: "id",
+                      autoIncrement: true
+                    }
+                  );
+
+
+                store.createIndex(
+                  "sequence",
+                  "sequence",
+                  {
+                    unique: true
+                  }
+                );
+
+
+                store.createIndex(
+                  "batchNumber",
+                  "batchNumber",
+                  {
+                    unique: false
+                  }
+                );
+
+              }
+
+            };
+
+
+          request.onsuccess =
+            function(event) {
+
+              resolve(
+                event.target.result
+              );
+
+            };
+
+
+          request.onerror =
+            function(event) {
+
+              reject(
+                event.target.error
+              );
+
+            };
+
+        }
+      );
+
+    }
+
+
+    /*
+      =========================
+      建立專案
+      =========================
+    */
+
+    function createProject() {
+
+      projectArea.style.display =
+        "block";
+
+    }
+
+
+    /*
+      =========================
+      選擇圖片
+      =========================
+    */
+
     function selectImages() {
 
-      /*
-        清空 input 的舊 value，
-        讓使用者再次選同一批檔案時，
-        change 事件仍可正常觸發。
-      */
+      if (!db) {
+
+        alert(
+          "本機資料庫尚未準備完成。"
+        );
+
+        return;
+
+      }
+
+
       fileInput.value = "";
 
       fileInput.click();
@@ -275,10 +477,18 @@
     );
 
 
-    function handleFiles(event) {
+    /*
+      =========================
+      加入新批次
+      =========================
+    */
+
+    async function handleFiles(event) {
 
       const files =
-        Array.from(event.target.files);
+        Array.from(
+          event.target.files
+        );
 
 
       if (files.length === 0) {
@@ -288,45 +498,279 @@
       }
 
 
-      batchCount++;
+      addButton.disabled = true;
+
+      storageStatus.textContent =
+        `正在儲存 ${files.length} 張截圖…`;
+
+
+      try {
+
+        const newBatchNumber =
+          batchCount + 1;
+
+        let nextSequence =
+          projectImages.length + 1;
+
+
+        for (const file of files) {
+
+          const record = {
+
+            sequence:
+              nextSequence,
+
+            batchNumber:
+              newBatchNumber,
+
+            name:
+              file.name,
+
+            type:
+              file.type,
+
+            size:
+              file.size,
+
+            lastModified:
+              file.lastModified,
+
+            createdAt:
+              Date.now(),
+
+            blob:
+              file
+
+          };
+
+
+          const id =
+            await saveImageRecord(
+              record
+            );
+
+
+          record.id = id;
+
+
+          projectImages.push(
+            record
+          );
+
+
+          nextSequence++;
+
+        }
+
+
+        batchCount =
+          newBatchNumber;
+
+
+        storageStatus.textContent =
+          `✅ 已永久儲存這一批 ${files.length} 張截圖`;
+
+
+        updateStatus(
+          files.length
+        );
+
+
+        renderImages();
+
+      }
+      catch (error) {
+
+        console.error(error);
+
+        storageStatus.textContent =
+          "❌ 儲存圖片失敗";
+
+        alert(
+          "圖片儲存失敗：" +
+          error.message
+        );
+
+      }
+      finally {
+
+        addButton.disabled =
+          false;
+
+      }
+
+    }
+
+
+    /*
+      =========================
+      儲存單一圖片
+      =========================
+    */
+
+    function saveImageRecord(record) {
+
+      return new Promise(
+        (resolve, reject) => {
+
+          const transaction =
+            db.transaction(
+              IMAGE_STORE,
+              "readwrite"
+            );
+
+
+          const store =
+            transaction.objectStore(
+              IMAGE_STORE
+            );
+
+
+          const request =
+            store.add(record);
+
+
+          request.onsuccess =
+            function() {
+
+              resolve(
+                request.result
+              );
+
+            };
+
+
+          request.onerror =
+            function() {
+
+              reject(
+                request.error
+              );
+
+            };
+
+        }
+      );
+
+    }
+
+
+    /*
+      =========================
+      重新載入資料庫圖片
+      =========================
+    */
+
+    function getAllImageRecords() {
+
+      return new Promise(
+        (resolve, reject) => {
+
+          const transaction =
+            db.transaction(
+              IMAGE_STORE,
+              "readonly"
+            );
+
+
+          const store =
+            transaction.objectStore(
+              IMAGE_STORE
+            );
+
+
+          const request =
+            store.getAll();
+
+
+          request.onsuccess =
+            function() {
+
+              resolve(
+                request.result
+              );
+
+            };
+
+
+          request.onerror =
+            function() {
+
+              reject(
+                request.error
+              );
+
+            };
+
+        }
+      );
+
+    }
+
+
+    async function loadImagesFromDatabase() {
+
+      const records =
+        await getAllImageRecords();
+
+
+      records.sort(
+        (a, b) =>
+          a.sequence -
+          b.sequence
+      );
+
+
+      projectImages =
+        records;
+
+
+      if (
+        projectImages.length === 0
+      ) {
+
+        batchCount = 0;
+
+        updateStatus(0);
+
+        return;
+
+      }
+
+
+      batchCount =
+        Math.max(
+          ...projectImages.map(
+            item =>
+              item.batchNumber || 1
+          )
+        );
 
 
       /*
-        把這一批加入既有陣列尾端，
-        不清除上一批。
+        有舊資料時，
+        自動顯示專案。
       */
-      files.forEach((file) => {
-
-        projectImages.push({
-          id: createImageId(),
-          file: file
-        });
-
-      });
+      projectArea.style.display =
+        "block";
 
 
-      updateStatus(
-        files.length
-      );
+      storageStatus.textContent =
+        `✅ 已從手機載入 ${projectImages.length} 張截圖`;
 
+
+      updateStatus(0);
 
       renderImages();
 
     }
 
 
-    function createImageId() {
-
-      return (
-        Date.now().toString() +
-        "-" +
-        Math.random()
-          .toString(36)
-          .slice(2)
-      );
-
-    }
-
+    /*
+      =========================
+      更新狀態
+      =========================
+    */
 
     function updateStatus(lastBatchSize) {
 
@@ -334,20 +778,43 @@
         `目前共 ${projectImages.length} 張截圖`;
 
 
-      batchInfo.textContent =
-        `已加入 ${batchCount} 批，` +
-        `上一批加入 ${lastBatchSize} 張`;
+      if (
+        projectImages.length === 0
+      ) {
+
+        batchInfo.textContent =
+          "尚未加入任何批次";
+
+        return;
+
+      }
+
+
+      if (lastBatchSize > 0) {
+
+        batchInfo.textContent =
+          `已加入 ${batchCount} 批，` +
+          `上一批加入 ${lastBatchSize} 張`;
+
+      }
+      else {
+
+        batchInfo.textContent =
+          `目前共有 ${batchCount} 個批次`;
+
+      }
 
     }
 
 
+    /*
+      =========================
+      顯示縮圖
+      =========================
+    */
+
     function renderImages() {
 
-      /*
-        先清除舊縮圖，
-        再按照 projectImages
-        的目前順序重新畫一次。
-      */
       previewGrid.innerHTML = "";
 
 
@@ -355,18 +822,25 @@
         (imageData, index) => {
 
           const item =
-            document.createElement("div");
+            document.createElement(
+              "div"
+            );
 
           item.className =
             "preview-item";
 
 
           const image =
-            document.createElement("img");
+            document.createElement(
+              "img"
+            );
 
 
           const number =
-            document.createElement("div");
+            document.createElement(
+              "div"
+            );
+
 
           number.className =
             "number";
@@ -377,7 +851,7 @@
 
           const imageURL =
             URL.createObjectURL(
-              imageData.file
+              imageData.blob
             );
 
 
@@ -385,20 +859,23 @@
             imageURL;
 
 
-          image.onload = function() {
+          image.onload =
+            function() {
 
-            URL.revokeObjectURL(
-              imageURL
-            );
+              URL.revokeObjectURL(
+                imageURL
+              );
 
-          };
+            };
 
 
           item.appendChild(image);
 
           item.appendChild(number);
 
-          previewGrid.appendChild(item);
+          previewGrid.appendChild(
+            item
+          );
 
         }
       );
@@ -406,11 +883,69 @@
     }
 
 
-    function clearImages() {
+    /*
+      =========================
+      清除全部 IndexedDB 圖片
+      =========================
+    */
+
+    function clearDatabaseImages() {
+
+      return new Promise(
+        (resolve, reject) => {
+
+          const transaction =
+            db.transaction(
+              IMAGE_STORE,
+              "readwrite"
+            );
+
+
+          const store =
+            transaction.objectStore(
+              IMAGE_STORE
+            );
+
+
+          const request =
+            store.clear();
+
+
+          request.onsuccess =
+            function() {
+
+              resolve();
+
+            };
+
+
+          request.onerror =
+            function() {
+
+              reject(
+                request.error
+              );
+
+            };
+
+        }
+      );
+
+    }
+
+
+    async function clearImages() {
+
+      if (!db) {
+
+        return;
+
+      }
+
 
       const confirmed =
         confirm(
-          "確定要清除目前所有截圖嗎？"
+          "確定要永久刪除目前所有截圖嗎？"
         );
 
 
@@ -421,17 +956,36 @@
       }
 
 
-      projectImages = [];
+      try {
 
-      batchCount = 0;
+        await clearDatabaseImages();
 
-      previewGrid.innerHTML = "";
 
-      imageCount.textContent =
-        "目前共 0 張截圖";
+        projectImages = [];
 
-      batchInfo.textContent =
-        "尚未加入任何批次";
+        batchCount = 0;
+
+
+        previewGrid.innerHTML = "";
+
+
+        updateStatus(0);
+
+
+        storageStatus.textContent =
+          "✅ 所有本機截圖已刪除";
+
+      }
+      catch (error) {
+
+        console.error(error);
+
+        alert(
+          "刪除失敗：" +
+          error.message
+        );
+
+      }
 
     }
 
