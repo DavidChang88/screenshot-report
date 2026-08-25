@@ -2,12 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Screenshot Report</title>
 
   <style>
@@ -17,12 +12,7 @@
 
     body {
       margin: 0;
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: #f5f5f7;
       color: #1d1d1f;
     }
@@ -60,13 +50,10 @@
       border-radius: 12px;
       padding: 16px;
       margin-top: 12px;
-
       background: #007aff;
       color: white;
-
       font-size: 17px;
       font-weight: 600;
-
       cursor: pointer;
     }
 
@@ -125,6 +112,10 @@
       font-size: 14px;
     }
 
+    #qualitySummary {
+      line-height: 1.5;
+    }
+
     .order-help {
       margin-top: 14px;
       padding: 10px;
@@ -137,10 +128,7 @@
 
     #previewGrid {
       display: grid;
-
-      grid-template-columns:
-        repeat(3, minmax(0, 1fr));
-
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 8px;
       margin-top: 16px;
     }
@@ -160,65 +148,53 @@
       display: block;
     }
 
-    .number {.image-meta {
-  position: absolute;
-
-  top: 5px;
-  right: 5px;
-
-  max-width: 72%;
-
-  padding: 4px 6px;
-
-  border-radius: 7px;
-
-  background: rgba(0,0,0,0.76);
-  color: white;
-
-  font-size: 9px;
-  line-height: 1.35;
-
-  text-align: right;
-
-  white-space: pre-line;
-}
+    .number {
       position: absolute;
-
       top: 5px;
       left: 5px;
-
       background: rgba(0,0,0,0.78);
       color: white;
-
       padding: 4px 8px;
       border-radius: 20px;
-
       font-size: 12px;
       font-weight: 700;
+      z-index: 2;
+    }
+
+    .image-meta {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      max-width: 72%;
+      padding: 4px 6px;
+      border-radius: 7px;
+      background: rgba(0,0,0,0.76);
+      color: white;
+      font-size: 9px;
+      line-height: 1.35;
+      text-align: right;
+      white-space: pre-line;
+      z-index: 2;
     }
 
     .preview-controls {
       position: absolute;
-
       left: 5px;
       right: 5px;
       bottom: 5px;
-
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 4px;
+      z-index: 2;
     }
 
     .preview-control {
       width: 100%;
       margin: 0;
       padding: 7px 2px;
-
       border-radius: 7px;
-
       background: rgba(0,0,0,0.78);
       color: white;
-
       font-size: 14px;
     }
 
@@ -233,11 +209,8 @@
 </head>
 
 <body>
-
   <div class="container">
-
     <div class="card">
-
       <h1>Screenshot Report</h1>
 
       <p>
@@ -251,7 +224,6 @@
       </button>
 
       <div id="projectArea">
-
         <h2>我的第一份報告</h2>
 
         <div class="status">
@@ -263,18 +235,13 @@
         </div>
 
         <div id="storagePanel">
-
-          <strong>
-            本機儲存空間
-          </strong>
+          <strong>本機儲存空間</strong>
 
           <div id="storageUsage">
             正在檢查…
           </div>
 
-          <div id="storageHealth">
-          </div>
-
+          <div id="storageHealth"></div>
         </div>
 
         <button
@@ -312,12 +279,14 @@
         <div id="batchInfo">
           尚未加入任何批次
         </div>
+
         <div
-  id="qualitySummary"
-  class="status"
->
-  圖片品質：等待檢查
-   </div>
+          id="qualitySummary"
+          class="status"
+        >
+          圖片品質：等待檢查
+        </div>
+
         <div class="order-help">
           ◀ = 往前移一格　
           ▶ = 往後移一格　
@@ -325,103 +294,42 @@
         </div>
 
         <div id="previewGrid"></div>
-
       </div>
-
     </div>
-
   </div>
 
-
   <script>
-
-    const DB_NAME =
-      "ScreenshotReportDB";
-
-    /*
-      Phase 1-E：
-      資料庫版本升級至 2，
-      新增 settings object store。
-    */
-    const DB_VERSION =
-      2;
-
-    const IMAGE_STORE =
-      "images";
-
-    const SETTINGS_STORE =
-      "settings";
-
+    const DB_NAME = "ScreenshotReportDB";
+    const DB_VERSION = 2;
+    const IMAGE_STORE = "images";
+    const SETTINGS_STORE = "settings";
 
     let db = null;
-
     let projectImages = [];
-
     let batchCount = 0;
 
+    const fileInput = document.getElementById("fileInput");
+    const projectArea = document.getElementById("projectArea");
+    const imageCount = document.getElementById("imageCount");
+    const batchInfo = document.getElementById("batchInfo");
+    const qualitySummary = document.getElementById("qualitySummary");
+    const previewGrid = document.getElementById("previewGrid");
+    const storageStatus = document.getElementById("storageStatus");
+    const addButton = document.getElementById("addButton");
 
-    const fileInput =
-      document.getElementById(
-        "fileInput"
-      );
-
-    const projectArea =
-      document.getElementById(
-        "projectArea"
-      );
-
-    const imageCount =
-      document.getElementById(
-        "imageCount"
-      );
-
-    const batchInfo =
-      document.getElementById(
-        "batchInfo"
-      );
-    const qualitySummary =
-  document.getElementById(
-    "qualitySummary"
-  );
-    const previewGrid =
-      document.getElementById(
-        "previewGrid"
-      );
-
-    const storageStatus =
-      document.getElementById(
-        "storageStatus"
-      );
-
-    const addButton =
-      document.getElementById(
-        "addButton"
-      );
-
-
-    window.addEventListener(
-      "DOMContentLoaded",
-      startApp
-    );
-
+    window.addEventListener("DOMContentLoaded", startApp);
 
     async function startApp() {
-
       try {
-
-        db =
-          await openDatabase();
+        db = await openDatabase();
 
         storageStatus.textContent =
           "✅ 本機資料庫已啟用";
 
         await loadImagesFromDatabase();
-
         await updateStorageInfo();
-
       }
       catch (error) {
-
         console.error(error);
 
         storageStatus.textContent =
@@ -431,291 +339,163 @@
           "IndexedDB 啟動失敗：" +
           error.message
         );
-
       }
-
     }
-
 
     function openDatabase() {
-
-      return new Promise(
-        (resolve, reject) => {
-
-          const request =
-            indexedDB.open(
-              DB_NAME,
-              DB_VERSION
-            );
-
-
-          request.onupgradeneeded =
-            function(event) {
-
-              const database =
-                event.target.result;
-
-
-              if (
-                !database.objectStoreNames
-                  .contains(IMAGE_STORE)
-              ) {
-
-                const store =
-                  database.createObjectStore(
-                    IMAGE_STORE,
-                    {
-                      keyPath: "id",
-                      autoIncrement: true
-                    }
-                  );
-
-
-                store.createIndex(
-                  "sequence",
-                  "sequence",
-                  {
-                    unique: true
-                  }
-                );
-
-
-                store.createIndex(
-                  "batchNumber",
-                  "batchNumber",
-                  {
-                    unique: false
-                  }
-                );
-
-              }
-
-
-              /*
-                Phase 1-E 新增：
-                小型設定資料庫。
-
-                圖片本身仍放 images，
-                排序只儲存圖片 ID 陣列。
-              */
-              if (
-                !database.objectStoreNames
-                  .contains(SETTINGS_STORE)
-              ) {
-
-                database.createObjectStore(
-                  SETTINGS_STORE,
-                  {
-                    keyPath: "key"
-                  }
-                );
-
-              }
-
-            };
-
-
-          request.onsuccess =
-            function(event) {
-
-              resolve(
-                event.target.result
-              );
-
-            };
-
-
-          request.onerror =
-            function(event) {
-
-              reject(
-                event.target.error
-              );
-
-            };
-
-        }
-      );
-
-    }
-
-
-    function createProject() {
-
-      projectArea.style.display =
-        "block";
-
-    }
-
-
-    function selectImages() {
-
-      if (!db) {
-
-        alert(
-          "本機資料庫尚未準備完成。"
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(
+          DB_NAME,
+          DB_VERSION
         );
 
-        return;
+        request.onupgradeneeded = function(event) {
+          const database = event.target.result;
 
+          if (
+            !database.objectStoreNames.contains(
+              IMAGE_STORE
+            )
+          ) {
+            const store = database.createObjectStore(
+              IMAGE_STORE,
+              {
+                keyPath: "id",
+                autoIncrement: true
+              }
+            );
+
+            store.createIndex(
+              "sequence",
+              "sequence",
+              { unique: true }
+            );
+
+            store.createIndex(
+              "batchNumber",
+              "batchNumber",
+              { unique: false }
+            );
+          }
+
+          if (
+            !database.objectStoreNames.contains(
+              SETTINGS_STORE
+            )
+          ) {
+            database.createObjectStore(
+              SETTINGS_STORE,
+              { keyPath: "key" }
+            );
+          }
+        };
+
+        request.onsuccess = function(event) {
+          resolve(event.target.result);
+        };
+
+        request.onerror = function(event) {
+          reject(event.target.error);
+        };
+      });
+    }
+
+    function createProject() {
+      projectArea.style.display = "block";
+    }
+
+    function selectImages() {
+      if (!db) {
+        alert("本機資料庫尚未準備完成。");
+        return;
       }
 
       fileInput.value = "";
-
       fileInput.click();
-
     }
-
 
     fileInput.addEventListener(
       "change",
       handleFiles
     );
 
-
     async function handleFiles(event) {
-
-      const files =
-        Array.from(
-          event.target.files
-        );
-
+      const files = Array.from(
+        event.target.files
+      );
 
       if (files.length === 0) {
-
         return;
-
       }
-
 
       addButton.disabled = true;
 
       storageStatus.textContent =
-        `正在儲存 ${files.length} 張截圖…`;
-
+        `正在分析並儲存 ${files.length} 張截圖…`;
 
       try {
-
         const newBatchNumber =
           batchCount + 1;
-
 
         const highestSequence =
           projectImages.length > 0
             ? Math.max(
                 ...projectImages.map(
-                  item =>
-                    item.sequence || 0
+                  item => item.sequence || 0
                 )
               )
             : 0;
 
-
         let nextSequence =
           highestSequence + 1;
 
+        let processed = 0;
 
         for (const file of files) {
+          processed++;
 
-       for (const file of files) {
+          storageStatus.textContent =
+            `正在分析新截圖 ${processed} / ${files.length}…`;
 
-  storageStatus.textContent =
-    `正在分析 ${
-      projectImages.length + 1
-    } 張以後的新截圖…`;
+          const analysis =
+            await analyzeImageFile(file);
 
-
-  const analysis =
-    await analyzeImageFile(
-      file
-    );
-
-
-  const record = {
-
-            sequence:
-              nextSequence,
-
-            batchNumber:
-              newBatchNumber,
-
-            name:
-              file.name,
-
-            type:
-              file.type,
-
-            size:
-              file.size,
-
-            lastModified:
-              file.lastModified,
-  width:
-  analysis.width,
-
-height:
-  analysis.height,
-
-fingerprint:
-  analysis.fingerprint,
-
-qualityIssues:
-  analysis.qualityIssues,
-  
-            createdAt:
-              Date.now(),
-
-            blob:
-              file
-
+          const record = {
+            sequence: nextSequence,
+            batchNumber: newBatchNumber,
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            lastModified: file.lastModified,
+            width: analysis.width,
+            height: analysis.height,
+            fingerprint: analysis.fingerprint,
+            qualityIssues: analysis.qualityIssues,
+            createdAt: Date.now(),
+            blob: file
           };
 
-
           const id =
-            await saveImageRecord(
-              record
-            );
-
+            await saveImageRecord(record);
 
           record.id = id;
 
-
-          projectImages.push(
-            record
-          );
-
-
+          projectImages.push(record);
           nextSequence++;
-
         }
 
+        batchCount = newBatchNumber;
 
-        batchCount =
-          newBatchNumber;
-
-
-        /*
-          保存目前顯示順序。
-        */
         await saveImageOrder();
-
 
         storageStatus.textContent =
           `✅ 已永久儲存這一批 ${files.length} 張截圖`;
 
-
-        updateStatus(
-          files.length
-        );
-
-
+        updateStatus(files.length);
         renderImages();
-
         await updateStorageInfo();
-
       }
       catch (error) {
-
         console.error(error);
 
         storageStatus.textContent =
@@ -725,314 +505,183 @@ qualityIssues:
           "圖片儲存失敗：" +
           error.message
         );
-
       }
       finally {
-
-        addButton.disabled =
-          false;
-
+        addButton.disabled = false;
       }
-
     }
-
 
     function saveImageRecord(record) {
-
-      return new Promise(
-        (resolve, reject) => {
-
-          const transaction =
-            db.transaction(
-              IMAGE_STORE,
-              "readwrite"
-            );
-
-
-          const store =
-            transaction.objectStore(
-              IMAGE_STORE
-            );
-
-
-          const request =
-            store.add(record);
-
-
-          request.onsuccess =
-            function() {
-
-              resolve(
-                request.result
-              );
-
-            };
-
-
-          request.onerror =
-            function() {
-
-              reject(
-                request.error
-              );
-
-            };
-
-        }
-      );
-
-    }
-
-
-    function getAllImageRecords() {
-
-      return new Promise(
-        (resolve, reject) => {
-
-          const transaction =
-            db.transaction(
-              IMAGE_STORE,
-              "readonly"
-            );
-
-
-          const store =
-            transaction.objectStore(
-              IMAGE_STORE
-            );
-
-
-          const request =
-            store.getAll();
-
-
-          request.onsuccess =
-            function() {
-
-              resolve(
-                request.result
-              );
-
-            };
-
-
-          request.onerror =
-            function() {
-
-              reject(
-                request.error
-              );
-
-            };
-
-        }
-      );
-
-    }
-
-
-    /*
-      =========================
-      Settings
-      =========================
-    */
-
-    function saveSetting(
-      key,
-      value
-    ) {
-
-      return new Promise(
-        (resolve, reject) => {
-
-          const transaction =
-            db.transaction(
-              SETTINGS_STORE,
-              "readwrite"
-            );
-
-
-          const store =
-            transaction.objectStore(
-              SETTINGS_STORE
-            );
-
-
-          store.put({
-            key: key,
-            value: value
-          });
-
-
-          transaction.oncomplete =
-            function() {
-
-              resolve();
-
-            };
-
-
-          transaction.onerror =
-            function() {
-
-              reject(
-                transaction.error
-              );
-
-            };
-
-
-          transaction.onabort =
-            function() {
-
-              reject(
-                transaction.error
-              );
-
-            };
-
-        }
-      );
-
-    }
-
-
-    function getSetting(key) {
-
-      return new Promise(
-        (resolve, reject) => {
-
-          const transaction =
-            db.transaction(
-              SETTINGS_STORE,
-              "readonly"
-            );
-
-
-          const store =
-            transaction.objectStore(
-              SETTINGS_STORE
-            );
-
-
-          const request =
-            store.get(key);
-
-
-          request.onsuccess =
-            function() {
-
-              resolve(
-                request.result || null
-              );
-
-            };
-
-
-          request.onerror =
-            function() {
-
-              reject(
-                request.error
-              );
-
-            };
-
-        }
-      );
-
-    }
-
-
-    async function saveImageOrder() {
-
-      const imageIds =
-        projectImages.map(
-          item => item.id
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(
+          IMAGE_STORE,
+          "readwrite"
         );
 
+        const store = transaction.objectStore(
+          IMAGE_STORE
+        );
+
+        const request = store.add(record);
+
+        request.onsuccess = function() {
+          resolve(request.result);
+        };
+
+        request.onerror = function() {
+          reject(request.error);
+        };
+      });
+    }
+
+    function updateImageRecord(record) {
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(
+          IMAGE_STORE,
+          "readwrite"
+        );
+
+        const store = transaction.objectStore(
+          IMAGE_STORE
+        );
+
+        const request = store.put(record);
+
+        request.onsuccess = function() {
+          resolve();
+        };
+
+        request.onerror = function() {
+          reject(request.error);
+        };
+      });
+    }
+
+    function getAllImageRecords() {
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(
+          IMAGE_STORE,
+          "readonly"
+        );
+
+        const store = transaction.objectStore(
+          IMAGE_STORE
+        );
+
+        const request = store.getAll();
+
+        request.onsuccess = function() {
+          resolve(request.result);
+        };
+
+        request.onerror = function() {
+          reject(request.error);
+        };
+      });
+    }
+
+    function saveSetting(key, value) {
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(
+          SETTINGS_STORE,
+          "readwrite"
+        );
+
+        const store = transaction.objectStore(
+          SETTINGS_STORE
+        );
+
+        store.put({
+          key: key,
+          value: value
+        });
+
+        transaction.oncomplete = function() {
+          resolve();
+        };
+
+        transaction.onerror = function() {
+          reject(transaction.error);
+        };
+
+        transaction.onabort = function() {
+          reject(transaction.error);
+        };
+      });
+    }
+
+    function getSetting(key) {
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(
+          SETTINGS_STORE,
+          "readonly"
+        );
+
+        const store = transaction.objectStore(
+          SETTINGS_STORE
+        );
+
+        const request = store.get(key);
+
+        request.onsuccess = function() {
+          resolve(request.result || null);
+        };
+
+        request.onerror = function() {
+          reject(request.error);
+        };
+      });
+    }
+
+    async function saveImageOrder() {
+      const imageIds = projectImages.map(
+        item => item.id
+      );
 
       await saveSetting(
         "imageOrder",
         imageIds
       );
-
     }
 
-
     async function loadImagesFromDatabase() {
-
       const records =
         await getAllImageRecords();
 
-
-      /*
-        預設使用最初加入順序。
-      */
       records.sort(
         (a, b) =>
           (a.sequence || 0) -
           (b.sequence || 0)
       );
 
-
       const orderSetting =
-        await getSetting(
-          "imageOrder"
-        );
-
+        await getSetting("imageOrder");
 
       if (
         orderSetting &&
-        Array.isArray(
-          orderSetting.value
-        )
+        Array.isArray(orderSetting.value)
       ) {
+        const recordMap = new Map(
+          records.map(record => [
+            record.id,
+            record
+          ])
+        );
 
-        const recordMap =
-          new Map(
-            records.map(
-              record => [
-                record.id,
-                record
-              ]
-            )
-          );
+        const orderedRecords = [];
 
-
-        const orderedRecords =
-          [];
-
-
-        for (
-          const id of
-          orderSetting.value
-        ) {
-
-          if (
-            recordMap.has(id)
-          ) {
-
+        for (const id of orderSetting.value) {
+          if (recordMap.has(id)) {
             orderedRecords.push(
               recordMap.get(id)
             );
 
             recordMap.delete(id);
-
           }
-
         }
 
-
-        /*
-          如果有新圖片不在舊排序紀錄，
-          自動接在最後。
-        */
         const remainingRecords =
-          Array.from(
-            recordMap.values()
-          );
-
+          Array.from(recordMap.values());
 
         remainingRecords.sort(
           (a, b) =>
@@ -1040,526 +689,189 @@ qualityIssues:
             (b.sequence || 0)
         );
 
-
         projectImages = [
           ...orderedRecords,
           ...remainingRecords
         ];
-
       }
       else {
-
-        projectImages =
-          records;
-
+        projectImages = records;
       }
 
-
-      if (
-        projectImages.length === 0
-      ) {
-
+      if (projectImages.length === 0) {
         batchCount = 0;
-
         updateStatus(0);
-
+        renderImages();
         return;
-
       }
-
 
       recalculateBatchCount();
 
+      await ensureImageMetadata();
 
-await ensureImageMetadata();
-
-
-projectArea.style.display =
-  "block";
-
-
-      projectArea.style.display =
-        "block";
-
+      projectArea.style.display = "block";
 
       storageStatus.textContent =
         `✅ 已從手機載入 ${projectImages.length} 張截圖`;
 
-
-      /*
-        確保舊版資料也建立排序設定。
-      */
       await saveImageOrder();
 
-
       updateStatus(0);
-
       renderImages();
-
     }
-
 
     function recalculateBatchCount() {
-
-      if (
-        projectImages.length === 0
-      ) {
-
+      if (projectImages.length === 0) {
         batchCount = 0;
-
         return;
-
       }
 
-
-      batchCount =
-        Math.max(
-          ...projectImages.map(
-            item =>
-              item.batchNumber || 1
-          )
-        );
-
+      batchCount = Math.max(
+        ...projectImages.map(
+          item => item.batchNumber || 1
+        )
+      );
     }
 
-
-    function updateStatus(
-      lastBatchSize
-    ) {
-
+    function updateStatus(lastBatchSize) {
       imageCount.textContent =
         `目前共 ${projectImages.length} 張截圖`;
 
-
-      if (
-        projectImages.length === 0
-      ) {
-
+      if (projectImages.length === 0) {
         batchInfo.textContent =
           "尚未加入任何批次";
-
         return;
-
       }
 
-
       if (lastBatchSize > 0) {
-
         batchInfo.textContent =
           `已加入 ${batchCount} 批，` +
           `上一批加入 ${lastBatchSize} 張`;
-
       }
       else {
-
         batchInfo.textContent =
           `目前共有 ${batchCount} 個批次`;
-
       }
-
     }
-
-
-    /*
-      =========================
-      顯示縮圖
-      =========================
-    */
 
     function renderImages() {
+      previewGrid.innerHTML = "";
 
-  previewGrid.innerHTML = "";
+      const duplicateIds =
+        findDuplicateImageIds();
 
-
-  const duplicateIds =
-    findDuplicateImageIds();
-
-
-  projectImages.forEach(
-    (imageData, index) => {
-
-      const item =
-        document.createElement(
-          "div"
-        );
-
-      item.className =
-        "preview-item";
-
-
-      const image =
-        document.createElement(
-          "img"
-        );
-
-
-      const number =
-        document.createElement(
-          "div"
-        );
-
-      number.className =
-        "number";
-
-      number.textContent =
-        index + 1;
-
-
-      /*
-        Phase 1-F：
-        圖片資訊
-      */
-
-      const meta =
-        document.createElement(
-          "div"
-        );
-
-      meta.className =
-        "image-meta";
-
-
-      const issues = [];
-
-
-      if (
-        Array.isArray(
-          imageData.qualityIssues
-        )
-      ) {
-
-        issues.push(
-          ...imageData
-            .qualityIssues
-        );
-
-      }
-
-
-      if (
-        duplicateIds.has(
-          imageData.id
-        )
-      ) {
-
-        issues.push(
-          "可能重複"
-        );
-
-      }
-
-
-      const qualityText =
-        issues.length > 0
-          ? "⚠️ " +
-            issues.join("、")
-          : "✅ 正常";
-
-
-      meta.textContent =
-        `${imageData.width || "?"}×` +
-        `${imageData.height || "?"}\n` +
-        `${formatBytes(
-          imageData.size || 0
-        )}\n` +
-        qualityText;
-
-
-      const imageURL =
-        URL.createObjectURL(
-          imageData.blob
-        );
-
-
-      image.src =
-        imageURL;
-
-
-      image.onload =
-        function() {
-
-          URL.revokeObjectURL(
-            imageURL
-          );
-
-        };
-
-
-      const controls =
-        document.createElement(
-          "div"
-        );
-
-      controls.className =
-        "preview-controls";
-
-
-      const earlierButton =
-        document.createElement(
-          "button"
-        );
-
-      earlierButton.className =
-        "preview-control";
-
-      earlierButton.textContent =
-        "◀";
-
-      earlierButton.disabled =
-        index === 0;
-
-      earlierButton.onclick =
-        function() {
-
-          moveImage(
-            index,
-            -1
-          );
-
-        };
-
-
-      const laterButton =
-        document.createElement(
-          "button"
-        );
-
-      laterButton.className =
-        "preview-control";
-
-      laterButton.textContent =
-        "▶";
-
-      laterButton.disabled =
-        index ===
-        projectImages.length - 1;
-
-      laterButton.onclick =
-        function() {
-
-          moveImage(
-            index,
-            1
-          );
-
-        };
-
-
-      const deleteButton =
-        document.createElement(
-          "button"
-        );
-
-      deleteButton.className =
-        "preview-control delete";
-
-      deleteButton.textContent =
-        "✕";
-
-      deleteButton.onclick =
-        function() {
-
-          deleteSingleImage(
-            index
-          );
-
-        };
-
-
-      controls.appendChild(
-        earlierButton
-      );
-
-      controls.appendChild(
-        laterButton
-      );
-
-      controls.appendChild(
-        deleteButton
-      );
-
-
-      item.appendChild(
-        image
-      );
-
-      item.appendChild(
-        number
-      );
-
-      item.appendChild(
-        meta
-      );
-
-      item.appendChild(
-        controls
-      );
-
-
-      previewGrid.appendChild(
-        item
-      );
-
-    }
-  );
-
-
-  updateQualitySummary(
-    duplicateIds
-  );
-
-}
-    
-      renderImages();
-      
       projectImages.forEach(
         (imageData, index) => {
+          const item = document.createElement(
+            "div"
+          );
 
-          const item =
-            document.createElement(
-              "div"
+          item.className = "preview-item";
+
+          const image = document.createElement(
+            "img"
+          );
+
+          const number = document.createElement(
+            "div"
+          );
+
+          number.className = "number";
+          number.textContent = index + 1;
+
+          const meta = document.createElement(
+            "div"
+          );
+
+          meta.className = "image-meta";
+
+          const issues = [];
+
+          if (
+            Array.isArray(
+              imageData.qualityIssues
+            )
+          ) {
+            issues.push(
+              ...imageData.qualityIssues
             );
+          }
 
-          item.className =
-            "preview-item";
+          if (
+            duplicateIds.has(imageData.id)
+          ) {
+            issues.push("可能重複");
+          }
 
+          const qualityText =
+            issues.length > 0
+              ? "⚠️ " + issues.join("、")
+              : "✅ 正常";
 
-          const image =
-            document.createElement(
-              "img"
-            );
-
-
-          const number =
-            document.createElement(
-              "div"
-            );
-
-          number.className =
-            "number";
-
-          number.textContent =
-            index + 1;
-
+          meta.textContent =
+            `${imageData.width || "?"}×` +
+            `${imageData.height || "?"}\n` +
+            `${formatBytes(imageData.size || 0)}\n` +
+            qualityText;
 
           const imageURL =
             URL.createObjectURL(
               imageData.blob
             );
 
+          image.src = imageURL;
 
-          image.src =
-            imageURL;
-
-
-          image.onload =
-            function() {
-
-              URL.revokeObjectURL(
-                imageURL
-              );
-
-            };
-
+          image.onload = function() {
+            URL.revokeObjectURL(imageURL);
+          };
 
           const controls =
-            document.createElement(
-              "div"
-            );
+            document.createElement("div");
 
           controls.className =
             "preview-controls";
 
-
-          /*
-            往前移
-          */
           const earlierButton =
-            document.createElement(
-              "button"
-            );
+            document.createElement("button");
 
           earlierButton.className =
             "preview-control";
 
-          earlierButton.textContent =
-            "◀";
+          earlierButton.textContent = "◀";
+          earlierButton.title = "往前移";
+          earlierButton.disabled = index === 0;
 
-          earlierButton.title =
-            "往前移";
+          earlierButton.onclick = function() {
+            moveImage(index, -1);
+          };
 
-          earlierButton.disabled =
-            index === 0;
-
-          earlierButton.onclick =
-            function() {
-
-              moveImage(
-                index,
-                -1
-              );
-
-            };
-
-
-          /*
-            往後移
-          */
           const laterButton =
-            document.createElement(
-              "button"
-            );
+            document.createElement("button");
 
           laterButton.className =
             "preview-control";
 
-          laterButton.textContent =
-            "▶";
-
-          laterButton.title =
-            "往後移";
-
+          laterButton.textContent = "▶";
+          laterButton.title = "往後移";
           laterButton.disabled =
-            index ===
-            projectImages.length - 1;
+            index === projectImages.length - 1;
 
-          laterButton.onclick =
-            function() {
+          laterButton.onclick = function() {
+            moveImage(index, 1);
+          };
 
-              moveImage(
-                index,
-                1
-              );
-
-            };
-
-
-          /*
-            刪除
-          */
           const deleteButton =
-            document.createElement(
-              "button"
-            );
+            document.createElement("button");
 
           deleteButton.className =
             "preview-control delete";
 
-          deleteButton.textContent =
-            "✕";
+          deleteButton.textContent = "✕";
+          deleteButton.title = "刪除此截圖";
 
-          deleteButton.title =
-            "刪除此截圖";
-
-          deleteButton.onclick =
-            function() {
-
-              deleteSingleImage(
-                index
-              );
-
-            };
-
+          deleteButton.onclick = function() {
+            deleteSingleImage(index);
+          };
 
           controls.appendChild(
             earlierButton
@@ -1573,55 +885,36 @@ projectArea.style.display =
             deleteButton
           );
 
-
           item.appendChild(image);
-
           item.appendChild(number);
+          item.appendChild(meta);
+          item.appendChild(controls);
 
-          item.appendChild(
-            controls
-          );
-
-
-          previewGrid.appendChild(
-            item
-          );
-
+          previewGrid.appendChild(item);
         }
       );
 
+      updateQualitySummary(
+        duplicateIds
+      );
     }
-
-
-    /*
-      =========================
-      移動圖片
-      =========================
-    */
 
     async function moveImage(
       index,
       direction
     ) {
-
       const targetIndex =
         index + direction;
 
-
       if (
         targetIndex < 0 ||
-        targetIndex >=
-          projectImages.length
+        targetIndex >= projectImages.length
       ) {
-
         return;
-
       }
-
 
       const originalImages =
         [...projectImages];
-
 
       [
         projectImages[index],
@@ -1631,927 +924,428 @@ projectArea.style.display =
         projectImages[index]
       ];
 
-
-      /*
-        先立即更新畫面。
-      */
       renderImages();
 
-
       try {
-
         await saveImageOrder();
-
 
         storageStatus.textContent =
           "✅ 圖片順序已永久保存";
-
       }
       catch (error) {
-
         console.error(error);
 
-
-        /*
-          儲存失敗就恢復原順序。
-        */
-        projectImages =
-          originalImages;
-
-
+        projectImages = originalImages;
         renderImages();
-
 
         alert(
           "排序儲存失敗：" +
           error.message
         );
-
       }
-
     }
-
-
-    /*
-      =========================
-      刪除單張圖片
-      =========================
-    */
 
     function deleteImageRecord(id) {
-
-      return new Promise(
-        (resolve, reject) => {
-
-          const transaction =
-            db.transaction(
-              IMAGE_STORE,
-              "readwrite"
-            );
-
-
-          const store =
-            transaction.objectStore(
-              IMAGE_STORE
-            );
-
-
-          const request =
-            store.delete(id);
-
-
-          request.onsuccess =
-            function() {
-
-              resolve();
-
-            };
-
-
-          request.onerror =
-            function() {
-
-              reject(
-                request.error
-              );
-
-            };
-
-        }
-      );
-
-    }
-
-
-    async function deleteSingleImage(
-      index
-    ) {
-
-      const imageData =
-        projectImages[index];
-
-
-      if (!imageData) {
-
-        return;
-
-      }
-
-
-      const confirmed =
-        confirm(
-          `確定要永久刪除第 ${index + 1} 張截圖嗎？`
-        );
-
-
-      if (!confirmed) {
-
-        return;
-
-      }
-
-
-      try {
-
-        await deleteImageRecord(
-          imageData.id
-        );
-
-
-        projectImages.splice(
-          index,
-          1
-        );
-
-
-        recalculateBatchCount();
-
-
-        await saveImageOrder();
-
-
-        updateStatus(0);
-
-        renderImages();
-
-        await updateStorageInfo();
-
-
-        storageStatus.textContent =
-          "✅ 截圖已永久刪除";
-
-      }
-      catch (error) {
-
-        console.error(error);
-
-        alert(
-          "刪除失敗：" +
-          error.message
-        );
-
-      }
-
-    }
-
-
-    /*
-      =========================
-      清除全部圖片
-      =========================
-    */
-
-    function clearDatabaseImages() {
-
-      return new Promise(
-        (resolve, reject) => {
-
-          const transaction =
-            db.transaction(
-              IMAGE_STORE,
-              "readwrite"
-            );
-
-
-          const store =
-            transaction.objectStore(
-              IMAGE_STORE
-            );
-
-
-          const request =
-            store.clear();
-
-
-          request.onsuccess =
-            function() {
-
-              resolve();
-
-            };
-
-
-          request.onerror =
-            function() {
-
-              reject(
-                request.error
-              );
-
-            };
-
-        }
-      );
-
-    }
-
-
-    async function clearImages() {
-
-      if (!db) {
-
-        return;
-
-      }
-
-
-      const confirmed =
-        confirm(
-          "確定要永久刪除目前所有截圖嗎？"
-        );
-
-
-      if (!confirmed) {
-
-        return;
-
-      }
-
-
-      try {
-
-        await clearDatabaseImages();
-
-
-        projectImages = [];
-
-        batchCount = 0;
-
-
-        await saveImageOrder();
-
-
-        previewGrid.innerHTML =
-          "";
-
-
-        updateStatus(0);
-
-
-        storageStatus.textContent =
-          "✅ 所有本機截圖已刪除";
-
-
-        await updateStorageInfo();
-
-      }
-      catch (error) {
-
-        console.error(error);
-
-        alert(
-          "刪除失敗：" +
-          error.message
-        );
-
-      }
-
-    }
-    /*
-  =========================
-  Phase 1-F
-  圖片品質分析
-  =========================
-*/
-
-
-function updateImageRecord(record) {
-
-  return new Promise(
-    (resolve, reject) => {
-
-      const transaction =
-        db.transaction(
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(
           IMAGE_STORE,
           "readwrite"
         );
 
-
-      const store =
-        transaction.objectStore(
+        const store = transaction.objectStore(
           IMAGE_STORE
         );
 
+        const request = store.delete(id);
 
-      const request =
-        store.put(record);
-
-
-      request.onsuccess =
-        function() {
-
+        request.onsuccess = function() {
           resolve();
-
         };
 
-
-      request.onerror =
-        function() {
-
-          reject(
-            request.error
-          );
-
+        request.onerror = function() {
+          reject(request.error);
         };
-
+      });
     }
-  );
 
-}
+    async function deleteSingleImage(index) {
+      const imageData =
+        projectImages[index];
 
+      if (!imageData) {
+        return;
+      }
 
-/*
-  取得圖片實際寬高
-*/
+      const confirmed = confirm(
+        `確定要永久刪除第 ${index + 1} 張截圖嗎？`
+      );
 
-function getImageDimensions(blob) {
+      if (!confirmed) {
+        return;
+      }
 
-  return new Promise(
-    (resolve, reject) => {
-
-      const image =
-        new Image();
-
-
-      const url =
-        URL.createObjectURL(
-          blob
+      try {
+        await deleteImageRecord(
+          imageData.id
         );
 
+        projectImages.splice(index, 1);
 
-      image.onload =
-        function() {
+        recalculateBatchCount();
+        await saveImageOrder();
 
-          const result = {
-            width:
-              image.naturalWidth,
+        updateStatus(0);
+        renderImages();
+        await updateStorageInfo();
 
-            height:
-              image.naturalHeight
-          };
+        storageStatus.textContent =
+          "✅ 截圖已永久刪除";
+      }
+      catch (error) {
+        console.error(error);
 
+        alert(
+          "刪除失敗：" +
+          error.message
+        );
+      }
+    }
 
-          URL.revokeObjectURL(
-            url
-          );
+    function clearDatabaseImages() {
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(
+          IMAGE_STORE,
+          "readwrite"
+        );
 
+        const store = transaction.objectStore(
+          IMAGE_STORE
+        );
 
-          resolve(result);
+        const request = store.clear();
 
+        request.onsuccess = function() {
+          resolve();
         };
 
+        request.onerror = function() {
+          reject(request.error);
+        };
+      });
+    }
 
-      image.onerror =
-        function() {
+    async function clearImages() {
+      if (!db) {
+        return;
+      }
 
-          URL.revokeObjectURL(
-            url
-          );
+      const confirmed = confirm(
+        "確定要永久刪除目前所有截圖嗎？"
+      );
 
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        await clearDatabaseImages();
+
+        projectImages = [];
+        batchCount = 0;
+
+        await saveImageOrder();
+
+        updateStatus(0);
+        renderImages();
+
+        storageStatus.textContent =
+          "✅ 所有本機截圖已刪除";
+
+        await updateStorageInfo();
+      }
+      catch (error) {
+        console.error(error);
+
+        alert(
+          "刪除失敗：" +
+          error.message
+        );
+      }
+    }
+
+    function getImageDimensions(blob) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        const url = URL.createObjectURL(blob);
+
+        image.onload = function() {
+          const result = {
+            width: image.naturalWidth,
+            height: image.naturalHeight
+          };
+
+          URL.revokeObjectURL(url);
+          resolve(result);
+        };
+
+        image.onerror = function() {
+          URL.revokeObjectURL(url);
 
           reject(
             new Error(
               "無法讀取圖片尺寸"
             )
           );
-
         };
 
-
-      image.src = url;
-
+        image.src = url;
+      });
     }
-  );
 
-}
+    async function createSampleFingerprint(blob) {
+      const chunkSize = 64 * 1024;
 
-
-/*
-  不讀取整張圖片進 RAM。
-
-  只抽取：
-  開頭
-  中間
-  結尾
-
-  各一小段資料，
-  建立圖片指紋。
-*/
-
-async function createSampleFingerprint(
-  blob
-) {
-
-  const chunkSize =
-    64 * 1024;
-
-
-  const middleStart =
-    Math.max(
-      0,
-      Math.floor(
-        blob.size / 2
-      ) -
-      Math.floor(
-        chunkSize / 2
-      )
-    );
-
-
-  const endStart =
-    Math.max(
-      0,
-      blob.size -
-      chunkSize
-    );
-
-
-  const positions = [
-    0,
-    middleStart,
-    endStart
-  ];
-
-
-  const arrays = [];
-
-
-  let totalLength = 0;
-
-
-  for (
-    const position of positions
-  ) {
-
-    const slice =
-      blob.slice(
-        position,
-        Math.min(
-          blob.size,
-          position +
-            chunkSize
-        )
+      const middleStart = Math.max(
+        0,
+        Math.floor(blob.size / 2) -
+        Math.floor(chunkSize / 2)
       );
 
-
-    const buffer =
-      await slice.arrayBuffer();
-
-
-    const bytes =
-      new Uint8Array(
-        buffer
+      const endStart = Math.max(
+        0,
+        blob.size - chunkSize
       );
 
+      const positions = [
+        0,
+        middleStart,
+        endStart
+      ];
 
-    arrays.push(bytes);
+      const arrays = [];
+      let totalLength = 0;
 
-    totalLength +=
-      bytes.length;
+      for (const position of positions) {
+        const slice = blob.slice(
+          position,
+          Math.min(
+            blob.size,
+            position + chunkSize
+          )
+        );
 
-  }
+        const buffer =
+          await slice.arrayBuffer();
 
+        const bytes =
+          new Uint8Array(buffer);
 
-  const header =
-    new TextEncoder()
-      .encode(
+        arrays.push(bytes);
+        totalLength += bytes.length;
+      }
+
+      const header = new TextEncoder().encode(
         `${blob.size}|${blob.type}|`
       );
 
+      totalLength += header.length;
 
-  totalLength +=
-    header.length;
+      const combined =
+        new Uint8Array(totalLength);
 
+      let offset = 0;
 
-  const combined =
-    new Uint8Array(
-      totalLength
-    );
+      combined.set(header, offset);
+      offset += header.length;
 
-
-  let offset = 0;
-
-
-  combined.set(
-    header,
-    offset
-  );
-
-
-  offset +=
-    header.length;
-
-
-  for (
-    const bytes of arrays
-  ) {
-
-    combined.set(
-      bytes,
-      offset
-    );
-
-
-    offset +=
-      bytes.length;
-
-  }
-
-
-  /*
-    優先使用 SHA-256。
-  */
-
-  if (
-    window.crypto &&
-    crypto.subtle
-  ) {
-
-    const digest =
-      await crypto.subtle.digest(
-        "SHA-256",
-        combined
-      );
-
-
-    return Array.from(
-      new Uint8Array(
-        digest
-      )
-    )
-      .map(
-        byte =>
-          byte
-            .toString(16)
-            .padStart(
-              2,
-              "0"
-            )
-      )
-      .join("");
-
-  }
-
-
-  /*
-    少數瀏覽器沒有 Web Crypto
-    時的 fallback。
-  */
-
-  let hash =
-    2166136261;
-
-
-  for (
-    const byte of combined
-  ) {
-
-    hash ^= byte;
-
-
-    hash =
-      Math.imul(
-        hash,
-        16777619
-      );
-
-  }
-
-
-  return (
-    "fallback-" +
-    (
-      hash >>> 0
-    ).toString(16) +
-    "-" +
-    blob.size
-  );
-
-}
-
-
-/*
-  分析一張圖片
-*/
-
-async function analyzeImageFile(
-  blob
-) {
-
-  const dimensions =
-    await getImageDimensions(
-      blob
-    );
-
-
-  const fingerprint =
-    await createSampleFingerprint(
-      blob
-    );
-
-
-  const issues = [];
-
-
-  const width =
-    dimensions.width;
-
-
-  const height =
-    dimensions.height;
-
-
-  const pixels =
-    width * height;
-
-
-  /*
-    非常小的圖片，
-    未來 OCR / 拼接通常會有問題。
-  */
-
-  if (
-    width < 400 ||
-    height < 400
-  ) {
-
-    issues.push(
-      "尺寸過小"
-    );
-
-  }
-  else if (
-    pixels < 600000
-  ) {
-
-    issues.push(
-      "解析度偏低"
-    );
-
-  }
-
-
-  /*
-    過大的圖片也先提醒，
-    因為之後影像分析會消耗 RAM。
-  */
-
-  if (
-    blob.size >
-    15 * 1024 * 1024
-  ) {
-
-    issues.push(
-      "檔案很大"
-    );
-
-  }
-
-
-  return {
-
-    width:
-      width,
-
-    height:
-      height,
-
-    fingerprint:
-      fingerprint,
-
-    qualityIssues:
-      issues
-
-  };
-
-}
-
-
-/*
-  舊版 IndexedDB 裡可能沒有
-  width / height / fingerprint。
-
-  第一次啟動新版時補齊。
-*/
-
-async function ensureImageMetadata() {
-
-  let completed = 0;
-
-
-  for (
-    const item of projectImages
-  ) {
-
-    const needsAnalysis =
-      !item.width ||
-      !item.height ||
-      !item.fingerprint ||
-      !Array.isArray(
-        item.qualityIssues
-      );
-
-
-    if (!needsAnalysis) {
-
-      completed++;
-
-      continue;
-
-    }
-
-
-    storageStatus.textContent =
-      `正在分析舊截圖 ${
-        completed + 1
-      } / ${
-        projectImages.length
-      }`;
-
-
-    const analysis =
-      await analyzeImageFile(
-        item.blob
-      );
-
-
-    item.width =
-      analysis.width;
-
-    item.height =
-      analysis.height;
-
-    item.fingerprint =
-      analysis.fingerprint;
-
-    item.qualityIssues =
-      analysis.qualityIssues;
-
-
-    await updateImageRecord(
-      item
-    );
-
-
-    completed++;
-
-  }
-
-}
-
-
-/*
-  找出檔案指紋相同圖片。
-*/
-
-function findDuplicateImageIds() {
-
-  const groups =
-    new Map();
-
-
-  for (
-    const item of projectImages
-  ) {
-
-    if (
-      !item.fingerprint
-    ) {
-
-      continue;
-
-    }
-
-
-    if (
-      !groups.has(
-        item.fingerprint
-      )
-    ) {
-
-      groups.set(
-        item.fingerprint,
-        []
-      );
-
-    }
-
-
-    groups
-      .get(
-        item.fingerprint
-      )
-      .push(
-        item.id
-      );
-
-  }
-
-
-  const duplicateIds =
-    new Set();
-
-
-  for (
-    const ids of
-    groups.values()
-  ) {
-
-    if (
-      ids.length > 1
-    ) {
-
-      for (
-        const id of ids
-      ) {
-
-        duplicateIds.add(
-          id
-        );
-
+      for (const bytes of arrays) {
+        combined.set(bytes, offset);
+        offset += bytes.length;
       }
 
-    }
+      if (
+        window.crypto &&
+        crypto.subtle
+      ) {
+        const digest =
+          await crypto.subtle.digest(
+            "SHA-256",
+            combined
+          );
 
-  }
+        return Array.from(
+          new Uint8Array(digest)
+        )
+          .map(byte =>
+            byte
+              .toString(16)
+              .padStart(2, "0")
+          )
+          .join("");
+      }
 
+      let hash = 2166136261;
 
-  return duplicateIds;
+      for (const byte of combined) {
+        hash ^= byte;
+        hash = Math.imul(
+          hash,
+          16777619
+        );
+      }
 
-}
-
-
-/*
-  更新整體品質摘要
-*/
-
-function updateQualitySummary(
-  duplicateIds
-) {
-
-  if (
-    projectImages.length === 0
-  ) {
-
-    qualitySummary.textContent =
-      "圖片品質：尚無圖片";
-
-    return;
-
-  }
-
-
-  let warningCount = 0;
-
-  let normalCount = 0;
-
-
-  for (
-    const item of projectImages
-  ) {
-
-    const hasWarning =
-      (
-        Array.isArray(
-          item.qualityIssues
-        ) &&
-        item.qualityIssues
-          .length > 0
-      ) ||
-      duplicateIds.has(
-        item.id
+      return (
+        "fallback-" +
+        (hash >>> 0).toString(16) +
+        "-" +
+        blob.size
       );
-
-
-    if (hasWarning) {
-
-      warningCount++;
-
-    }
-    else {
-
-      normalCount++;
-
     }
 
-  }
+    async function analyzeImageFile(blob) {
+      const dimensions =
+        await getImageDimensions(blob);
 
+      const fingerprint =
+        await createSampleFingerprint(blob);
 
-  qualitySummary.textContent =
-    `圖片品質：正常 ${normalCount} 張｜` +
-    `需注意 ${warningCount} 張｜` +
-    `可能重複 ${duplicateIds.size} 張`;
+      const issues = [];
+      const width = dimensions.width;
+      const height = dimensions.height;
+      const pixels = width * height;
 
-}
+      if (
+        width < 400 ||
+        height < 400
+      ) {
+        issues.push("尺寸過小");
+      }
+      else if (pixels < 600000) {
+        issues.push("解析度偏低");
+      }
 
-    /*
-      =========================
-      儲存空間監控
-      =========================
-    */
+      if (
+        blob.size >
+        15 * 1024 * 1024
+      ) {
+        issues.push("檔案很大");
+      }
+
+      return {
+        width: width,
+        height: height,
+        fingerprint: fingerprint,
+        qualityIssues: issues
+      };
+    }
+
+    async function ensureImageMetadata() {
+      let completed = 0;
+
+      for (const item of projectImages) {
+        const needsAnalysis =
+          !item.width ||
+          !item.height ||
+          !item.fingerprint ||
+          !Array.isArray(
+            item.qualityIssues
+          );
+
+        if (!needsAnalysis) {
+          completed++;
+          continue;
+        }
+
+        storageStatus.textContent =
+          `正在分析舊截圖 ${completed + 1} / ${projectImages.length}`;
+
+        const analysis =
+          await analyzeImageFile(
+            item.blob
+          );
+
+        item.width = analysis.width;
+        item.height = analysis.height;
+        item.fingerprint =
+          analysis.fingerprint;
+        item.qualityIssues =
+          analysis.qualityIssues;
+
+        await updateImageRecord(item);
+        completed++;
+      }
+    }
+
+    function findDuplicateImageIds() {
+      const groups = new Map();
+
+      for (const item of projectImages) {
+        if (!item.fingerprint) {
+          continue;
+        }
+
+        if (!groups.has(item.fingerprint)) {
+          groups.set(
+            item.fingerprint,
+            []
+          );
+        }
+
+        groups
+          .get(item.fingerprint)
+          .push(item.id);
+      }
+
+      const duplicateIds = new Set();
+
+      for (const ids of groups.values()) {
+        if (ids.length > 1) {
+          for (const id of ids) {
+            duplicateIds.add(id);
+          }
+        }
+      }
+
+      return duplicateIds;
+    }
+
+    function updateQualitySummary(
+      duplicateIds
+    ) {
+      if (projectImages.length === 0) {
+        qualitySummary.textContent =
+          "圖片品質：尚無圖片";
+        return;
+      }
+
+      let warningCount = 0;
+      let normalCount = 0;
+
+      for (const item of projectImages) {
+        const hasWarning =
+          (
+            Array.isArray(
+              item.qualityIssues
+            ) &&
+            item.qualityIssues.length > 0
+          ) ||
+          duplicateIds.has(item.id);
+
+        if (hasWarning) {
+          warningCount++;
+        }
+        else {
+          normalCount++;
+        }
+      }
+
+      qualitySummary.textContent =
+        `圖片品質：正常 ${normalCount} 張｜` +
+        `需注意 ${warningCount} 張｜` +
+        `可能重複 ${duplicateIds.size} 張`;
+    }
 
     async function updateStorageInfo() {
-
       const storageUsage =
         document.getElementById(
           "storageUsage"
@@ -2562,12 +1356,10 @@ function updateQualitySummary(
           "storageHealth"
         );
 
-
       if (
         !navigator.storage ||
         !navigator.storage.estimate
       ) {
-
         storageUsage.textContent =
           "此瀏覽器無法提供儲存空間資訊";
 
@@ -2575,101 +1367,61 @@ function updateQualitySummary(
           "⚠️ 無法監控儲存容量";
 
         return;
-
       }
 
-
       try {
-
         const estimate =
-          await navigator.storage
-            .estimate();
+          await navigator.storage.estimate();
 
-
-        const usage =
-          estimate.usage || 0;
-
-        const quota =
-          estimate.quota || 0;
-
+        const usage = estimate.usage || 0;
+        const quota = estimate.quota || 0;
 
         const percentage =
           quota > 0
             ? (usage / quota) * 100
             : 0;
 
-
         storageUsage.innerHTML =
           `
             已使用：
-            <strong>
-              ${formatBytes(usage)}
-            </strong>
+            <strong>${formatBytes(usage)}</strong>
             <br>
-
             預估配額：
-            <strong>
-              ${formatBytes(quota)}
-            </strong>
+            <strong>${formatBytes(quota)}</strong>
             <br>
-
             使用率：
-            <strong>
-              ${percentage.toFixed(1)}%
-            </strong>
+            <strong>${percentage.toFixed(1)}%</strong>
           `;
 
-
         if (percentage < 70) {
-
           storageHealth.textContent =
             "✅ 儲存空間充足";
-
         }
-        else if (
-          percentage < 85
-        ) {
-
+        else if (percentage < 85) {
           storageHealth.textContent =
             "⚠️ 儲存空間開始偏高";
-
         }
-        else if (
-          percentage < 95
-        ) {
-
+        else if (percentage < 95) {
           storageHealth.textContent =
             "⚠️ 儲存空間不足，建議先匯出或刪除舊資料";
-
         }
         else {
-
           storageHealth.textContent =
             "🛑 儲存空間接近上限";
-
         }
-
       }
       catch (error) {
-
         console.error(error);
 
         storageUsage.textContent =
           "無法取得儲存資訊";
-
       }
-
     }
 
-
     function formatBytes(bytes) {
-
       if (bytes === 0) {
-
         return "0 MB";
-
       }
-
 
       const units = [
         "B",
@@ -2678,108 +1430,73 @@ function updateQualitySummary(
         "GB"
       ];
 
+      const index = Math.floor(
+        Math.log(bytes) /
+        Math.log(1024)
+      );
 
-      const index =
-        Math.floor(
-          Math.log(bytes) /
-          Math.log(1024)
-        );
-
-
-      const safeIndex =
-        Math.min(
-          index,
-          units.length - 1
-        );
-
+      const safeIndex = Math.min(
+        index,
+        units.length - 1
+      );
 
       const value =
         bytes /
-        Math.pow(
-          1024,
-          safeIndex
-        );
-
+        Math.pow(1024, safeIndex);
 
       return (
         value.toFixed(2) +
         " " +
         units[safeIndex]
       );
-
     }
 
-
     async function requestPersistentStorage() {
-
       if (
         !navigator.storage ||
         !navigator.storage.persist
       ) {
-
         alert(
           "此瀏覽器不支援 Persistent Storage。"
         );
-
         return;
-
       }
 
-
       try {
-
         const alreadyPersistent =
           navigator.storage.persisted
-            ? await navigator.storage
-                .persisted()
+            ? await navigator.storage.persisted()
             : false;
 
-
         if (alreadyPersistent) {
-
           alert(
             "✅ 本網站目前已取得較可靠的永久儲存權限。"
           );
-
           return;
-
         }
 
-
         const granted =
-          await navigator.storage
-            .persist();
-
+          await navigator.storage.persist();
 
         if (granted) {
-
           alert(
             "✅ 已取得 Persistent Storage。資料較不容易被瀏覽器自動清除。"
           );
-
         }
         else {
-
           alert(
             "⚠️ 瀏覽器目前沒有授予 Persistent Storage。IndexedDB 仍然可以正常使用。"
           );
-
         }
-
       }
       catch (error) {
-
         console.error(error);
 
         alert(
           "無法要求 Persistent Storage。IndexedDB 仍可正常使用。"
         );
-
       }
-
     }
-
   </script>
-
 </body>
 </html>
