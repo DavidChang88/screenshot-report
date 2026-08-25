@@ -160,7 +160,28 @@
       display: block;
     }
 
-    .number {
+    .number {.image-meta {
+  position: absolute;
+
+  top: 5px;
+  right: 5px;
+
+  max-width: 72%;
+
+  padding: 4px 6px;
+
+  border-radius: 7px;
+
+  background: rgba(0,0,0,0.76);
+  color: white;
+
+  font-size: 9px;
+  line-height: 1.35;
+
+  text-align: right;
+
+  white-space: pre-line;
+}
       position: absolute;
 
       top: 5px;
@@ -291,7 +312,12 @@
         <div id="batchInfo">
           尚未加入任何批次
         </div>
-
+        <div
+  id="qualitySummary"
+  class="status"
+>
+  圖片品質：等待檢查
+   </div>
         <div class="order-help">
           ◀ = 往前移一格　
           ▶ = 往後移一格　
@@ -353,7 +379,10 @@
       document.getElementById(
         "batchInfo"
       );
-
+    const qualitySummary =
+  document.getElementById(
+    "qualitySummary"
+  );
     const previewGrid =
       document.getElementById(
         "previewGrid"
@@ -588,7 +617,21 @@
 
         for (const file of files) {
 
-          const record = {
+       for (const file of files) {
+
+  storageStatus.textContent =
+    `正在分析 ${
+      projectImages.length + 1
+    } 張以後的新截圖…`;
+
+
+  const analysis =
+    await analyzeImageFile(
+      file
+    );
+
+
+  const record = {
 
             sequence:
               nextSequence,
@@ -607,7 +650,18 @@
 
             lastModified:
               file.lastModified,
+  width:
+  analysis.width,
 
+height:
+  analysis.height,
+
+fingerprint:
+  analysis.fingerprint,
+
+qualityIssues:
+  analysis.qualityIssues,
+  
             createdAt:
               Date.now(),
 
@@ -1017,6 +1071,13 @@
       recalculateBatchCount();
 
 
+await ensureImageMetadata();
+
+
+projectArea.style.display =
+  "block";
+
+
       projectArea.style.display =
         "block";
 
@@ -1107,9 +1168,250 @@
 
     function renderImages() {
 
-      previewGrid.innerHTML = "";
+  previewGrid.innerHTML = "";
 
 
+  const duplicateIds =
+    findDuplicateImageIds();
+
+
+  projectImages.forEach(
+    (imageData, index) => {
+
+      const item =
+        document.createElement(
+          "div"
+        );
+
+      item.className =
+        "preview-item";
+
+
+      const image =
+        document.createElement(
+          "img"
+        );
+
+
+      const number =
+        document.createElement(
+          "div"
+        );
+
+      number.className =
+        "number";
+
+      number.textContent =
+        index + 1;
+
+
+      /*
+        Phase 1-F：
+        圖片資訊
+      */
+
+      const meta =
+        document.createElement(
+          "div"
+        );
+
+      meta.className =
+        "image-meta";
+
+
+      const issues = [];
+
+
+      if (
+        Array.isArray(
+          imageData.qualityIssues
+        )
+      ) {
+
+        issues.push(
+          ...imageData
+            .qualityIssues
+        );
+
+      }
+
+
+      if (
+        duplicateIds.has(
+          imageData.id
+        )
+      ) {
+
+        issues.push(
+          "可能重複"
+        );
+
+      }
+
+
+      const qualityText =
+        issues.length > 0
+          ? "⚠️ " +
+            issues.join("、")
+          : "✅ 正常";
+
+
+      meta.textContent =
+        `${imageData.width || "?"}×` +
+        `${imageData.height || "?"}\n` +
+        `${formatBytes(
+          imageData.size || 0
+        )}\n` +
+        qualityText;
+
+
+      const imageURL =
+        URL.createObjectURL(
+          imageData.blob
+        );
+
+
+      image.src =
+        imageURL;
+
+
+      image.onload =
+        function() {
+
+          URL.revokeObjectURL(
+            imageURL
+          );
+
+        };
+
+
+      const controls =
+        document.createElement(
+          "div"
+        );
+
+      controls.className =
+        "preview-controls";
+
+
+      const earlierButton =
+        document.createElement(
+          "button"
+        );
+
+      earlierButton.className =
+        "preview-control";
+
+      earlierButton.textContent =
+        "◀";
+
+      earlierButton.disabled =
+        index === 0;
+
+      earlierButton.onclick =
+        function() {
+
+          moveImage(
+            index,
+            -1
+          );
+
+        };
+
+
+      const laterButton =
+        document.createElement(
+          "button"
+        );
+
+      laterButton.className =
+        "preview-control";
+
+      laterButton.textContent =
+        "▶";
+
+      laterButton.disabled =
+        index ===
+        projectImages.length - 1;
+
+      laterButton.onclick =
+        function() {
+
+          moveImage(
+            index,
+            1
+          );
+
+        };
+
+
+      const deleteButton =
+        document.createElement(
+          "button"
+        );
+
+      deleteButton.className =
+        "preview-control delete";
+
+      deleteButton.textContent =
+        "✕";
+
+      deleteButton.onclick =
+        function() {
+
+          deleteSingleImage(
+            index
+          );
+
+        };
+
+
+      controls.appendChild(
+        earlierButton
+      );
+
+      controls.appendChild(
+        laterButton
+      );
+
+      controls.appendChild(
+        deleteButton
+      );
+
+
+      item.appendChild(
+        image
+      );
+
+      item.appendChild(
+        number
+      );
+
+      item.appendChild(
+        meta
+      );
+
+      item.appendChild(
+        controls
+      );
+
+
+      previewGrid.appendChild(
+        item
+      );
+
+    }
+  );
+
+
+  updateQualitySummary(
+    duplicateIds
+  );
+
+}
+    
+      renderImages();
+      
       projectImages.forEach(
         (imageData, index) => {
 
@@ -1605,7 +1907,642 @@
       }
 
     }
+    /*
+  =========================
+  Phase 1-F
+  圖片品質分析
+  =========================
+*/
 
+
+function updateImageRecord(record) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      const transaction =
+        db.transaction(
+          IMAGE_STORE,
+          "readwrite"
+        );
+
+
+      const store =
+        transaction.objectStore(
+          IMAGE_STORE
+        );
+
+
+      const request =
+        store.put(record);
+
+
+      request.onsuccess =
+        function() {
+
+          resolve();
+
+        };
+
+
+      request.onerror =
+        function() {
+
+          reject(
+            request.error
+          );
+
+        };
+
+    }
+  );
+
+}
+
+
+/*
+  取得圖片實際寬高
+*/
+
+function getImageDimensions(blob) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      const image =
+        new Image();
+
+
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+
+      image.onload =
+        function() {
+
+          const result = {
+            width:
+              image.naturalWidth,
+
+            height:
+              image.naturalHeight
+          };
+
+
+          URL.revokeObjectURL(
+            url
+          );
+
+
+          resolve(result);
+
+        };
+
+
+      image.onerror =
+        function() {
+
+          URL.revokeObjectURL(
+            url
+          );
+
+
+          reject(
+            new Error(
+              "無法讀取圖片尺寸"
+            )
+          );
+
+        };
+
+
+      image.src = url;
+
+    }
+  );
+
+}
+
+
+/*
+  不讀取整張圖片進 RAM。
+
+  只抽取：
+  開頭
+  中間
+  結尾
+
+  各一小段資料，
+  建立圖片指紋。
+*/
+
+async function createSampleFingerprint(
+  blob
+) {
+
+  const chunkSize =
+    64 * 1024;
+
+
+  const middleStart =
+    Math.max(
+      0,
+      Math.floor(
+        blob.size / 2
+      ) -
+      Math.floor(
+        chunkSize / 2
+      )
+    );
+
+
+  const endStart =
+    Math.max(
+      0,
+      blob.size -
+      chunkSize
+    );
+
+
+  const positions = [
+    0,
+    middleStart,
+    endStart
+  ];
+
+
+  const arrays = [];
+
+
+  let totalLength = 0;
+
+
+  for (
+    const position of positions
+  ) {
+
+    const slice =
+      blob.slice(
+        position,
+        Math.min(
+          blob.size,
+          position +
+            chunkSize
+        )
+      );
+
+
+    const buffer =
+      await slice.arrayBuffer();
+
+
+    const bytes =
+      new Uint8Array(
+        buffer
+      );
+
+
+    arrays.push(bytes);
+
+    totalLength +=
+      bytes.length;
+
+  }
+
+
+  const header =
+    new TextEncoder()
+      .encode(
+        `${blob.size}|${blob.type}|`
+      );
+
+
+  totalLength +=
+    header.length;
+
+
+  const combined =
+    new Uint8Array(
+      totalLength
+    );
+
+
+  let offset = 0;
+
+
+  combined.set(
+    header,
+    offset
+  );
+
+
+  offset +=
+    header.length;
+
+
+  for (
+    const bytes of arrays
+  ) {
+
+    combined.set(
+      bytes,
+      offset
+    );
+
+
+    offset +=
+      bytes.length;
+
+  }
+
+
+  /*
+    優先使用 SHA-256。
+  */
+
+  if (
+    window.crypto &&
+    crypto.subtle
+  ) {
+
+    const digest =
+      await crypto.subtle.digest(
+        "SHA-256",
+        combined
+      );
+
+
+    return Array.from(
+      new Uint8Array(
+        digest
+      )
+    )
+      .map(
+        byte =>
+          byte
+            .toString(16)
+            .padStart(
+              2,
+              "0"
+            )
+      )
+      .join("");
+
+  }
+
+
+  /*
+    少數瀏覽器沒有 Web Crypto
+    時的 fallback。
+  */
+
+  let hash =
+    2166136261;
+
+
+  for (
+    const byte of combined
+  ) {
+
+    hash ^= byte;
+
+
+    hash =
+      Math.imul(
+        hash,
+        16777619
+      );
+
+  }
+
+
+  return (
+    "fallback-" +
+    (
+      hash >>> 0
+    ).toString(16) +
+    "-" +
+    blob.size
+  );
+
+}
+
+
+/*
+  分析一張圖片
+*/
+
+async function analyzeImageFile(
+  blob
+) {
+
+  const dimensions =
+    await getImageDimensions(
+      blob
+    );
+
+
+  const fingerprint =
+    await createSampleFingerprint(
+      blob
+    );
+
+
+  const issues = [];
+
+
+  const width =
+    dimensions.width;
+
+
+  const height =
+    dimensions.height;
+
+
+  const pixels =
+    width * height;
+
+
+  /*
+    非常小的圖片，
+    未來 OCR / 拼接通常會有問題。
+  */
+
+  if (
+    width < 400 ||
+    height < 400
+  ) {
+
+    issues.push(
+      "尺寸過小"
+    );
+
+  }
+  else if (
+    pixels < 600000
+  ) {
+
+    issues.push(
+      "解析度偏低"
+    );
+
+  }
+
+
+  /*
+    過大的圖片也先提醒，
+    因為之後影像分析會消耗 RAM。
+  */
+
+  if (
+    blob.size >
+    15 * 1024 * 1024
+  ) {
+
+    issues.push(
+      "檔案很大"
+    );
+
+  }
+
+
+  return {
+
+    width:
+      width,
+
+    height:
+      height,
+
+    fingerprint:
+      fingerprint,
+
+    qualityIssues:
+      issues
+
+  };
+
+}
+
+
+/*
+  舊版 IndexedDB 裡可能沒有
+  width / height / fingerprint。
+
+  第一次啟動新版時補齊。
+*/
+
+async function ensureImageMetadata() {
+
+  let completed = 0;
+
+
+  for (
+    const item of projectImages
+  ) {
+
+    const needsAnalysis =
+      !item.width ||
+      !item.height ||
+      !item.fingerprint ||
+      !Array.isArray(
+        item.qualityIssues
+      );
+
+
+    if (!needsAnalysis) {
+
+      completed++;
+
+      continue;
+
+    }
+
+
+    storageStatus.textContent =
+      `正在分析舊截圖 ${
+        completed + 1
+      } / ${
+        projectImages.length
+      }`;
+
+
+    const analysis =
+      await analyzeImageFile(
+        item.blob
+      );
+
+
+    item.width =
+      analysis.width;
+
+    item.height =
+      analysis.height;
+
+    item.fingerprint =
+      analysis.fingerprint;
+
+    item.qualityIssues =
+      analysis.qualityIssues;
+
+
+    await updateImageRecord(
+      item
+    );
+
+
+    completed++;
+
+  }
+
+}
+
+
+/*
+  找出檔案指紋相同圖片。
+*/
+
+function findDuplicateImageIds() {
+
+  const groups =
+    new Map();
+
+
+  for (
+    const item of projectImages
+  ) {
+
+    if (
+      !item.fingerprint
+    ) {
+
+      continue;
+
+    }
+
+
+    if (
+      !groups.has(
+        item.fingerprint
+      )
+    ) {
+
+      groups.set(
+        item.fingerprint,
+        []
+      );
+
+    }
+
+
+    groups
+      .get(
+        item.fingerprint
+      )
+      .push(
+        item.id
+      );
+
+  }
+
+
+  const duplicateIds =
+    new Set();
+
+
+  for (
+    const ids of
+    groups.values()
+  ) {
+
+    if (
+      ids.length > 1
+    ) {
+
+      for (
+        const id of ids
+      ) {
+
+        duplicateIds.add(
+          id
+        );
+
+      }
+
+    }
+
+  }
+
+
+  return duplicateIds;
+
+}
+
+
+/*
+  更新整體品質摘要
+*/
+
+function updateQualitySummary(
+  duplicateIds
+) {
+
+  if (
+    projectImages.length === 0
+  ) {
+
+    qualitySummary.textContent =
+      "圖片品質：尚無圖片";
+
+    return;
+
+  }
+
+
+  let warningCount = 0;
+
+  let normalCount = 0;
+
+
+  for (
+    const item of projectImages
+  ) {
+
+    const hasWarning =
+      (
+        Array.isArray(
+          item.qualityIssues
+        ) &&
+        item.qualityIssues
+          .length > 0
+      ) ||
+      duplicateIds.has(
+        item.id
+      );
+
+
+    if (hasWarning) {
+
+      warningCount++;
+
+    }
+    else {
+
+      normalCount++;
+
+    }
+
+  }
+
+
+  qualitySummary.textContent =
+    `圖片品質：正常 ${normalCount} 張｜` +
+    `需注意 ${warningCount} 張｜` +
+    `可能重複 ${duplicateIds.size} 張`;
+
+}
 
     /*
       =========================
