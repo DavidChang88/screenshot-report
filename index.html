@@ -22,6 +22,7 @@
         BlinkMacSystemFont,
         "Segoe UI",
         sans-serif;
+
       background: #f5f5f7;
       color: #1d1d1f;
     }
@@ -59,11 +60,19 @@
       border-radius: 12px;
       padding: 16px;
       margin-top: 12px;
+
       background: #007aff;
       color: white;
+
       font-size: 17px;
       font-weight: 600;
+
       cursor: pointer;
+    }
+
+    .secondary-button {
+      background: #e9e9ee;
+      color: #1d1d1f;
     }
 
     #projectArea {
@@ -85,40 +94,59 @@
       font-weight: 600;
     }
 
+    #batchInfo {
+      margin-top: 8px;
+      color: #666;
+      font-size: 14px;
+    }
+
     #previewGrid {
       display: grid;
+
       grid-template-columns:
         repeat(3, minmax(0, 1fr));
+
       gap: 8px;
       margin-top: 16px;
     }
 
     .preview-item {
       position: relative;
+
       overflow: hidden;
+
       border-radius: 8px;
+
       background: #eee;
+
       aspect-ratio: 9 / 16;
     }
 
     .preview-item img {
       width: 100%;
       height: 100%;
+
       object-fit: cover;
+
       display: block;
     }
 
     .number {
       position: absolute;
+
       top: 5px;
       left: 5px;
 
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.75);
       color: white;
 
-      padding: 3px 7px;
+      padding: 4px 8px;
+
       border-radius: 20px;
+
       font-size: 12px;
+
+      font-weight: 600;
     }
 
     #fileInput {
@@ -154,7 +182,14 @@
         </div>
 
         <button onclick="selectImages()">
-          ＋ 加入截圖
+          ＋ 加入一批截圖
+        </button>
+
+        <button
+          class="secondary-button"
+          onclick="clearImages()"
+        >
+          清除全部截圖
         </button>
 
         <input
@@ -165,7 +200,11 @@
         >
 
         <div id="imageCount">
-          尚未選擇圖片
+          目前共 0 張截圖
+        </div>
+
+        <div id="batchInfo">
+          尚未加入任何批次
         </div>
 
         <div id="previewGrid"></div>
@@ -176,6 +215,7 @@
 
   </div>
 
+
   <script>
 
     const fileInput =
@@ -184,8 +224,26 @@
     const imageCount =
       document.getElementById("imageCount");
 
+    const batchInfo =
+      document.getElementById("batchInfo");
+
     const previewGrid =
       document.getElementById("previewGrid");
+
+
+    /*
+      目前所有已加入的截圖
+      Phase 1-B 只存在記憶體。
+
+      下一階段才會改成 IndexedDB。
+    */
+    let projectImages = [];
+
+
+    /*
+      記錄加入了幾個批次。
+    */
+    let batchCount = 0;
 
 
     function createProject() {
@@ -198,6 +256,13 @@
 
 
     function selectImages() {
+
+      /*
+        清空 input 的舊 value，
+        讓使用者再次選同一批檔案時，
+        change 事件仍可正常觸發。
+      */
+      fileInput.value = "";
 
       fileInput.click();
 
@@ -215,24 +280,79 @@
       const files =
         Array.from(event.target.files);
 
-      previewGrid.innerHTML = "";
 
       if (files.length === 0) {
-
-        imageCount.textContent =
-          "尚未選擇圖片";
 
         return;
 
       }
 
 
+      batchCount++;
+
+
+      /*
+        把這一批加入既有陣列尾端，
+        不清除上一批。
+      */
+      files.forEach((file) => {
+
+        projectImages.push({
+          id: createImageId(),
+          file: file
+        });
+
+      });
+
+
+      updateStatus(
+        files.length
+      );
+
+
+      renderImages();
+
+    }
+
+
+    function createImageId() {
+
+      return (
+        Date.now().toString() +
+        "-" +
+        Math.random()
+          .toString(36)
+          .slice(2)
+      );
+
+    }
+
+
+    function updateStatus(lastBatchSize) {
+
       imageCount.textContent =
-        `已選擇 ${files.length} 張截圖`;
+        `目前共 ${projectImages.length} 張截圖`;
 
 
-      files.forEach(
-        (file, index) => {
+      batchInfo.textContent =
+        `已加入 ${batchCount} 批，` +
+        `上一批加入 ${lastBatchSize} 張`;
+
+    }
+
+
+    function renderImages() {
+
+      /*
+        先清除舊縮圖，
+        再按照 projectImages
+        的目前順序重新畫一次。
+      */
+      previewGrid.innerHTML = "";
+
+
+      projectImages.forEach(
+        (imageData, index) => {
 
           const item =
             document.createElement("div");
@@ -256,7 +376,9 @@
 
 
           const imageURL =
-            URL.createObjectURL(file);
+            URL.createObjectURL(
+              imageData.file
+            );
 
 
           image.src =
@@ -273,12 +395,43 @@
 
 
           item.appendChild(image);
+
           item.appendChild(number);
 
           previewGrid.appendChild(item);
 
         }
       );
+
+    }
+
+
+    function clearImages() {
+
+      const confirmed =
+        confirm(
+          "確定要清除目前所有截圖嗎？"
+        );
+
+
+      if (!confirmed) {
+
+        return;
+
+      }
+
+
+      projectImages = [];
+
+      batchCount = 0;
+
+      previewGrid.innerHTML = "";
+
+      imageCount.textContent =
+        "目前共 0 張截圖";
+
+      batchInfo.textContent =
+        "尚未加入任何批次";
 
     }
 
