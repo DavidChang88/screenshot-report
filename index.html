@@ -196,7 +196,32 @@
         <div id="storageStatus">
           正在開啟本機資料庫…
         </div>
+<div
+  id="storagePanel"
+  style="
+    margin-top: 12px;
+    padding: 14px;
+    background: #f2f2f7;
+    border-radius: 12px;
+    line-height: 1.7;
+  "
+>
+  <strong>本機儲存空間</strong>
 
+  <div id="storageUsage">
+    正在檢查…
+  </div>
+
+  <div id="storageHealth">
+  </div>
+</div>
+
+<button
+  class="secondary-button"
+  onclick="requestPersistentStorage()"
+>
+  提高資料保存可靠性
+</button>
         <button
           id="addButton"
           onclick="selectImages()"
@@ -325,7 +350,7 @@
           "✅ 本機資料庫已啟用";
 
         await loadImagesFromDatabase();
-
+        await updateStorageInfo();
       }
       catch (error) {
 
@@ -577,7 +602,7 @@
 
 
         renderImages();
-
+       await updateStorageInfo();
       }
       catch (error) {
 
@@ -974,7 +999,7 @@
 
         storageStatus.textContent =
           "✅ 所有本機截圖已刪除";
-
+        await updateStorageInfo();
       }
       catch (error) {
 
@@ -990,6 +1015,245 @@
     }
 
   </script>
+/*
+  =========================
+  儲存空間監控
+  =========================
+*/
 
+async function updateStorageInfo() {
+
+  const storageUsage =
+    document.getElementById(
+      "storageUsage"
+    );
+
+  const storageHealth =
+    document.getElementById(
+      "storageHealth"
+    );
+
+
+  if (
+    !navigator.storage ||
+    !navigator.storage.estimate
+  ) {
+
+    storageUsage.textContent =
+      "此瀏覽器無法提供儲存空間資訊";
+
+    storageHealth.textContent =
+      "⚠️ 無法監控儲存容量";
+
+    return;
+
+  }
+
+
+  try {
+
+    const estimate =
+      await navigator.storage
+        .estimate();
+
+
+    const usage =
+      estimate.usage || 0;
+
+    const quota =
+      estimate.quota || 0;
+
+
+    const percentage =
+      quota > 0
+        ? (usage / quota) * 100
+        : 0;
+
+
+    storageUsage.innerHTML =
+      `
+        已使用：
+        <strong>
+          ${formatBytes(usage)}
+        </strong>
+        <br>
+
+        預估配額：
+        <strong>
+          ${formatBytes(quota)}
+        </strong>
+        <br>
+
+        使用率：
+        <strong>
+          ${percentage.toFixed(1)}%
+        </strong>
+      `;
+
+
+    if (percentage < 70) {
+
+      storageHealth.textContent =
+        "✅ 儲存空間充足";
+
+    }
+    else if (percentage < 85) {
+
+      storageHealth.textContent =
+        "⚠️ 儲存空間開始偏高";
+
+    }
+    else if (percentage < 95) {
+
+      storageHealth.textContent =
+        "⚠️ 儲存空間不足，建議先匯出或刪除舊資料";
+
+    }
+    else {
+
+      storageHealth.textContent =
+        "🛑 儲存空間接近上限";
+
+    }
+
+  }
+  catch (error) {
+
+    console.error(error);
+
+    storageUsage.textContent =
+      "無法取得儲存資訊";
+
+  }
+
+}
+
+
+/*
+  將 bytes 轉成人類容易看的單位
+*/
+
+function formatBytes(bytes) {
+
+  if (bytes === 0) {
+
+    return "0 MB";
+
+  }
+
+
+  const units = [
+    "B",
+    "KB",
+    "MB",
+    "GB"
+  ];
+
+
+  const index =
+    Math.floor(
+      Math.log(bytes) /
+      Math.log(1024)
+    );
+
+
+  const safeIndex =
+    Math.min(
+      index,
+      units.length - 1
+    );
+
+
+  const value =
+    bytes /
+    Math.pow(
+      1024,
+      safeIndex
+    );
+
+
+  return (
+    value.toFixed(2) +
+    " " +
+    units[safeIndex]
+  );
+
+}
+
+
+/*
+  =========================
+  Persistent Storage
+  =========================
+*/
+
+async function requestPersistentStorage() {
+
+  if (
+    !navigator.storage ||
+    !navigator.storage.persist
+  ) {
+
+    alert(
+      "此瀏覽器不支援 Persistent Storage。"
+    );
+
+    return;
+
+  }
+
+
+  try {
+
+    const alreadyPersistent =
+      navigator.storage.persisted
+        ? await navigator.storage
+            .persisted()
+        : false;
+
+
+    if (alreadyPersistent) {
+
+      alert(
+        "✅ 本網站目前已取得較可靠的永久儲存權限。"
+      );
+
+      return;
+
+    }
+
+
+    const granted =
+      await navigator.storage
+        .persist();
+
+
+    if (granted) {
+
+      alert(
+        "✅ 已取得 Persistent Storage。資料較不容易被瀏覽器自動清除。"
+      );
+
+    }
+    else {
+
+      alert(
+        "⚠️ 瀏覽器目前沒有授予 Persistent Storage。IndexedDB 仍然可以正常使用。"
+      );
+
+    }
+
+  }
+  catch (error) {
+
+    console.error(error);
+
+    alert(
+      "無法要求 Persistent Storage。IndexedDB 仍可正常使用。"
+    );
+
+  }
+
+}
 </body>
 </html>
