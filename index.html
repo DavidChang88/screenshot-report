@@ -22,7 +22,6 @@
         BlinkMacSystemFont,
         "Segoe UI",
         sans-serif;
-
       background: #f5f5f7;
       color: #1d1d1f;
     }
@@ -45,6 +44,10 @@
       font-size: 28px;
     }
 
+    h2 {
+      font-size: 20px;
+    }
+
     p {
       line-height: 1.6;
       color: #666;
@@ -56,13 +59,10 @@
       border-radius: 12px;
       padding: 16px;
       margin-top: 12px;
-
       background: #007aff;
       color: white;
-
       font-size: 17px;
       font-weight: 600;
-
       cursor: pointer;
     }
 
@@ -70,7 +70,6 @@
       display: none;
       margin-top: 20px;
       padding-top: 20px;
-
       border-top: 1px solid #ddd;
     }
 
@@ -79,6 +78,51 @@
       border-radius: 10px;
       background: #f2f2f7;
       margin-top: 12px;
+    }
+
+    #imageCount {
+      margin-top: 16px;
+      font-weight: 600;
+    }
+
+    #previewGrid {
+      display: grid;
+      grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .preview-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #eee;
+      aspect-ratio: 9 / 16;
+    }
+
+    .preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .number {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+
+      background: rgba(0,0,0,0.7);
+      color: white;
+
+      padding: 3px 7px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+
+    #fileInput {
+      display: none;
     }
   </style>
 </head>
@@ -109,9 +153,22 @@
           ✅ 專案已建立
         </div>
 
-        <button>
+        <button onclick="selectImages()">
           ＋ 加入截圖
         </button>
+
+        <input
+          id="fileInput"
+          type="file"
+          accept="image/*"
+          multiple
+        >
+
+        <div id="imageCount">
+          尚未選擇圖片
+        </div>
+
+        <div id="previewGrid"></div>
 
       </div>
 
@@ -119,13 +176,110 @@
 
   </div>
 
+
   <script>
+
+    const fileInput =
+      document.getElementById("fileInput");
+
+    const imageCount =
+      document.getElementById("imageCount");
+
+    const previewGrid =
+      document.getElementById("previewGrid");
+
 
     function createProject() {
 
       document.getElementById(
         "projectArea"
       ).style.display = "block";
+
+    }
+
+
+    function selectImages() {
+
+      fileInput.click();
+
+    }
+
+
+    fileInput.addEventListener(
+      "change",
+      handleFiles
+    );
+
+
+    function handleFiles(event) {
+
+      const files =
+        Array.from(event.target.files);
+
+      previewGrid.innerHTML = "";
+
+      if (files.length === 0) {
+
+        imageCount.textContent =
+          "尚未選擇圖片";
+
+        return;
+
+      }
+
+
+      imageCount.textContent =
+        `已選擇 ${files.length} 張截圖`;
+
+
+      files.forEach(
+        (file, index) => {
+
+          const item =
+            document.createElement("div");
+
+          item.className =
+            "preview-item";
+
+
+          const image =
+            document.createElement("img");
+
+
+          const number =
+            document.createElement("div");
+
+          number.className =
+            "number";
+
+          number.textContent =
+            index + 1;
+
+
+          const imageURL =
+            URL.createObjectURL(file);
+
+
+          image.src =
+            imageURL;
+
+
+          image.onload = function() {
+
+            URL.revokeObjectURL(
+              imageURL
+            );
+
+          };
+
+
+          item.appendChild(image);
+          item.appendChild(number);
+
+          previewGrid.appendChild(item);
+
+        }
+      );
 
     }
 
