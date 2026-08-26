@@ -359,1460 +359,6 @@
 
     /*
       =========================
-      Phase 2-D
-      建立連續虛擬文件
-      =========================
-    */
-
-    function getPhase2DSourceFingerprint() {
-      if (!phase2cState) {
-        return "";
-      }
-
-      const compactResults =
-        Array.isArray(
-          phase2cState.results
-        )
-          ? phase2cState.results.map(
-              result => [
-                Number(
-                  result.pairIndex
-                ),
-                String(
-                  result.status ||
-                  ""
-                ),
-                Number(
-                  result.overlapPixels
-                ) || 0,
-                Number(
-                  result.similarity
-                ) || 0
-              ]
-            )
-          : [];
-
-      return JSON.stringify({
-        projectSignature:
-          getPhase2CProjectSignature(),
-        ignoreChrome:
-          Boolean(
-            phase2cState.ignoreChrome
-          ),
-        completed:
-          Boolean(
-            phase2cState.completed
-          ),
-        nextPairIndex:
-          Number(
-            phase2cState.nextPairIndex
-          ) || 0,
-        results:
-          compactResults
-      });
-    }
-
-
-    function phase2DPlanMatchesCurrentInputs() {
-      if (!phase2dPlan) {
-        return false;
-      }
-
-      return (
-        phase2dPlan.version ===
-          PHASE2D_PLAN_VERSION &&
-        phase2dPlan.projectSignature ===
-          getPhase2CProjectSignature() &&
-        phase2dPlan.sourceFingerprint ===
-          getPhase2DSourceFingerprint() &&
-        Boolean(
-          phase2dPlan.allowHighConfidence
-        ) ===
-          Boolean(
-            virtualAllowHighConfidence.checked
-          )
-      );
-    }
-
-
-    async function loadPhase2DPlan() {
-      try {
-        const saved =
-          await getSetting(
-            PHASE2D_PLAN_KEY
-          );
-
-        phase2dPlan =
-          saved && saved.value
-            ? saved.value
-            : null;
-      }
-      catch (error) {
-        console.warn(
-          "讀取 Phase 2-D 計畫失敗：",
-          error
-        );
-
-        phase2dPlan = null;
-      }
-
-      if (
-        phase2dPlan &&
-        typeof phase2dPlan
-          .allowHighConfidence ===
-          "boolean"
-      ) {
-        virtualAllowHighConfidence.checked =
-          phase2dPlan
-            .allowHighConfidence;
-      }
-
-      renderPhase2DPlan();
-    }
-
-
-    async function savePhase2DPlan() {
-      await saveSetting(
-        PHASE2D_PLAN_KEY,
-        phase2dPlan
-      );
-    }
-
-
-    function getPhase2DResultForPair(
-      pairIndex
-    ) {
-      if (
-        !phase2cState ||
-        !Array.isArray(
-          phase2cState.results
-        )
-      ) {
-        return null;
-      }
-
-      return phase2cState.results.find(
-        result =>
-          Number(
-            result.pairIndex
-          ) ===
-          Number(pairIndex)
-      ) || null;
-    }
-
-
-    function classifyPhase2DEdge(
-      pairIndex,
-      allowHighConfidence
-    ) {
-      const result =
-        getPhase2DResultForPair(
-          pairIndex
-        );
-
-      if (!result) {
-        return {
-          accepted: false,
-          status: "pending",
-          reason:
-            "尚無 Phase 2-C 結果",
-          overlapPixels: 0
-        };
-      }
-
-      if (
-        result.status ===
-        "confirmed"
-      ) {
-        return {
-          accepted: true,
-          status: "confirmed",
-          reason:
-            "Phase 2-B 已人工確認",
-          overlapPixels:
-            Math.max(
-              0,
-              Math.round(
-                Number(
-                  result.overlapPixels
-                ) || 0
-              )
-            ),
-          similarity:
-            Number(
-              result.similarity
-            ) || null
-        };
-      }
-
-      if (
-        allowHighConfidence &&
-        result.status ===
-          "high"
-      ) {
-        return {
-          accepted: true,
-          status: "high",
-          reason:
-            "Phase 2-C 高信心候選",
-          overlapPixels:
-            Math.max(
-              0,
-              Math.round(
-                Number(
-                  result.overlapPixels
-                ) || 0
-              )
-            ),
-          similarity:
-            Number(
-              result.similarity
-            ) || null
-        };
-      }
-
-      const reasonMap = {
-        high:
-          "高信心候選尚未人工確認",
-        medium:
-          "中信心，需人工確認",
-        low:
-          "低信心，需人工確認",
-        duplicate:
-          "完全重複，需先處理重複圖片",
-        rejected:
-          "已人工標記為不是正確重疊",
-        none:
-          "找不到重疊候選",
-        error:
-          "分析錯誤",
-        pending:
-          "尚未分析"
-      };
-
-      return {
-        accepted: false,
-        status:
-          result.status ||
-          "pending",
-        reason:
-          reasonMap[
-            result.status
-          ] ||
-          "尚未確認",
-        overlapPixels:
-          Number(
-            result.overlapPixels
-          ) || 0,
-        similarity:
-          Number(
-            result.similarity
-          ) || null
-      };
-    }
-
-
-    function createPhase2DSlice(
-      image,
-      imageIndex,
-      cropTop,
-      cropBottom,
-      incomingEdge
-    ) {
-      const sourceWidth =
-        Math.max(
-          1,
-          Number(
-            image.width
-          ) || 1
-        );
-
-      const sourceHeight =
-        Math.max(
-          1,
-          Number(
-            image.height
-          ) || 1
-        );
-
-      const safeTop =
-        Math.max(
-          0,
-          Math.min(
-            sourceHeight - 1,
-            Math.round(
-              cropTop
-            )
-          )
-        );
-
-      const safeBottom =
-        Math.max(
-          safeTop + 1,
-          Math.min(
-            sourceHeight,
-            Math.round(
-              cropBottom
-            )
-          )
-        );
-
-      return {
-        imageId:
-          image.id,
-
-        imageIndex:
-          imageIndex,
-
-        displayNumber:
-          imageIndex + 1,
-
-        sourceWidth:
-          sourceWidth,
-
-        sourceHeight:
-          sourceHeight,
-
-        cropTop:
-          safeTop,
-
-        cropBottom:
-          safeBottom,
-
-        retainedHeight:
-          safeBottom -
-          safeTop,
-
-        incomingEdge:
-          incomingEdge || null
-      };
-    }
-
-
-    function finalizePhase2DChain(
-      chain
-    ) {
-      if (
-        !chain ||
-        !Array.isArray(
-          chain.slices
-        ) ||
-        chain.slices.length === 0
-      ) {
-        return chain;
-      }
-
-      const targetWidth =
-        Math.max(
-          1,
-          Number(
-            chain.slices[0]
-              .sourceWidth
-          ) || 1
-        );
-
-      let virtualY = 0;
-
-      for (
-        const slice of
-        chain.slices
-      ) {
-        const scale =
-          targetWidth /
-          Math.max(
-            1,
-            slice.sourceWidth
-          );
-
-        const normalizedHeight =
-          slice.retainedHeight *
-          scale;
-
-        slice.targetWidth =
-          targetWidth;
-
-        slice.scaleToTarget =
-          scale;
-
-        slice.virtualYStart =
-          virtualY;
-
-        slice.normalizedHeight =
-          normalizedHeight;
-
-        slice.virtualYEnd =
-          virtualY +
-          normalizedHeight;
-
-        virtualY =
-          slice.virtualYEnd;
-      }
-
-      chain.targetWidth =
-        targetWidth;
-
-      chain.virtualHeight =
-        virtualY;
-
-      chain.firstImageNumber =
-        chain.slices[0]
-          .displayNumber;
-
-      chain.lastImageNumber =
-        chain.slices[
-          chain.slices.length - 1
-        ].displayNumber;
-
-      return chain;
-    }
-
-
-    async function buildPhase2DVirtualDocument() {
-      if (
-        !phase2cState ||
-        !phase2CStateMatchesCurrentProject()
-      ) {
-        alert(
-          "請先完成與目前截圖順序一致的 Phase 2-C 整批分析。"
-        );
-        return;
-      }
-
-      const totalPairs =
-        Math.max(
-          0,
-          projectImages.length - 1
-        );
-
-      const completedCount =
-        Math.min(
-          Number(
-            phase2cState.nextPairIndex
-          ) || 0,
-          totalPairs
-        );
-
-      if (
-        !phase2cState.completed ||
-        completedCount < totalPairs
-      ) {
-        alert(
-          "Phase 2-C 尚未完成全部相鄰組分析。請先完成 Phase 2-C。"
-        );
-        return;
-      }
-
-      if (
-        projectImages.length === 0
-      ) {
-        alert(
-          "目前沒有截圖。"
-        );
-        return;
-      }
-
-      const allowHighConfidence =
-        Boolean(
-          virtualAllowHighConfidence
-            .checked
-        );
-
-      const ignoreChrome =
-        Boolean(
-          phase2cState.ignoreChrome
-        );
-
-      const chains = [];
-      const breaks = [];
-      const acceptedEdges = [];
-
-      let currentChain = {
-        id:
-          "chain-1",
-        slices: [],
-        acceptedEdges: []
-      };
-
-      /*
-        第一張一定是第一條鏈的起點。
-      */
-      const firstImage =
-        projectImages[0];
-
-      const firstBounds =
-        getContentPixelBounds(
-          firstImage,
-          ignoreChrome
-        );
-
-      currentChain.slices.push(
-        createPhase2DSlice(
-          firstImage,
-          0,
-          firstBounds.top,
-          firstBounds.bottom,
-          null
-        )
-      );
-
-      for (
-        let pairIndex = 0;
-        pairIndex < totalPairs;
-        pairIndex++
-      ) {
-        const nextImage =
-          projectImages[
-            pairIndex + 1
-          ];
-
-        const edge =
-          classifyPhase2DEdge(
-            pairIndex,
-            allowHighConfidence
-          );
-
-        const nextBounds =
-          getContentPixelBounds(
-            nextImage,
-            ignoreChrome
-          );
-
-        if (edge.accepted) {
-          const maxAllowedOverlap =
-            Math.max(
-              0,
-              nextBounds.height - 1
-            );
-
-          const overlapPixels =
-            Math.min(
-              maxAllowedOverlap,
-              Math.max(
-                0,
-                Number(
-                  edge.overlapPixels
-                ) || 0
-              )
-            );
-
-          const incomingEdge = {
-            pairIndex:
-              pairIndex,
-
-            fromImageId:
-              projectImages[
-                pairIndex
-              ].id,
-
-            toImageId:
-              nextImage.id,
-
-            status:
-              edge.status,
-
-            reason:
-              edge.reason,
-
-            overlapPixels:
-              overlapPixels,
-
-            similarity:
-              edge.similarity
-          };
-
-          currentChain.acceptedEdges
-            .push(
-              incomingEdge
-            );
-
-          acceptedEdges.push(
-            incomingEdge
-          );
-
-          currentChain.slices.push(
-            createPhase2DSlice(
-              nextImage,
-              pairIndex + 1,
-              nextBounds.top +
-                overlapPixels,
-              nextBounds.bottom,
-              incomingEdge
-            )
-          );
-        }
-        else {
-          finalizePhase2DChain(
-            currentChain
-          );
-
-          chains.push(
-            currentChain
-          );
-
-          breaks.push({
-            pairIndex:
-              pairIndex,
-
-            afterImageId:
-              projectImages[
-                pairIndex
-              ].id,
-
-            beforeImageId:
-              nextImage.id,
-
-            afterDisplayNumber:
-              pairIndex + 1,
-
-            beforeDisplayNumber:
-              pairIndex + 2,
-
-            status:
-              edge.status,
-
-            reason:
-              edge.reason,
-
-            overlapPixels:
-              edge.overlapPixels,
-
-            similarity:
-              edge.similarity
-          });
-
-          currentChain = {
-            id:
-              `chain-${chains.length + 1}`,
-            slices: [],
-            acceptedEdges: []
-          };
-
-          currentChain.slices.push(
-            createPhase2DSlice(
-              nextImage,
-              pairIndex + 1,
-              nextBounds.top,
-              nextBounds.bottom,
-              null
-            )
-          );
-        }
-      }
-
-      finalizePhase2DChain(
-        currentChain
-      );
-
-      chains.push(
-        currentChain
-      );
-
-      const totalSlices =
-        chains.reduce(
-          (
-            sum,
-            chain
-          ) =>
-            sum +
-            chain.slices.length,
-          0
-        );
-
-      phase2dPlan = {
-        version:
-          PHASE2D_PLAN_VERSION,
-
-        projectSignature:
-          getPhase2CProjectSignature(),
-
-        sourceFingerprint:
-          getPhase2DSourceFingerprint(),
-
-        allowHighConfidence:
-          allowHighConfidence,
-
-        ignoreChrome:
-          ignoreChrome,
-
-        builtAt:
-          Date.now(),
-
-        updatedAt:
-          Date.now(),
-
-        sourceImageCount:
-          projectImages.length,
-
-        totalPairs:
-          totalPairs,
-
-        chainCount:
-          chains.length,
-
-        acceptedSeamCount:
-          acceptedEdges.length,
-
-        breakCount:
-          breaks.length,
-
-        sliceCount:
-          totalSlices,
-
-        chains:
-          chains,
-
-        breaks:
-          breaks,
-
-        acceptedEdges:
-          acceptedEdges
-      };
-
-      await savePhase2DPlan();
-
-      renderPhase2DPlan();
-
-      virtualDocStatus.innerHTML =
-        `
-          ✅ 已建立虛擬文件計畫。
-          <br>
-          安全模式：
-          <strong>
-            ${
-              allowHighConfidence
-                ? "人工確認＋高信心候選"
-                : "只採用人工確認接縫"
-            }
-          </strong>
-          <br>
-          原始截圖沒有被裁切或修改。
-        `;
-
-      virtualDocPanel.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
-    }
-
-
-    function clearPhase2DPreviewUrls() {
-      for (
-        const url of
-        phase2dPreviewUrls
-      ) {
-        try {
-          URL.revokeObjectURL(
-            url
-          );
-        }
-        catch (error) {
-          console.warn(
-            "Phase 2-D Blob URL 回收失敗：",
-            error
-          );
-        }
-      }
-
-      phase2dPreviewUrls.clear();
-    }
-
-
-    function createPhase2DPreviewUrl(
-      blob
-    ) {
-      const url =
-        URL.createObjectURL(
-          blob
-        );
-
-      phase2dPreviewUrls.add(
-        url
-      );
-
-      return url;
-    }
-
-
-    function getPhase2DImageById(
-      imageId
-    ) {
-      return projectImages.find(
-        item =>
-          Number(item.id) ===
-          Number(imageId)
-      ) || null;
-    }
-
-
-    function renderPhase2DPlan() {
-      clearPhase2DPreviewUrls();
-
-      const hasPlan =
-        Boolean(
-          phase2dPlan
-        );
-
-      const matches =
-        phase2DPlanMatchesCurrentInputs();
-
-      if (!hasPlan) {
-        virtualDocStatus.textContent =
-          "尚未建立虛擬文件計畫。";
-
-        virtualChainCount.textContent =
-          "0";
-
-        virtualAcceptedSeamCount
-          .textContent =
-          "0";
-
-        virtualBreakCount.textContent =
-          "0";
-
-        virtualSliceCount.textContent =
-          "0";
-
-        virtualExportButton.disabled =
-          true;
-
-        virtualChainSelect.disabled =
-          true;
-
-        virtualChainSelect.innerHTML =
-          `
-            <option value="">
-              尚未建立
-            </option>
-          `;
-
-        virtualPreview.innerHTML =
-          `
-            <div class="virtual-preview-empty">
-              建立計畫後，可在這裡預覽文件鏈。
-            </div>
-          `;
-
-        virtualChainList.innerHTML =
-          "";
-
-        virtualBreakList.innerHTML =
-          `
-            <h4>文件斷點</h4>
-            <div>尚未建立計畫。</div>
-          `;
-
-        return;
-      }
-
-      virtualChainCount.textContent =
-        String(
-          phase2dPlan.chainCount || 0
-        );
-
-      virtualAcceptedSeamCount
-        .textContent =
-        String(
-          phase2dPlan
-            .acceptedSeamCount || 0
-        );
-
-      virtualBreakCount.textContent =
-        String(
-          phase2dPlan.breakCount || 0
-        );
-
-      virtualSliceCount.textContent =
-        String(
-          phase2dPlan.sliceCount || 0
-        );
-
-      virtualExportButton.disabled =
-        !matches;
-
-      if (!matches) {
-        virtualDocStatus.innerHTML =
-          `
-            ⚠️ 虛擬文件計畫已過期。
-            <br>
-            Phase 2-C 結果、圖片順序或安全模式已改變，
-            請按「建立／更新虛擬文件計畫」重新產生。
-          `;
-      }
-      else {
-        virtualDocStatus.innerHTML =
-          `
-            ✅ 虛擬文件計畫有效。
-            <br>
-            模式：
-            <strong>
-              ${
-                phase2dPlan
-                  .allowHighConfidence
-                  ? "人工確認＋高信心候選"
-                  : "只採用人工確認接縫"
-              }
-            </strong>
-            <br>
-            ${
-              phase2dPlan.breakCount > 0
-                ? `<span class="virtual-warning">
-                    仍有 ${phase2dPlan.breakCount} 個文件斷點需要後續確認。
-                   </span>`
-                : "所有相鄰截圖都已形成可用接縫。"
-            }
-          `;
-      }
-
-      renderPhase2DChainList();
-      renderPhase2DBreakList();
-      populatePhase2DChainSelect();
-
-      if (matches) {
-        renderSelectedVirtualChain();
-      }
-      else {
-        virtualPreview.innerHTML =
-          `
-            <div class="virtual-preview-empty">
-              計畫已過期，請先重新建立。
-            </div>
-          `;
-      }
-    }
-
-
-    function renderPhase2DChainList() {
-      virtualChainList.innerHTML =
-        "";
-
-      if (
-        !phase2dPlan ||
-        !Array.isArray(
-          phase2dPlan.chains
-        )
-      ) {
-        return;
-      }
-
-      phase2dPlan.chains.forEach(
-        (
-          chain,
-          index
-        ) => {
-          const card =
-            document.createElement(
-              "div"
-            );
-
-          card.className =
-            "virtual-chain-card";
-
-          const title =
-            document.createElement(
-              "div"
-            );
-
-          title.className =
-            "virtual-chain-title";
-
-          const rangeText =
-            chain.firstImageNumber ===
-              chain.lastImageNumber
-              ? `第 ${chain.firstImageNumber} 張`
-              : `第 ${chain.firstImageNumber} 張 → 第 ${chain.lastImageNumber} 張`;
-
-          title.textContent =
-            `文件鏈 ${index + 1}｜${rangeText}`;
-
-          const meta =
-            document.createElement(
-              "div"
-            );
-
-          meta.className =
-            "virtual-chain-meta";
-
-          const virtualHeight =
-            Number(
-              chain.virtualHeight
-            ) || 0;
-
-          meta.innerHTML =
-            `切片：<strong>${chain.slices.length}</strong>` +
-            `｜已串接：<strong>${chain.acceptedEdges.length}</strong>` +
-            `<br>虛擬尺寸：約 ${Math.round(chain.targetWidth || 0)} × ${Math.round(virtualHeight)} px`;
-
-          card.appendChild(
-            title
-          );
-
-          card.appendChild(
-            meta
-          );
-
-          virtualChainList.appendChild(
-            card
-          );
-        }
-      );
-    }
-
-
-    function renderPhase2DBreakList() {
-      virtualBreakList.innerHTML =
-        "<h4>文件斷點</h4>";
-
-      if (
-        !phase2dPlan ||
-        !Array.isArray(
-          phase2dPlan.breaks
-        ) ||
-        phase2dPlan.breaks.length ===
-          0
-      ) {
-        const empty =
-          document.createElement(
-            "div"
-          );
-
-        empty.textContent =
-          "✅ 沒有待確認文件斷點。";
-
-        virtualBreakList.appendChild(
-          empty
-        );
-
-        return;
-      }
-
-      for (
-        const item of
-        phase2dPlan.breaks
-      ) {
-        const row =
-          document.createElement(
-            "div"
-          );
-
-        row.className =
-          "virtual-break-item";
-
-        const similarityText =
-          Number.isFinite(
-            Number(
-              item.similarity
-            )
-          )
-            ? `｜相似度 ${Number(item.similarity).toFixed(1)}%`
-            : "";
-
-        row.innerHTML =
-          `<strong>
-             第 ${item.afterDisplayNumber} 張 → 第 ${item.beforeDisplayNumber} 張
-           </strong>
-           <br>
-           ${item.reason}${similarityText}`;
-
-        virtualBreakList.appendChild(
-          row
-        );
-      }
-    }
-
-
-    function populatePhase2DChainSelect() {
-      const previousValue =
-        virtualChainSelect.value;
-
-      virtualChainSelect.innerHTML =
-        "";
-
-      if (
-        !phase2dPlan ||
-        !Array.isArray(
-          phase2dPlan.chains
-        ) ||
-        phase2dPlan.chains.length ===
-          0 ||
-        !phase2DPlanMatchesCurrentInputs()
-      ) {
-        virtualChainSelect.disabled =
-          true;
-
-        const option =
-          document.createElement(
-            "option"
-          );
-
-        option.value = "";
-        option.textContent =
-          "沒有可預覽的文件鏈";
-
-        virtualChainSelect.appendChild(
-          option
-        );
-
-        return;
-      }
-
-      virtualChainSelect.disabled =
-        false;
-
-      phase2dPlan.chains.forEach(
-        (
-          chain,
-          index
-        ) => {
-          const option =
-            document.createElement(
-              "option"
-            );
-
-          option.value =
-            String(index);
-
-          const rangeText =
-            chain.firstImageNumber ===
-              chain.lastImageNumber
-              ? `第 ${chain.firstImageNumber} 張`
-              : `第 ${chain.firstImageNumber}–${chain.lastImageNumber} 張`;
-
-          option.textContent =
-            `文件鏈 ${index + 1}｜${rangeText}｜${chain.slices.length} 切片`;
-
-          virtualChainSelect.appendChild(
-            option
-          );
-        }
-      );
-
-      const previousExists =
-        Array.from(
-          virtualChainSelect.options
-        ).some(
-          option =>
-            option.value ===
-            previousValue
-        );
-
-      if (previousExists) {
-        virtualChainSelect.value =
-          previousValue;
-      }
-      else {
-        /*
-          優先預覽第一條有 2 張以上的鏈。
-        */
-        const preferredIndex =
-          phase2dPlan.chains
-            .findIndex(
-              chain =>
-                chain.slices.length > 1
-            );
-
-        virtualChainSelect.value =
-          String(
-            preferredIndex >= 0
-              ? preferredIndex
-              : 0
-          );
-      }
-    }
-
-
-    function renderSelectedVirtualChain() {
-      clearPhase2DPreviewUrls();
-
-      virtualPreview.innerHTML =
-        "";
-
-      if (
-        !phase2dPlan ||
-        !phase2DPlanMatchesCurrentInputs()
-      ) {
-        virtualPreview.innerHTML =
-          `
-            <div class="virtual-preview-empty">
-              尚無有效的虛擬文件計畫。
-            </div>
-          `;
-        return;
-      }
-
-      const chainIndex =
-        Number(
-          virtualChainSelect.value
-        );
-
-      const chain =
-        phase2dPlan.chains[
-          chainIndex
-        ];
-
-      if (!chain) {
-        virtualPreview.innerHTML =
-          `
-            <div class="virtual-preview-empty">
-              找不到此文件鏈。
-            </div>
-          `;
-        return;
-      }
-
-      for (
-        let sliceIndex = 0;
-        sliceIndex <
-          chain.slices.length;
-        sliceIndex++
-      ) {
-        const slice =
-          chain.slices[
-            sliceIndex
-          ];
-
-        const imageData =
-          getPhase2DImageById(
-            slice.imageId
-          );
-
-        if (!imageData) {
-          continue;
-        }
-
-        if (
-          sliceIndex > 0 &&
-          slice.incomingEdge
-        ) {
-          const seam =
-            document.createElement(
-              "div"
-            );
-
-          seam.className =
-            "virtual-seam-label";
-
-          seam.textContent =
-            `接縫：移除下一張頂部 ${Math.round(slice.incomingEdge.overlapPixels)} px｜` +
-            (
-              slice.incomingEdge.status ===
-                "confirmed"
-                ? "人工確認"
-                : "高信心候選"
-            );
-
-          virtualPreview.appendChild(
-            seam
-          );
-        }
-
-        const holder =
-          document.createElement(
-            "div"
-          );
-
-        holder.className =
-          "virtual-slice";
-
-        const sourceWidth =
-          Math.max(
-            1,
-            Number(
-              slice.sourceWidth
-            ) || 1
-          );
-
-        const sourceHeight =
-          Math.max(
-            1,
-            Number(
-              slice.sourceHeight
-            ) || 1
-          );
-
-        const retainedHeight =
-          Math.max(
-            1,
-            Number(
-              slice.retainedHeight
-            ) || 1
-          );
-
-        /*
-          使用 CSS aspect-ratio 建立真正響應式裁切視窗。
-          不依賴固定 420px 高度，因此 iPhone 窄螢幕也不會變形。
-        */
-        holder.style.aspectRatio =
-          `${sourceWidth} / ${retainedHeight}`;
-
-        const img =
-          document.createElement(
-            "img"
-          );
-
-        img.alt =
-          `第 ${slice.displayNumber} 張虛擬切片`;
-
-        const blob =
-          imageData.thumbnailBlob
-            instanceof Blob
-            ? imageData.thumbnailBlob
-            : (
-                imageData.blob
-                  instanceof Blob
-                  ? imageData.blob
-                  : null
-              );
-
-        if (!blob) {
-          holder.textContent =
-            `第 ${slice.displayNumber} 張預覽不可用`;
-
-          virtualPreview.appendChild(
-            holder
-          );
-
-          continue;
-        }
-
-        const url =
-          createPhase2DPreviewUrl(
-            blob
-          );
-
-        img.src = url;
-
-        /*
-          thumbnail 與原圖具有相同比例。
-          transform 的百分比是相對於 img 自身高度，
-          因此可直接以 cropTop/sourceHeight 做響應式位移。
-        */
-        const cropTopPercent =
-          slice.cropTop /
-          sourceHeight *
-          100;
-
-        img.style.top =
-          "0px";
-
-        img.style.transform =
-          `translateY(-${cropTopPercent}%)`;
-
-        holder.appendChild(
-          img
-        );
-
-        virtualPreview.appendChild(
-          holder
-        );
-      }
-    }
-
-
-    async function clearPhase2DPlan() {
-      const confirmed =
-        confirm(
-          "確定要清除 Phase 2-D 虛擬文件計畫嗎？原始截圖、Phase 2-B 人工接縫與 Phase 2-C 分析結果都不會被刪除。"
-        );
-
-      if (!confirmed) {
-        return;
-      }
-
-      phase2dPlan = null;
-
-      await saveSetting(
-        PHASE2D_PLAN_KEY,
-        null
-      );
-
-      renderPhase2DPlan();
-    }
-
-
-    function downloadTextFile(
-      filename,
-      text,
-      mimeType =
-        "application/json"
-    ) {
-      const blob =
-        new Blob(
-          [text],
-          {
-            type:
-              mimeType +
-              ";charset=utf-8"
-          }
-        );
-
-      const url =
-        URL.createObjectURL(
-          blob
-        );
-
-      const anchor =
-        document.createElement(
-          "a"
-        );
-
-      anchor.href = url;
-      anchor.download =
-        filename;
-
-      document.body.appendChild(
-        anchor
-      );
-
-      anchor.click();
-
-      anchor.remove();
-
-      setTimeout(
-        () =>
-          URL.revokeObjectURL(
-            url
-          ),
-        1500
-      );
-    }
-
-
-    function exportPhase2DPlanJson() {
-      if (
-        !phase2dPlan ||
-        !phase2DPlanMatchesCurrentInputs()
-      ) {
-        alert(
-          "請先建立有效的 Phase 2-D 虛擬文件計畫。"
-        );
-        return;
-      }
-
-      const exportObject = {
-        schema:
-          "screenshot-report.phase2d.virtual-document-plan.v1",
-
-        exportedAt:
-          new Date()
-            .toISOString(),
-
-        plan:
-          phase2dPlan
-      };
-
-      downloadTextFile(
-        "phase2d-virtual-document-plan.json",
-        JSON.stringify(
-          exportObject,
-          null,
-          2
-        )
-      );
-    }
-
-
-    /*
-      =========================
       Phase 2-C
       整批相鄰截圖分析
       =========================
@@ -5553,6 +4099,1462 @@
         recommendation:
           "目前不建議自動拼接，請確認是否為真正連續截圖"
       };
+    }
+
+
+
+
+    /*
+      =========================
+      Phase 2-D
+      建立連續虛擬文件
+      =========================
+    */
+
+    function getPhase2DSourceFingerprint() {
+      if (!phase2cState) {
+        return "";
+      }
+
+      const compactResults =
+        Array.isArray(
+          phase2cState.results
+        )
+          ? phase2cState.results.map(
+              result => [
+                Number(
+                  result.pairIndex
+                ),
+                String(
+                  result.status ||
+                  ""
+                ),
+                Number(
+                  result.overlapPixels
+                ) || 0,
+                Number(
+                  result.similarity
+                ) || 0
+              ]
+            )
+          : [];
+
+      return JSON.stringify({
+        projectSignature:
+          getPhase2CProjectSignature(),
+        ignoreChrome:
+          Boolean(
+            phase2cState.ignoreChrome
+          ),
+        completed:
+          Boolean(
+            phase2cState.completed
+          ),
+        nextPairIndex:
+          Number(
+            phase2cState.nextPairIndex
+          ) || 0,
+        results:
+          compactResults
+      });
+    }
+
+
+    function phase2DPlanMatchesCurrentInputs() {
+      if (!phase2dPlan) {
+        return false;
+      }
+
+      return (
+        phase2dPlan.version ===
+          PHASE2D_PLAN_VERSION &&
+        phase2dPlan.projectSignature ===
+          getPhase2CProjectSignature() &&
+        phase2dPlan.sourceFingerprint ===
+          getPhase2DSourceFingerprint() &&
+        Boolean(
+          phase2dPlan.allowHighConfidence
+        ) ===
+          Boolean(
+            virtualAllowHighConfidence.checked
+          )
+      );
+    }
+
+
+    async function loadPhase2DPlan() {
+      try {
+        const saved =
+          await getSetting(
+            PHASE2D_PLAN_KEY
+          );
+
+        phase2dPlan =
+          saved && saved.value
+            ? saved.value
+            : null;
+      }
+      catch (error) {
+        console.warn(
+          "讀取 Phase 2-D 計畫失敗：",
+          error
+        );
+
+        phase2dPlan = null;
+      }
+
+      if (
+        phase2dPlan &&
+        typeof phase2dPlan
+          .allowHighConfidence ===
+          "boolean"
+      ) {
+        virtualAllowHighConfidence.checked =
+          phase2dPlan
+            .allowHighConfidence;
+      }
+
+      renderPhase2DPlan();
+    }
+
+
+    async function savePhase2DPlan() {
+      await saveSetting(
+        PHASE2D_PLAN_KEY,
+        phase2dPlan
+      );
+    }
+
+
+    function getPhase2DResultForPair(
+      pairIndex
+    ) {
+      if (
+        !phase2cState ||
+        !Array.isArray(
+          phase2cState.results
+        )
+      ) {
+        return null;
+      }
+
+      return phase2cState.results.find(
+        result =>
+          Number(
+            result.pairIndex
+          ) ===
+          Number(pairIndex)
+      ) || null;
+    }
+
+
+    function classifyPhase2DEdge(
+      pairIndex,
+      allowHighConfidence
+    ) {
+      const result =
+        getPhase2DResultForPair(
+          pairIndex
+        );
+
+      if (!result) {
+        return {
+          accepted: false,
+          status: "pending",
+          reason:
+            "尚無 Phase 2-C 結果",
+          overlapPixels: 0
+        };
+      }
+
+      if (
+        result.status ===
+        "confirmed"
+      ) {
+        return {
+          accepted: true,
+          status: "confirmed",
+          reason:
+            "Phase 2-B 已人工確認",
+          overlapPixels:
+            Math.max(
+              0,
+              Math.round(
+                Number(
+                  result.overlapPixels
+                ) || 0
+              )
+            ),
+          similarity:
+            Number(
+              result.similarity
+            ) || null
+        };
+      }
+
+      if (
+        allowHighConfidence &&
+        result.status ===
+          "high"
+      ) {
+        return {
+          accepted: true,
+          status: "high",
+          reason:
+            "Phase 2-C 高信心候選",
+          overlapPixels:
+            Math.max(
+              0,
+              Math.round(
+                Number(
+                  result.overlapPixels
+                ) || 0
+              )
+            ),
+          similarity:
+            Number(
+              result.similarity
+            ) || null
+        };
+      }
+
+      const reasonMap = {
+        high:
+          "高信心候選尚未人工確認",
+        medium:
+          "中信心，需人工確認",
+        low:
+          "低信心，需人工確認",
+        duplicate:
+          "完全重複，需先處理重複圖片",
+        rejected:
+          "已人工標記為不是正確重疊",
+        none:
+          "找不到重疊候選",
+        error:
+          "分析錯誤",
+        pending:
+          "尚未分析"
+      };
+
+      return {
+        accepted: false,
+        status:
+          result.status ||
+          "pending",
+        reason:
+          reasonMap[
+            result.status
+          ] ||
+          "尚未確認",
+        overlapPixels:
+          Number(
+            result.overlapPixels
+          ) || 0,
+        similarity:
+          Number(
+            result.similarity
+          ) || null
+      };
+    }
+
+
+    function createPhase2DSlice(
+      image,
+      imageIndex,
+      cropTop,
+      cropBottom,
+      incomingEdge
+    ) {
+      const sourceWidth =
+        Math.max(
+          1,
+          Number(
+            image.width
+          ) || 1
+        );
+
+      const sourceHeight =
+        Math.max(
+          1,
+          Number(
+            image.height
+          ) || 1
+        );
+
+      const safeTop =
+        Math.max(
+          0,
+          Math.min(
+            sourceHeight - 1,
+            Math.round(
+              cropTop
+            )
+          )
+        );
+
+      const safeBottom =
+        Math.max(
+          safeTop + 1,
+          Math.min(
+            sourceHeight,
+            Math.round(
+              cropBottom
+            )
+          )
+        );
+
+      return {
+        imageId:
+          image.id,
+
+        imageIndex:
+          imageIndex,
+
+        displayNumber:
+          imageIndex + 1,
+
+        sourceWidth:
+          sourceWidth,
+
+        sourceHeight:
+          sourceHeight,
+
+        cropTop:
+          safeTop,
+
+        cropBottom:
+          safeBottom,
+
+        retainedHeight:
+          safeBottom -
+          safeTop,
+
+        incomingEdge:
+          incomingEdge || null
+      };
+    }
+
+
+    function finalizePhase2DChain(
+      chain
+    ) {
+      if (
+        !chain ||
+        !Array.isArray(
+          chain.slices
+        ) ||
+        chain.slices.length === 0
+      ) {
+        return chain;
+      }
+
+      const targetWidth =
+        Math.max(
+          1,
+          Number(
+            chain.slices[0]
+              .sourceWidth
+          ) || 1
+        );
+
+      let virtualY = 0;
+
+      for (
+        const slice of
+        chain.slices
+      ) {
+        const scale =
+          targetWidth /
+          Math.max(
+            1,
+            slice.sourceWidth
+          );
+
+        const normalizedHeight =
+          slice.retainedHeight *
+          scale;
+
+        slice.targetWidth =
+          targetWidth;
+
+        slice.scaleToTarget =
+          scale;
+
+        slice.virtualYStart =
+          virtualY;
+
+        slice.normalizedHeight =
+          normalizedHeight;
+
+        slice.virtualYEnd =
+          virtualY +
+          normalizedHeight;
+
+        virtualY =
+          slice.virtualYEnd;
+      }
+
+      chain.targetWidth =
+        targetWidth;
+
+      chain.virtualHeight =
+        virtualY;
+
+      chain.firstImageNumber =
+        chain.slices[0]
+          .displayNumber;
+
+      chain.lastImageNumber =
+        chain.slices[
+          chain.slices.length - 1
+        ].displayNumber;
+
+      return chain;
+    }
+
+
+    async function buildPhase2DVirtualDocument() {
+      if (
+        !phase2cState ||
+        !phase2CStateMatchesCurrentProject()
+      ) {
+        alert(
+          "請先完成與目前截圖順序一致的 Phase 2-C 整批分析。"
+        );
+        return;
+      }
+
+      const totalPairs =
+        Math.max(
+          0,
+          projectImages.length - 1
+        );
+
+      const completedCount =
+        Math.min(
+          Number(
+            phase2cState.nextPairIndex
+          ) || 0,
+          totalPairs
+        );
+
+      if (
+        !phase2cState.completed ||
+        completedCount < totalPairs
+      ) {
+        alert(
+          "Phase 2-C 尚未完成全部相鄰組分析。請先完成 Phase 2-C。"
+        );
+        return;
+      }
+
+      if (
+        projectImages.length === 0
+      ) {
+        alert(
+          "目前沒有截圖。"
+        );
+        return;
+      }
+
+      const allowHighConfidence =
+        Boolean(
+          virtualAllowHighConfidence
+            .checked
+        );
+
+      const ignoreChrome =
+        Boolean(
+          phase2cState.ignoreChrome
+        );
+
+      const chains = [];
+      const breaks = [];
+      const acceptedEdges = [];
+
+      let currentChain = {
+        id:
+          "chain-1",
+        slices: [],
+        acceptedEdges: []
+      };
+
+      /*
+        第一張一定是第一條鏈的起點。
+      */
+      const firstImage =
+        projectImages[0];
+
+      const firstBounds =
+        getContentPixelBounds(
+          firstImage,
+          ignoreChrome
+        );
+
+      currentChain.slices.push(
+        createPhase2DSlice(
+          firstImage,
+          0,
+          firstBounds.top,
+          firstBounds.bottom,
+          null
+        )
+      );
+
+      for (
+        let pairIndex = 0;
+        pairIndex < totalPairs;
+        pairIndex++
+      ) {
+        const nextImage =
+          projectImages[
+            pairIndex + 1
+          ];
+
+        const edge =
+          classifyPhase2DEdge(
+            pairIndex,
+            allowHighConfidence
+          );
+
+        const nextBounds =
+          getContentPixelBounds(
+            nextImage,
+            ignoreChrome
+          );
+
+        if (edge.accepted) {
+          const maxAllowedOverlap =
+            Math.max(
+              0,
+              nextBounds.height - 1
+            );
+
+          const overlapPixels =
+            Math.min(
+              maxAllowedOverlap,
+              Math.max(
+                0,
+                Number(
+                  edge.overlapPixels
+                ) || 0
+              )
+            );
+
+          const incomingEdge = {
+            pairIndex:
+              pairIndex,
+
+            fromImageId:
+              projectImages[
+                pairIndex
+              ].id,
+
+            toImageId:
+              nextImage.id,
+
+            status:
+              edge.status,
+
+            reason:
+              edge.reason,
+
+            overlapPixels:
+              overlapPixels,
+
+            similarity:
+              edge.similarity
+          };
+
+          currentChain.acceptedEdges
+            .push(
+              incomingEdge
+            );
+
+          acceptedEdges.push(
+            incomingEdge
+          );
+
+          currentChain.slices.push(
+            createPhase2DSlice(
+              nextImage,
+              pairIndex + 1,
+              nextBounds.top +
+                overlapPixels,
+              nextBounds.bottom,
+              incomingEdge
+            )
+          );
+        }
+        else {
+          finalizePhase2DChain(
+            currentChain
+          );
+
+          chains.push(
+            currentChain
+          );
+
+          breaks.push({
+            pairIndex:
+              pairIndex,
+
+            afterImageId:
+              projectImages[
+                pairIndex
+              ].id,
+
+            beforeImageId:
+              nextImage.id,
+
+            afterDisplayNumber:
+              pairIndex + 1,
+
+            beforeDisplayNumber:
+              pairIndex + 2,
+
+            status:
+              edge.status,
+
+            reason:
+              edge.reason,
+
+            overlapPixels:
+              edge.overlapPixels,
+
+            similarity:
+              edge.similarity
+          });
+
+          currentChain = {
+            id:
+              `chain-${chains.length + 1}`,
+            slices: [],
+            acceptedEdges: []
+          };
+
+          currentChain.slices.push(
+            createPhase2DSlice(
+              nextImage,
+              pairIndex + 1,
+              nextBounds.top,
+              nextBounds.bottom,
+              null
+            )
+          );
+        }
+      }
+
+      finalizePhase2DChain(
+        currentChain
+      );
+
+      chains.push(
+        currentChain
+      );
+
+      const totalSlices =
+        chains.reduce(
+          (
+            sum,
+            chain
+          ) =>
+            sum +
+            chain.slices.length,
+          0
+        );
+
+      phase2dPlan = {
+        version:
+          PHASE2D_PLAN_VERSION,
+
+        projectSignature:
+          getPhase2CProjectSignature(),
+
+        sourceFingerprint:
+          getPhase2DSourceFingerprint(),
+
+        allowHighConfidence:
+          allowHighConfidence,
+
+        ignoreChrome:
+          ignoreChrome,
+
+        builtAt:
+          Date.now(),
+
+        updatedAt:
+          Date.now(),
+
+        sourceImageCount:
+          projectImages.length,
+
+        totalPairs:
+          totalPairs,
+
+        chainCount:
+          chains.length,
+
+        acceptedSeamCount:
+          acceptedEdges.length,
+
+        breakCount:
+          breaks.length,
+
+        sliceCount:
+          totalSlices,
+
+        chains:
+          chains,
+
+        breaks:
+          breaks,
+
+        acceptedEdges:
+          acceptedEdges
+      };
+
+      await savePhase2DPlan();
+
+      renderPhase2DPlan();
+
+      virtualDocStatus.innerHTML =
+        `
+          ✅ 已建立虛擬文件計畫。
+          <br>
+          安全模式：
+          <strong>
+            ${
+              allowHighConfidence
+                ? "人工確認＋高信心候選"
+                : "只採用人工確認接縫"
+            }
+          </strong>
+          <br>
+          原始截圖沒有被裁切或修改。
+        `;
+
+      virtualDocPanel.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+
+
+    function clearPhase2DPreviewUrls() {
+      for (
+        const url of
+        phase2dPreviewUrls
+      ) {
+        try {
+          URL.revokeObjectURL(
+            url
+          );
+        }
+        catch (error) {
+          console.warn(
+            "Phase 2-D Blob URL 回收失敗：",
+            error
+          );
+        }
+      }
+
+      phase2dPreviewUrls.clear();
+    }
+
+
+    function createPhase2DPreviewUrl(
+      blob
+    ) {
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+      phase2dPreviewUrls.add(
+        url
+      );
+
+      return url;
+    }
+
+
+    function getPhase2DImageById(
+      imageId
+    ) {
+      return projectImages.find(
+        item =>
+          Number(item.id) ===
+          Number(imageId)
+      ) || null;
+    }
+
+
+    function renderPhase2DPlan() {
+      clearPhase2DPreviewUrls();
+
+      const hasPlan =
+        Boolean(
+          phase2dPlan
+        );
+
+      const matches =
+        phase2DPlanMatchesCurrentInputs();
+
+      if (!hasPlan) {
+        virtualDocStatus.textContent =
+          "尚未建立虛擬文件計畫。";
+
+        virtualChainCount.textContent =
+          "0";
+
+        virtualAcceptedSeamCount
+          .textContent =
+          "0";
+
+        virtualBreakCount.textContent =
+          "0";
+
+        virtualSliceCount.textContent =
+          "0";
+
+        virtualExportButton.disabled =
+          true;
+
+        virtualChainSelect.disabled =
+          true;
+
+        virtualChainSelect.innerHTML =
+          `
+            <option value="">
+              尚未建立
+            </option>
+          `;
+
+        virtualPreview.innerHTML =
+          `
+            <div class="virtual-preview-empty">
+              建立計畫後，可在這裡預覽文件鏈。
+            </div>
+          `;
+
+        virtualChainList.innerHTML =
+          "";
+
+        virtualBreakList.innerHTML =
+          `
+            <h4>文件斷點</h4>
+            <div>尚未建立計畫。</div>
+          `;
+
+        return;
+      }
+
+      virtualChainCount.textContent =
+        String(
+          phase2dPlan.chainCount || 0
+        );
+
+      virtualAcceptedSeamCount
+        .textContent =
+        String(
+          phase2dPlan
+            .acceptedSeamCount || 0
+        );
+
+      virtualBreakCount.textContent =
+        String(
+          phase2dPlan.breakCount || 0
+        );
+
+      virtualSliceCount.textContent =
+        String(
+          phase2dPlan.sliceCount || 0
+        );
+
+      virtualExportButton.disabled =
+        !matches;
+
+      if (!matches) {
+        virtualDocStatus.innerHTML =
+          `
+            ⚠️ 虛擬文件計畫已過期。
+            <br>
+            Phase 2-C 結果、圖片順序或安全模式已改變，
+            請按「建立／更新虛擬文件計畫」重新產生。
+          `;
+      }
+      else {
+        virtualDocStatus.innerHTML =
+          `
+            ✅ 虛擬文件計畫有效。
+            <br>
+            模式：
+            <strong>
+              ${
+                phase2dPlan
+                  .allowHighConfidence
+                  ? "人工確認＋高信心候選"
+                  : "只採用人工確認接縫"
+              }
+            </strong>
+            <br>
+            ${
+              phase2dPlan.breakCount > 0
+                ? `<span class="virtual-warning">
+                    仍有 ${phase2dPlan.breakCount} 個文件斷點需要後續確認。
+                   </span>`
+                : "所有相鄰截圖都已形成可用接縫。"
+            }
+          `;
+      }
+
+      renderPhase2DChainList();
+      renderPhase2DBreakList();
+      populatePhase2DChainSelect();
+
+      if (matches) {
+        renderSelectedVirtualChain();
+      }
+      else {
+        virtualPreview.innerHTML =
+          `
+            <div class="virtual-preview-empty">
+              計畫已過期，請先重新建立。
+            </div>
+          `;
+      }
+    }
+
+
+    function renderPhase2DChainList() {
+      virtualChainList.innerHTML =
+        "";
+
+      if (
+        !phase2dPlan ||
+        !Array.isArray(
+          phase2dPlan.chains
+        )
+      ) {
+        return;
+      }
+
+      phase2dPlan.chains.forEach(
+        (
+          chain,
+          index
+        ) => {
+          const card =
+            document.createElement(
+              "div"
+            );
+
+          card.className =
+            "virtual-chain-card";
+
+          const title =
+            document.createElement(
+              "div"
+            );
+
+          title.className =
+            "virtual-chain-title";
+
+          const rangeText =
+            chain.firstImageNumber ===
+              chain.lastImageNumber
+              ? `第 ${chain.firstImageNumber} 張`
+              : `第 ${chain.firstImageNumber} 張 → 第 ${chain.lastImageNumber} 張`;
+
+          title.textContent =
+            `文件鏈 ${index + 1}｜${rangeText}`;
+
+          const meta =
+            document.createElement(
+              "div"
+            );
+
+          meta.className =
+            "virtual-chain-meta";
+
+          const virtualHeight =
+            Number(
+              chain.virtualHeight
+            ) || 0;
+
+          meta.innerHTML =
+            `切片：<strong>${chain.slices.length}</strong>` +
+            `｜已串接：<strong>${chain.acceptedEdges.length}</strong>` +
+            `<br>虛擬尺寸：約 ${Math.round(chain.targetWidth || 0)} × ${Math.round(virtualHeight)} px`;
+
+          card.appendChild(
+            title
+          );
+
+          card.appendChild(
+            meta
+          );
+
+          virtualChainList.appendChild(
+            card
+          );
+        }
+      );
+    }
+
+
+    function renderPhase2DBreakList() {
+      virtualBreakList.innerHTML =
+        "<h4>文件斷點</h4>";
+
+      if (
+        !phase2dPlan ||
+        !Array.isArray(
+          phase2dPlan.breaks
+        ) ||
+        phase2dPlan.breaks.length ===
+          0
+      ) {
+        const empty =
+          document.createElement(
+            "div"
+          );
+
+        empty.textContent =
+          "✅ 沒有待確認文件斷點。";
+
+        virtualBreakList.appendChild(
+          empty
+        );
+
+        return;
+      }
+
+      for (
+        const item of
+        phase2dPlan.breaks
+      ) {
+        const row =
+          document.createElement(
+            "div"
+          );
+
+        row.className =
+          "virtual-break-item";
+
+        const similarityText =
+          Number.isFinite(
+            Number(
+              item.similarity
+            )
+          )
+            ? `｜相似度 ${Number(item.similarity).toFixed(1)}%`
+            : "";
+
+        row.innerHTML =
+          `<strong>
+             第 ${item.afterDisplayNumber} 張 → 第 ${item.beforeDisplayNumber} 張
+           </strong>
+           <br>
+           ${item.reason}${similarityText}`;
+
+        virtualBreakList.appendChild(
+          row
+        );
+      }
+    }
+
+
+    function populatePhase2DChainSelect() {
+      const previousValue =
+        virtualChainSelect.value;
+
+      virtualChainSelect.innerHTML =
+        "";
+
+      if (
+        !phase2dPlan ||
+        !Array.isArray(
+          phase2dPlan.chains
+        ) ||
+        phase2dPlan.chains.length ===
+          0 ||
+        !phase2DPlanMatchesCurrentInputs()
+      ) {
+        virtualChainSelect.disabled =
+          true;
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value = "";
+        option.textContent =
+          "沒有可預覽的文件鏈";
+
+        virtualChainSelect.appendChild(
+          option
+        );
+
+        return;
+      }
+
+      virtualChainSelect.disabled =
+        false;
+
+      phase2dPlan.chains.forEach(
+        (
+          chain,
+          index
+        ) => {
+          const option =
+            document.createElement(
+              "option"
+            );
+
+          option.value =
+            String(index);
+
+          const rangeText =
+            chain.firstImageNumber ===
+              chain.lastImageNumber
+              ? `第 ${chain.firstImageNumber} 張`
+              : `第 ${chain.firstImageNumber}–${chain.lastImageNumber} 張`;
+
+          option.textContent =
+            `文件鏈 ${index + 1}｜${rangeText}｜${chain.slices.length} 切片`;
+
+          virtualChainSelect.appendChild(
+            option
+          );
+        }
+      );
+
+      const previousExists =
+        Array.from(
+          virtualChainSelect.options
+        ).some(
+          option =>
+            option.value ===
+            previousValue
+        );
+
+      if (previousExists) {
+        virtualChainSelect.value =
+          previousValue;
+      }
+      else {
+        /*
+          優先預覽第一條有 2 張以上的鏈。
+        */
+        const preferredIndex =
+          phase2dPlan.chains
+            .findIndex(
+              chain =>
+                chain.slices.length > 1
+            );
+
+        virtualChainSelect.value =
+          String(
+            preferredIndex >= 0
+              ? preferredIndex
+              : 0
+          );
+      }
+    }
+
+
+    function renderSelectedVirtualChain() {
+      clearPhase2DPreviewUrls();
+
+      virtualPreview.innerHTML =
+        "";
+
+      if (
+        !phase2dPlan ||
+        !phase2DPlanMatchesCurrentInputs()
+      ) {
+        virtualPreview.innerHTML =
+          `
+            <div class="virtual-preview-empty">
+              尚無有效的虛擬文件計畫。
+            </div>
+          `;
+        return;
+      }
+
+      const chainIndex =
+        Number(
+          virtualChainSelect.value
+        );
+
+      const chain =
+        phase2dPlan.chains[
+          chainIndex
+        ];
+
+      if (!chain) {
+        virtualPreview.innerHTML =
+          `
+            <div class="virtual-preview-empty">
+              找不到此文件鏈。
+            </div>
+          `;
+        return;
+      }
+
+      for (
+        let sliceIndex = 0;
+        sliceIndex <
+          chain.slices.length;
+        sliceIndex++
+      ) {
+        const slice =
+          chain.slices[
+            sliceIndex
+          ];
+
+        const imageData =
+          getPhase2DImageById(
+            slice.imageId
+          );
+
+        if (!imageData) {
+          continue;
+        }
+
+        if (
+          sliceIndex > 0 &&
+          slice.incomingEdge
+        ) {
+          const seam =
+            document.createElement(
+              "div"
+            );
+
+          seam.className =
+            "virtual-seam-label";
+
+          seam.textContent =
+            `接縫：移除下一張頂部 ${Math.round(slice.incomingEdge.overlapPixels)} px｜` +
+            (
+              slice.incomingEdge.status ===
+                "confirmed"
+                ? "人工確認"
+                : "高信心候選"
+            );
+
+          virtualPreview.appendChild(
+            seam
+          );
+        }
+
+        const holder =
+          document.createElement(
+            "div"
+          );
+
+        holder.className =
+          "virtual-slice";
+
+        const sourceWidth =
+          Math.max(
+            1,
+            Number(
+              slice.sourceWidth
+            ) || 1
+          );
+
+        const sourceHeight =
+          Math.max(
+            1,
+            Number(
+              slice.sourceHeight
+            ) || 1
+          );
+
+        const retainedHeight =
+          Math.max(
+            1,
+            Number(
+              slice.retainedHeight
+            ) || 1
+          );
+
+        /*
+          使用 CSS aspect-ratio 建立真正響應式裁切視窗。
+          不依賴固定 420px 高度，因此 iPhone 窄螢幕也不會變形。
+        */
+        holder.style.aspectRatio =
+          `${sourceWidth} / ${retainedHeight}`;
+
+        const img =
+          document.createElement(
+            "img"
+          );
+
+        img.alt =
+          `第 ${slice.displayNumber} 張虛擬切片`;
+
+        const blob =
+          imageData.thumbnailBlob
+            instanceof Blob
+            ? imageData.thumbnailBlob
+            : (
+                imageData.blob
+                  instanceof Blob
+                  ? imageData.blob
+                  : null
+              );
+
+        if (!blob) {
+          holder.textContent =
+            `第 ${slice.displayNumber} 張預覽不可用`;
+
+          virtualPreview.appendChild(
+            holder
+          );
+
+          continue;
+        }
+
+        const url =
+          createPhase2DPreviewUrl(
+            blob
+          );
+
+        img.src = url;
+
+        /*
+          thumbnail 與原圖具有相同比例。
+          transform 的百分比是相對於 img 自身高度，
+          因此可直接以 cropTop/sourceHeight 做響應式位移。
+        */
+        const cropTopPercent =
+          slice.cropTop /
+          sourceHeight *
+          100;
+
+        img.style.top =
+          "0px";
+
+        img.style.transform =
+          `translateY(-${cropTopPercent}%)`;
+
+        holder.appendChild(
+          img
+        );
+
+        virtualPreview.appendChild(
+          holder
+        );
+      }
+    }
+
+
+    async function clearPhase2DPlan() {
+      const confirmed =
+        confirm(
+          "確定要清除 Phase 2-D 虛擬文件計畫嗎？原始截圖、Phase 2-B 人工接縫與 Phase 2-C 分析結果都不會被刪除。"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      phase2dPlan = null;
+
+      await saveSetting(
+        PHASE2D_PLAN_KEY,
+        null
+      );
+
+      renderPhase2DPlan();
+    }
+
+
+    function downloadTextFile(
+      filename,
+      text,
+      mimeType =
+        "application/json"
+    ) {
+      const blob =
+        new Blob(
+          [text],
+          {
+            type:
+              mimeType +
+              ";charset=utf-8"
+          }
+        );
+
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+      const anchor =
+        document.createElement(
+          "a"
+        );
+
+      anchor.href = url;
+      anchor.download =
+        filename;
+
+      document.body.appendChild(
+        anchor
+      );
+
+      anchor.click();
+
+      anchor.remove();
+
+      setTimeout(
+        () =>
+          URL.revokeObjectURL(
+            url
+          ),
+        1500
+      );
+    }
+
+
+    function exportPhase2DPlanJson() {
+      if (
+        !phase2dPlan ||
+        !phase2DPlanMatchesCurrentInputs()
+      ) {
+        alert(
+          "請先建立有效的 Phase 2-D 虛擬文件計畫。"
+        );
+        return;
+      }
+
+      const exportObject = {
+        schema:
+          "screenshot-report.phase2d.virtual-document-plan.v1",
+
+        exportedAt:
+          new Date()
+            .toISOString(),
+
+        plan:
+          phase2dPlan
+      };
+
+      downloadTextFile(
+        "phase2d-virtual-document-plan.json",
+        JSON.stringify(
+          exportObject,
+          null,
+          2
+        )
+      );
     }
 
 
