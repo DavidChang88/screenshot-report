@@ -12,9 +12,11 @@
 
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", "Heiti TC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: #f5f5f7;
       color: #1d1d1f;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
 
     .container {
@@ -146,6 +148,21 @@
       height: 100%;
       object-fit: cover;
       display: block;
+    }
+
+    .preview-error {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 34px 10px 52px;
+      text-align: center;
+      white-space: pre-line;
+      color: #666;
+      background: #eeeeef;
+      font-size: 12px;
+      line-height: 1.5;
     }
 
     .number {
@@ -287,6 +304,13 @@
           圖片品質：等待檢查
         </div>
 
+        <div
+          id="thumbnailSummary"
+          class="status"
+        >
+          預覽縮圖：等待檢查
+        </div>
+
         <div class="order-help">
           ◀ = 往前移一格　
           ▶ = 往後移一格　
@@ -304,20 +328,41 @@
     const IMAGE_STORE = "images";
     const SETTINGS_STORE = "settings";
 
+    /*
+      Phase 1-F 縮圖修正版
+      不改 IndexedDB schema，所以 DB_VERSION 維持 2。
+      thumbnailBlob 直接存回每張圖片原有 record。
+    */
+    const THUMBNAIL_VERSION = 1;
+    const THUMBNAIL_MAX_WIDTH = 360;
+    const THUMBNAIL_JPEG_QUALITY = 0.78;
+
     let db = null;
     let projectImages = [];
     let batchCount = 0;
+
+    /*
+      Safari 對 Blob URL 的回收時機較敏感。
+      預覽期間保留 URL，只有重新 render 時才統一 revoke。
+    */
+    const activePreviewUrls = new Set();
 
     const fileInput = document.getElementById("fileInput");
     const projectArea = document.getElementById("projectArea");
     const imageCount = document.getElementById("imageCount");
     const batchInfo = document.getElementById("batchInfo");
     const qualitySummary = document.getElementById("qualitySummary");
+    const thumbnailSummary = document.getElementById("thumbnailSummary");
     const previewGrid = document.getElementById("previewGrid");
     const storageStatus = document.getElementById("storageStatus");
     const addButton = document.getElementById("addButton");
 
     window.addEventListener("DOMContentLoaded", startApp);
+
+    window.addEventListener(
+      "pagehide",
+      clearPreviewUrls
+    );
 
     async function startApp() {
       try {
@@ -460,6 +505,23 @@
           const analysis =
             await analyzeImageFile(file);
 
+          let thumbnailData = null;
+
+          try {
+            thumbnailData =
+              await createThumbnailData(
+                file,
+                file.type,
+                file.name
+              );
+          }
+          catch (thumbnailError) {
+            console.warn(
+              "新截圖縮圖建立失敗：",
+              thumbnailError
+            );
+          }
+
           const record = {
             sequence: nextSequence,
             batchNumber: newBatchNumber,
@@ -471,6 +533,32 @@
             height: analysis.height,
             fingerprint: analysis.fingerprint,
             qualityIssues: analysis.qualityIssues,
+
+            thumbnailBlob:
+              thumbnailData
+                ? thumbnailData.blob
+                : null,
+
+            thumbnailWidth:
+              thumbnailData
+                ? thumbnailData.width
+                : null,
+
+            thumbnailHeight:
+              thumbnailData
+                ? thumbnailData.height
+                : null,
+
+            thumbnailVersion:
+              thumbnailData
+                ? THUMBNAIL_VERSION
+                : 0,
+
+            thumbnailError:
+              thumbnailData
+                ? ""
+                : "縮圖建立失敗",
+
             createdAt: Date.now(),
             blob: file
           };
@@ -709,6 +797,13 @@
 
       await ensureImageMetadata();
 
+      /*
+        Phase 1-F 縮圖修正：
+        舊圖片第一次開新版時逐張建立小型縮圖，
+        建好後存回 IndexedDB，之後不用重做。
+      */
+      await ensureImageThumbnails();
+
       projectArea.style.display = "block";
 
       storageStatus.textContent =
@@ -754,7 +849,40 @@
       }
     }
 
+    function clearPreviewUrls() {
+      for (const url of activePreviewUrls) {
+        try {
+          URL.revokeObjectURL(url);
+        }
+        catch (error) {
+          console.warn(
+            "Blob URL 回收失敗：",
+            error
+          );
+        }
+      }
+
+      activePreviewUrls.clear();
+    }
+
+
+    function createManagedObjectUrl(blob) {
+      const url =
+        URL.createObjectURL(blob);
+
+      activePreviewUrls.add(url);
+
+      return url;
+    }
+
+
     function renderImages() {
+      /*
+        Safari 不要在 img.onload 時立刻 revoke URL。
+        先清掉「上一輪」預覽 URL，再重畫。
+      */
+      clearPreviewUrls();
+
       previewGrid.innerHTML = "";
 
       const duplicateIds =
@@ -762,28 +890,48 @@
 
       projectImages.forEach(
         (imageData, index) => {
-          const item = document.createElement(
-            "div"
-          );
+          const item =
+            document.createElement("div");
 
-          item.className = "preview-item";
+          item.className =
+            "preview-item";
 
-          const image = document.createElement(
-            "img"
-          );
 
-          const number = document.createElement(
-            "div"
-          );
+          const image =
+            document.createElement("img");
 
-          number.className = "number";
-          number.textContent = index + 1;
+          image.alt =
+            `第 ${index + 1} 張截圖預覽`;
 
-          const meta = document.createElement(
-            "div"
-          );
+          image.loading = "lazy";
 
-          meta.className = "image-meta";
+
+          const previewError =
+            document.createElement("div");
+
+          previewError.className =
+            "preview-error";
+
+          previewError.textContent =
+            "⚠️ 預覽載入失敗\n原始截圖仍保留";
+
+
+          const number =
+            document.createElement("div");
+
+          number.className =
+            "number";
+
+          number.textContent =
+            index + 1;
+
+
+          const meta =
+            document.createElement("div");
+
+          meta.className =
+            "image-meta";
+
 
           const issues = [];
 
@@ -797,33 +945,124 @@
             );
           }
 
+
           if (
-            duplicateIds.has(imageData.id)
+            duplicateIds.has(
+              imageData.id
+            )
           ) {
-            issues.push("可能重複");
+            issues.push(
+              "可能重複"
+            );
           }
+
 
           const qualityText =
             issues.length > 0
-              ? "⚠️ " + issues.join("、")
+              ? "⚠️ " +
+                issues.join("、")
               : "✅ 正常";
+
 
           meta.textContent =
             `${imageData.width || "?"}×` +
             `${imageData.height || "?"}\n` +
-            `${formatBytes(imageData.size || 0)}\n` +
+            `${formatBytes(
+              imageData.size || 0
+            )}\n` +
             qualityText;
 
-          const imageURL =
-            URL.createObjectURL(
-              imageData.blob
+
+          /*
+            預覽來源優先順序：
+            1. 小型 thumbnailBlob
+            2. 原始 blob（fallback）
+
+            這樣畫面不再同時解碼大量原圖。
+          */
+          const thumbnailBlob =
+            imageData.thumbnailBlob
+              instanceof Blob
+              ? imageData.thumbnailBlob
+              : null;
+
+          const originalBlob =
+            getRenderableImageBlob(
+              imageData.blob,
+              imageData.type,
+              imageData.name
             );
 
-          image.src = imageURL;
+          let triedOriginal =
+            false;
 
-          image.onload = function() {
-            URL.revokeObjectURL(imageURL);
-          };
+
+          function loadOriginalFallback() {
+            if (
+              triedOriginal ||
+              !(originalBlob instanceof Blob)
+            ) {
+              image.style.display = "none";
+              previewError.style.display = "flex";
+              return;
+            }
+
+            triedOriginal = true;
+
+            try {
+              image.src =
+                createManagedObjectUrl(
+                  originalBlob
+                );
+            }
+            catch (error) {
+              console.warn(
+                "原圖預覽建立失敗：",
+                error
+              );
+
+              image.style.display = "none";
+              previewError.style.display = "flex";
+            }
+          }
+
+
+          image.onerror =
+            function() {
+              /*
+                如果 thumbnail 解碼失敗，
+                再試一次原圖。
+              */
+              if (!triedOriginal) {
+                loadOriginalFallback();
+                return;
+              }
+
+              image.style.display = "none";
+              previewError.style.display = "flex";
+            };
+
+
+          try {
+            if (thumbnailBlob) {
+              image.src =
+                createManagedObjectUrl(
+                  thumbnailBlob
+                );
+            }
+            else {
+              loadOriginalFallback();
+            }
+          }
+          catch (error) {
+            console.warn(
+              "預覽來源建立失敗：",
+              error
+            );
+
+            loadOriginalFallback();
+          }
+
 
           const controls =
             document.createElement("div");
@@ -831,19 +1070,30 @@
           controls.className =
             "preview-controls";
 
+
           const earlierButton =
             document.createElement("button");
 
           earlierButton.className =
             "preview-control";
 
-          earlierButton.textContent = "◀";
-          earlierButton.title = "往前移";
-          earlierButton.disabled = index === 0;
+          earlierButton.textContent =
+            "◀";
 
-          earlierButton.onclick = function() {
-            moveImage(index, -1);
-          };
+          earlierButton.title =
+            "往前移";
+
+          earlierButton.disabled =
+            index === 0;
+
+          earlierButton.onclick =
+            function() {
+              moveImage(
+                index,
+                -1
+              );
+            };
+
 
           const laterButton =
             document.createElement("button");
@@ -851,14 +1101,24 @@
           laterButton.className =
             "preview-control";
 
-          laterButton.textContent = "▶";
-          laterButton.title = "往後移";
-          laterButton.disabled =
-            index === projectImages.length - 1;
+          laterButton.textContent =
+            "▶";
 
-          laterButton.onclick = function() {
-            moveImage(index, 1);
-          };
+          laterButton.title =
+            "往後移";
+
+          laterButton.disabled =
+            index ===
+            projectImages.length - 1;
+
+          laterButton.onclick =
+            function() {
+              moveImage(
+                index,
+                1
+              );
+            };
+
 
           const deleteButton =
             document.createElement("button");
@@ -866,12 +1126,19 @@
           deleteButton.className =
             "preview-control delete";
 
-          deleteButton.textContent = "✕";
-          deleteButton.title = "刪除此截圖";
+          deleteButton.textContent =
+            "✕";
 
-          deleteButton.onclick = function() {
-            deleteSingleImage(index);
-          };
+          deleteButton.title =
+            "刪除此截圖";
+
+          deleteButton.onclick =
+            function() {
+              deleteSingleImage(
+                index
+              );
+            };
+
 
           controls.appendChild(
             earlierButton
@@ -885,19 +1152,31 @@
             deleteButton
           );
 
+
           item.appendChild(image);
+          item.appendChild(
+            previewError
+          );
           item.appendChild(number);
           item.appendChild(meta);
-          item.appendChild(controls);
+          item.appendChild(
+            controls
+          );
 
-          previewGrid.appendChild(item);
+          previewGrid.appendChild(
+            item
+          );
         }
       );
+
 
       updateQualitySummary(
         duplicateIds
       );
+
+      updateThumbnailSummary();
     }
+
 
     async function moveImage(
       index,
@@ -1073,18 +1352,555 @@
       }
     }
 
+    /*
+      =========================
+      Phase 1-F 縮圖修正版
+      =========================
+    */
+
+
+    function guessImageMimeType(
+      name
+    ) {
+      const lowerName =
+        String(name || "")
+          .toLowerCase();
+
+      if (
+        lowerName.endsWith(".jpg") ||
+        lowerName.endsWith(".jpeg")
+      ) {
+        return "image/jpeg";
+      }
+
+      if (
+        lowerName.endsWith(".webp")
+      ) {
+        return "image/webp";
+      }
+
+      if (
+        lowerName.endsWith(".gif")
+      ) {
+        return "image/gif";
+      }
+
+      if (
+        lowerName.endsWith(".heic")
+      ) {
+        return "image/heic";
+      }
+
+      if (
+        lowerName.endsWith(".heif")
+      ) {
+        return "image/heif";
+      }
+
+      return "image/png";
+    }
+
+
+    function getRenderableImageBlob(
+      blob,
+      storedType,
+      name
+    ) {
+      if (!(blob instanceof Blob)) {
+        return null;
+      }
+
+      const currentType =
+        String(blob.type || "");
+
+      if (
+        currentType.startsWith(
+          "image/"
+        )
+      ) {
+        return blob;
+      }
+
+      const preferredType =
+        String(storedType || "")
+          .startsWith("image/")
+          ? storedType
+          : guessImageMimeType(name);
+
+      /*
+        部分 iOS / Safari 從 IndexedDB 取回舊 Blob 後
+        MIME type 可能不完整。
+        重新包成具有 image/* MIME 的 Blob，
+        能提高預覽與 Canvas 解碼成功率。
+      */
+      return new Blob(
+        [blob],
+        {
+          type:
+            preferredType ||
+            "image/png"
+        }
+      );
+    }
+
+
+    function loadImageElementFromBlob(
+      blob,
+      storedType,
+      name
+    ) {
+      return new Promise(
+        (resolve, reject) => {
+          const renderableBlob =
+            getRenderableImageBlob(
+              blob,
+              storedType,
+              name
+            );
+
+          if (!renderableBlob) {
+            reject(
+              new Error(
+                "找不到可讀取的圖片 Blob"
+              )
+            );
+            return;
+          }
+
+          const image =
+            new Image();
+
+          const url =
+            URL.createObjectURL(
+              renderableBlob
+            );
+
+          image.onload =
+            function() {
+              /*
+                這個 URL 只用於 Canvas 建縮圖。
+                drawImage 之後才會 revoke。
+              */
+              resolve({
+                image: image,
+                url: url
+              });
+            };
+
+          image.onerror =
+            function() {
+              URL.revokeObjectURL(
+                url
+              );
+
+              reject(
+                new Error(
+                  "Safari 無法解碼此圖片"
+                )
+              );
+            };
+
+          image.src = url;
+        }
+      );
+    }
+
+
+    function canvasToJpegBlob(
+      canvas
+    ) {
+      return new Promise(
+        (resolve, reject) => {
+          canvas.toBlob(
+            function(blob) {
+              if (blob) {
+                resolve(blob);
+              }
+              else {
+                reject(
+                  new Error(
+                    "Canvas 無法產生縮圖 Blob"
+                  )
+                );
+              }
+            },
+            "image/jpeg",
+            THUMBNAIL_JPEG_QUALITY
+          );
+        }
+      );
+    }
+
+
+    async function createThumbnailData(
+      blob,
+      storedType,
+      name
+    ) {
+      const loaded =
+        await loadImageElementFromBlob(
+          blob,
+          storedType,
+          name
+        );
+
+      const image =
+        loaded.image;
+
+      const sourceWidth =
+        image.naturalWidth;
+
+      const sourceHeight =
+        image.naturalHeight;
+
+      if (
+        !sourceWidth ||
+        !sourceHeight
+      ) {
+        URL.revokeObjectURL(
+          loaded.url
+        );
+
+        throw new Error(
+          "圖片尺寸無效"
+        );
+      }
+
+
+      const scale =
+        Math.min(
+          1,
+          THUMBNAIL_MAX_WIDTH /
+            sourceWidth
+        );
+
+      const width =
+        Math.max(
+          1,
+          Math.round(
+            sourceWidth * scale
+          )
+        );
+
+      const height =
+        Math.max(
+          1,
+          Math.round(
+            sourceHeight * scale
+          )
+        );
+
+
+      const canvas =
+        document.createElement(
+          "canvas"
+        );
+
+      canvas.width = width;
+      canvas.height = height;
+
+
+      const context =
+        canvas.getContext(
+          "2d",
+          {
+            alpha: false
+          }
+        );
+
+      if (!context) {
+        URL.revokeObjectURL(
+          loaded.url
+        );
+
+        throw new Error(
+          "無法建立 Canvas"
+        );
+      }
+
+
+      /*
+        JPEG 沒有透明背景。
+        使用白底，避免透明 PNG 變黑。
+      */
+      context.fillStyle =
+        "#ffffff";
+
+      context.fillRect(
+        0,
+        0,
+        width,
+        height
+      );
+
+
+      context.drawImage(
+        image,
+        0,
+        0,
+        width,
+        height
+      );
+
+
+      /*
+        Canvas 已完成 drawImage，
+        現在才安全回收來源 URL。
+      */
+      URL.revokeObjectURL(
+        loaded.url
+      );
+
+
+      const thumbnailBlob =
+        await canvasToJpegBlob(
+          canvas
+        );
+
+
+      /*
+        主動釋放 Canvas backing store。
+      */
+      canvas.width = 1;
+      canvas.height = 1;
+
+
+      return {
+        blob:
+          thumbnailBlob,
+
+        width:
+          width,
+
+        height:
+          height
+      };
+    }
+
+
+    async function ensureImageThumbnails() {
+      if (
+        projectImages.length === 0
+      ) {
+        updateThumbnailSummary();
+        return;
+      }
+
+
+      let completed = 0;
+      let created = 0;
+      let failed = 0;
+
+
+      for (
+        const item of projectImages
+      ) {
+        const hasCurrentThumbnail =
+          item.thumbnailBlob
+            instanceof Blob &&
+          item.thumbnailBlob.size > 0 &&
+          item.thumbnailVersion ===
+            THUMBNAIL_VERSION;
+
+
+        if (hasCurrentThumbnail) {
+          completed++;
+          continue;
+        }
+
+
+        storageStatus.textContent =
+          `正在建立預覽縮圖 ${completed + 1} / ${projectImages.length}…`;
+
+
+        try {
+          const thumbnailData =
+            await createThumbnailData(
+              item.blob,
+              item.type,
+              item.name
+            );
+
+
+          item.thumbnailBlob =
+            thumbnailData.blob;
+
+          item.thumbnailWidth =
+            thumbnailData.width;
+
+          item.thumbnailHeight =
+            thumbnailData.height;
+
+          item.thumbnailVersion =
+            THUMBNAIL_VERSION;
+
+          item.thumbnailError =
+            "";
+
+
+          await updateImageRecord(
+            item
+          );
+
+          created++;
+        }
+        catch (error) {
+          console.warn(
+            `第 ${completed + 1} 張縮圖建立失敗：`,
+            error
+          );
+
+
+          /*
+            原圖絕對不刪除。
+            只記錄縮圖失敗，render 時仍會嘗試原圖 fallback。
+          */
+          item.thumbnailBlob =
+            null;
+
+          item.thumbnailVersion =
+            0;
+
+          item.thumbnailError =
+            error.message ||
+            "縮圖建立失敗";
+
+
+          try {
+            await updateImageRecord(
+              item
+            );
+          }
+          catch (saveError) {
+            console.warn(
+              "縮圖錯誤狀態保存失敗：",
+              saveError
+            );
+          }
+
+          failed++;
+        }
+
+
+        completed++;
+
+        /*
+          每處理一張就把控制權還給瀏覽器，
+          避免 iPhone 長時間凍結畫面。
+        */
+        await new Promise(
+          resolve =>
+            setTimeout(
+              resolve,
+              0
+            )
+        );
+      }
+
+
+      if (failed === 0) {
+        storageStatus.textContent =
+          created > 0
+            ? `✅ 已建立 ${created} 張預覽縮圖`
+            : `✅ ${projectImages.length} 張預覽縮圖已就緒`;
+      }
+      else {
+        storageStatus.textContent =
+          `⚠️ 縮圖完成：成功 ${
+            projectImages.length - failed
+          } 張，失敗 ${failed} 張`;
+      }
+
+
+      updateThumbnailSummary();
+    }
+
+
+    function updateThumbnailSummary() {
+      if (
+        projectImages.length === 0
+      ) {
+        thumbnailSummary.textContent =
+          "預覽縮圖：尚無圖片";
+        return;
+      }
+
+
+      let ready = 0;
+      let failed = 0;
+      let waiting = 0;
+
+
+      for (
+        const item of projectImages
+      ) {
+        if (
+          item.thumbnailBlob
+            instanceof Blob &&
+          item.thumbnailBlob.size > 0 &&
+          item.thumbnailVersion ===
+            THUMBNAIL_VERSION
+        ) {
+          ready++;
+        }
+        else if (
+          item.thumbnailError
+        ) {
+          failed++;
+        }
+        else {
+          waiting++;
+        }
+      }
+
+
+      thumbnailSummary.textContent =
+        `預覽縮圖：完成 ${ready} 張｜` +
+        `失敗 ${failed} 張｜` +
+        `待處理 ${waiting} 張`;
+    }
+
+
     function getImageDimensions(blob) {
       return new Promise((resolve, reject) => {
+        /*
+          這裡主要處理「新加入的 File」。
+          舊資料的縮圖處理會另外傳入 stored type / name。
+        */
+        const renderableBlob =
+          getRenderableImageBlob(
+            blob,
+            blob ? blob.type : "",
+            ""
+          );
+
+        if (!renderableBlob) {
+          reject(
+            new Error(
+              "無法讀取圖片 Blob"
+            )
+          );
+          return;
+        }
+
         const image = new Image();
-        const url = URL.createObjectURL(blob);
+
+        const url =
+          URL.createObjectURL(
+            renderableBlob
+          );
 
         image.onload = function() {
           const result = {
-            width: image.naturalWidth,
-            height: image.naturalHeight
+            width:
+              image.naturalWidth,
+
+            height:
+              image.naturalHeight
           };
 
           URL.revokeObjectURL(url);
+
           resolve(result);
         };
 
