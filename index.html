@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Screenshot Report｜Phase 2-E</title>
+  <title>Screenshot Report｜Phase 3-A</title>
 
   <style>
     * {
@@ -1156,7 +1156,217 @@
     #fileInput {
       display: none;
     }
-  </style>
+  
+
+    /*
+      =========================
+      Phase 3-A
+      完整文章重建閱讀預覽
+      =========================
+    */
+
+    .phase3-reader-panel {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 16px;
+      background: #f2f7f2;
+      border: 1px solid #bdd7c2;
+    }
+
+    .phase3-reader-panel h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    .phase3-reader-panel p {
+      margin: 0 0 12px;
+      color: #5f6368;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .phase3-status-card,
+    .phase3-control-card,
+    .phase3-summary-card {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid #cfe1d2;
+    }
+
+    .phase3-control-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .phase3-control-grid button {
+      margin: 0;
+    }
+
+    .phase3-build-button {
+      background: #256d4a;
+    }
+
+    .phase3-pass-button {
+      background: #1f7a45;
+    }
+
+    .phase3-reader-options {
+      display: grid;
+      gap: 9px;
+      margin-top: 10px;
+    }
+
+    .phase3-reader-options label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .phase3-reader-options input {
+      width: 24px;
+      height: 24px;
+      flex: 0 0 auto;
+      margin: 0;
+    }
+
+    .phase3-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .phase3-summary-item {
+      padding: 12px;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid #cfe1d2;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .phase3-summary-item strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 22px;
+    }
+
+    .phase3-reader-shell {
+      margin-top: 12px;
+      padding: 8px;
+      border-radius: 12px;
+      background: #dfe8e1;
+      border: 1px solid #bfd0c2;
+      overflow: hidden;
+    }
+
+    .phase3-reader-toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      padding: 6px 6px 10px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .phase3-reader {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      background: white;
+      overflow: hidden;
+      border-radius: 8px;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.08);
+    }
+
+    .phase3-reader-empty {
+      padding: 34px 16px;
+      text-align: center;
+      color: #666;
+      line-height: 1.65;
+      background: white;
+    }
+
+    .phase3-reader-slice {
+      position: relative;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: white;
+    }
+
+    .phase3-reader-slice img {
+      position: absolute;
+      inset: 0 auto auto 0;
+      width: 100%;
+      height: auto;
+      max-width: none;
+      display: block;
+      margin: 0;
+      padding: 0;
+    }
+
+    .phase3-source-badge {
+      position: absolute;
+      z-index: 3;
+      top: 6px;
+      left: 6px;
+      max-width: calc(100% - 12px);
+      padding: 5px 7px;
+      border-radius: 8px;
+      background: rgba(0,0,0,0.72);
+      color: white;
+      font-size: 11px;
+      line-height: 1.35;
+      pointer-events: none;
+    }
+
+    .phase3-seam-marker {
+      position: relative;
+      z-index: 4;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 6px 8px;
+      text-align: center;
+      background: #e9f7ec;
+      color: #176137;
+      border-top: 2px solid #38a169;
+      border-bottom: 2px solid #38a169;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.4;
+    }
+
+    .phase3-reader-note {
+      margin-top: 10px;
+      padding: 11px;
+      border-radius: 10px;
+      background: white;
+      border: 1px solid #cfe1d2;
+      color: #4d4d4d;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .phase3-review-good {
+      color: #176137;
+      font-weight: 800;
+    }
+
+    .phase3-review-warn {
+      color: #9a3412;
+      font-weight: 800;
+    }
+
+</style>
 </head>
 
 <body>
@@ -1842,6 +2052,151 @@
           </div>
         </div>
 
+        <div
+          id="phase3ReaderPanel"
+          class="phase3-reader-panel"
+        >
+          <h3>
+            Phase 3-A｜完整文章重建閱讀預覽
+          </h3>
+
+          <p>
+            直接使用 Phase 2-E 已確認的 6 個虛擬切片資料，以原始截圖解析度建立連續閱讀預覽。
+            本階段不做 OCR、不轉 Markdown，也不產生 PDF；先確認文章重建本身沒有漏段或重複。
+          </p>
+
+          <div
+            id="phase3Status"
+            class="phase3-status-card"
+          >
+            等待有效的 Phase 2-E 完整文章虛擬文件。
+          </div>
+
+          <div class="phase3-control-card">
+            <strong>
+              閱讀預覽設定
+            </strong>
+
+            <div class="phase3-reader-options">
+              <label>
+                <input
+                  id="phase3ShowSeams"
+                  type="checkbox"
+                  checked
+                >
+                <span>
+                  顯示接縫檢查線與重疊量
+                </span>
+              </label>
+
+              <label>
+                <input
+                  id="phase3ShowSources"
+                  type="checkbox"
+                  checked
+                >
+                <span>
+                  顯示來源截圖編號與虛擬裁切範圍
+                </span>
+              </label>
+            </div>
+
+            <div class="phase3-control-grid">
+              <button
+                id="phase3BuildButton"
+                class="phase3-build-button"
+                onclick="buildPhase3AReader()"
+                disabled
+              >
+                建立／更新高畫質重建文章預覽
+              </button>
+
+              <button
+                id="phase3TopButton"
+                class="secondary-button"
+                onclick="scrollPhase3AToTop()"
+                disabled
+              >
+                ↑ 回到重建文章開頭
+              </button>
+
+              <button
+                id="phase3PassButton"
+                class="phase3-pass-button"
+                onclick="markPhase3AReconstructionPass()"
+                disabled
+              >
+                ✓ 我已檢查全文，標記 Phase 3-A PASS
+              </button>
+
+              <button
+                class="secondary-button"
+                onclick="clearPhase3AReviewState()"
+              >
+                清除 Phase 3-A 驗收狀態
+              </button>
+            </div>
+          </div>
+
+          <div class="phase3-summary-grid">
+            <div class="phase3-summary-item">
+              文章切片
+              <strong id="phase3SliceCount">0</strong>
+            </div>
+
+            <div class="phase3-summary-item">
+              已確認接縫
+              <strong id="phase3SeamCount">0</strong>
+            </div>
+
+            <div class="phase3-summary-item">
+              文件斷點
+              <strong id="phase3BreakCount">0</strong>
+            </div>
+
+            <div class="phase3-summary-item">
+              虛擬文章高度
+              <strong id="phase3VirtualHeight">0</strong>
+            </div>
+          </div>
+
+          <div
+            id="phase3ReviewStatus"
+            class="phase3-status-card"
+          >
+            尚未完成 Phase 3-A 人工閱讀驗收。
+          </div>
+
+          <div
+            id="phase3ReaderShell"
+            class="phase3-reader-shell"
+          >
+            <div class="phase3-reader-toolbar">
+              <strong>
+                高畫質重建文章
+              </strong>
+              <span>
+                原圖切片｜不使用超長 Canvas
+              </span>
+            </div>
+
+            <div
+              id="phase3Reader"
+              class="phase3-reader"
+            >
+              <div class="phase3-reader-empty">
+                請先按「建立／更新高畫質重建文章預覽」。
+              </div>
+            </div>
+          </div>
+
+          <div class="phase3-reader-note">
+            <strong>本階段只檢查三件事：</strong>
+            文章順序正確、接縫沒有整段重複、接縫沒有漏掉內容。
+            若接縫線本身影響閱讀，可取消「顯示接縫檢查線」查看乾淨閱讀模式。
+          </div>
+        </div>
+
         <div class="order-help">
           ◀ = 往前移一格　
           ▶ = 往後移一格　
@@ -2048,6 +2403,45 @@
     const articlePreview =
       document.getElementById("articlePreview");
 
+    const phase3Status =
+      document.getElementById("phase3Status");
+
+    const phase3ShowSeams =
+      document.getElementById("phase3ShowSeams");
+
+    const phase3ShowSources =
+      document.getElementById("phase3ShowSources");
+
+    const phase3BuildButton =
+      document.getElementById("phase3BuildButton");
+
+    const phase3TopButton =
+      document.getElementById("phase3TopButton");
+
+    const phase3PassButton =
+      document.getElementById("phase3PassButton");
+
+    const phase3SliceCount =
+      document.getElementById("phase3SliceCount");
+
+    const phase3SeamCount =
+      document.getElementById("phase3SeamCount");
+
+    const phase3BreakCount =
+      document.getElementById("phase3BreakCount");
+
+    const phase3VirtualHeight =
+      document.getElementById("phase3VirtualHeight");
+
+    const phase3ReviewStatus =
+      document.getElementById("phase3ReviewStatus");
+
+    const phase3ReaderShell =
+      document.getElementById("phase3ReaderShell");
+
+    const phase3Reader =
+      document.getElementById("phase3Reader");
+
     const PHASE2C_STATE_KEY =
       "phase2cBatchState:v1";
 
@@ -2064,6 +2458,11 @@
 
     const PHASE2E_VERSION = 1;
 
+    const PHASE3A_REVIEW_KEY =
+      "phase3aReconstructionReview:v1";
+
+    const PHASE3A_VERSION = 1;
+
     let phase2cState = null;
     let phase2cRunning = false;
     let phase2cStopRequested = false;
@@ -2078,6 +2477,12 @@
     let phase2eRunning = false;
     let phase2eStopRequested = false;
     const phase2ePreviewUrls =
+      new Set();
+
+    let phase3aReviewState = null;
+    let phase3aReaderBuilt = false;
+
+    const phase3aPreviewUrls =
       new Set();
 
     let lastOverlapCandidate = null;
@@ -2097,6 +2502,7 @@
         clearPreviewUrls();
         clearPhase2DPreviewUrls();
         clearPhase2EPreviewUrls();
+        clearPhase3APreviewUrls();
       }
     );
 
@@ -2142,6 +2548,25 @@
       }
     );
 
+    phase3ShowSeams.addEventListener(
+      "change",
+      function() {
+        if (phase3aReaderBuilt) {
+          renderPhase3AReader();
+        }
+      }
+    );
+
+    phase3ShowSources.addEventListener(
+      "change",
+      function() {
+        if (phase3aReaderBuilt) {
+          renderPhase3AReader();
+        }
+      }
+    );
+
+
     async function startApp() {
       try {
         db = await openDatabase();
@@ -2154,6 +2579,7 @@
         await loadPhase2DPlan();
         populatePhase2ERangeSelectors();
         await loadPhase2EWorkspace();
+        await loadPhase3AReviewState();
         await updateStorageInfo();
       }
       catch (error) {
@@ -6000,6 +6426,17 @@
     function renderPhase2EArticlePlan() {
       clearPhase2EPreviewUrls();
 
+      queueMicrotask(
+        function() {
+          if (
+            typeof renderPhase3AAvailability ===
+            "function"
+          ) {
+            renderPhase3AAvailability();
+          }
+        }
+      );
+
       if (
         !phase2eArticlePlan ||
         !phase2EArticlePlanMatchesWorkspace()
@@ -6178,6 +6615,615 @@
         )
       );
     }
+
+
+    /*
+      =========================
+      Phase 3-A
+      完整文章重建閱讀預覽
+      =========================
+    */
+
+    function getPhase3APlanFingerprint() {
+      if (
+        !phase2eArticlePlan ||
+        !phase2EArticlePlanMatchesWorkspace()
+      ) {
+        return "";
+      }
+
+      const chain =
+        phase2eArticlePlan.chain;
+
+      return JSON.stringify({
+        version:
+          PHASE3A_VERSION,
+        imageIds:
+          phase2eArticlePlan.imageIds,
+        ignoreChrome:
+          phase2eArticlePlan.ignoreChrome,
+        chainCount:
+          phase2eArticlePlan.chainCount,
+        acceptedSeamCount:
+          phase2eArticlePlan.acceptedSeamCount,
+        breakCount:
+          phase2eArticlePlan.breakCount,
+        sliceCount:
+          phase2eArticlePlan.sliceCount,
+        slices:
+          chain.slices.map(
+            slice => ({
+              imageId:
+                slice.imageId,
+              cropTop:
+                slice.cropTop,
+              cropBottom:
+                slice.cropBottom,
+              retainedHeight:
+                slice.retainedHeight,
+              overlapPixels:
+                slice.incomingEdge
+                  ? slice.incomingEdge
+                      .overlapPixels
+                  : 0
+            })
+          )
+      });
+    }
+
+
+    function phase3APlanIsReady() {
+      if (
+        !phase2eArticlePlan ||
+        !phase2EArticlePlanMatchesWorkspace()
+      ) {
+        return false;
+      }
+
+      const plan =
+        phase2eArticlePlan;
+
+      return (
+        Number(plan.chainCount) === 1 &&
+        Number(plan.breakCount) === 0 &&
+        Number(plan.sliceCount) >= 2 &&
+        Number(
+          plan.acceptedSeamCount
+        ) ===
+          Number(plan.sliceCount) - 1 &&
+        plan.chain &&
+        Array.isArray(
+          plan.chain.slices
+        ) &&
+        plan.chain.slices.length ===
+          Number(plan.sliceCount)
+      );
+    }
+
+
+    async function loadPhase3AReviewState() {
+      try {
+        const saved =
+          await getSetting(
+            PHASE3A_REVIEW_KEY
+          );
+
+        phase3aReviewState =
+          saved && saved.value
+            ? saved.value
+            : null;
+      }
+      catch (error) {
+        console.warn(
+          "讀取 Phase 3-A 驗收狀態失敗：",
+          error
+        );
+
+        phase3aReviewState = null;
+      }
+
+      renderPhase3AAvailability();
+    }
+
+
+    function clearPhase3APreviewUrls() {
+      for (
+        const url of
+        phase3aPreviewUrls
+      ) {
+        try {
+          URL.revokeObjectURL(
+            url
+          );
+        }
+        catch (error) {
+          console.warn(
+            "Phase 3-A Blob URL 回收失敗：",
+            error
+          );
+        }
+      }
+
+      phase3aPreviewUrls.clear();
+    }
+
+
+    function createPhase3APreviewUrl(
+      blob
+    ) {
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+      phase3aPreviewUrls.add(
+        url
+      );
+
+      return url;
+    }
+
+
+    function renderPhase3AAvailability() {
+      const ready =
+        phase3APlanIsReady();
+
+      if (!ready) {
+        phase3Status.innerHTML =
+          `<span class="phase3-review-warn">⚠️ 尚無可用的完整文章計畫。</span>` +
+          `<br>請先完成 Phase 2-E：1 條文件鏈、0 斷點、所有接縫人工確認。`;
+
+        phase3SliceCount.textContent =
+          "0";
+        phase3SeamCount.textContent =
+          "0";
+        phase3BreakCount.textContent =
+          "0";
+        phase3VirtualHeight.textContent =
+          "0";
+
+        phase3BuildButton.disabled =
+          true;
+        phase3TopButton.disabled =
+          true;
+        phase3PassButton.disabled =
+          true;
+
+        phase3aReaderBuilt =
+          false;
+
+        clearPhase3APreviewUrls();
+
+        phase3Reader.innerHTML =
+          `<div class="phase3-reader-empty">等待 Phase 2-E 完整文章虛擬文件。</div>`;
+
+        renderPhase3AReviewStatus();
+
+        return;
+      }
+
+      const plan =
+        phase2eArticlePlan;
+
+      phase3SliceCount.textContent =
+        String(
+          plan.sliceCount
+        );
+
+      phase3SeamCount.textContent =
+        String(
+          plan.acceptedSeamCount
+        );
+
+      phase3BreakCount.textContent =
+        String(
+          plan.breakCount
+        );
+
+      phase3VirtualHeight.textContent =
+        `${Math.round(
+          Number(
+            plan.chain.virtualHeight
+          ) || 0
+        )} px`;
+
+      const firstSlice =
+        plan.chain.slices[0];
+
+      const lastSlice =
+        plan.chain.slices[
+          plan.chain.slices.length - 1
+        ];
+
+      phase3Status.innerHTML =
+        `<span class="phase3-review-good">✅ Phase 3-A 已可建立閱讀預覽。</span>` +
+        `<br>第 ${firstSlice.displayNumber}～${lastSlice.displayNumber} 張` +
+        `｜${plan.sliceCount} 切片` +
+        `｜${plan.acceptedSeamCount} 已確認接縫` +
+        `｜${plan.breakCount} 斷點`;
+
+      phase3BuildButton.disabled =
+        false;
+
+      if (!phase3aReaderBuilt) {
+        phase3TopButton.disabled =
+          true;
+        phase3PassButton.disabled =
+          true;
+      }
+
+      renderPhase3AReviewStatus();
+    }
+
+
+    function renderPhase3AReviewStatus() {
+      const fingerprint =
+        getPhase3APlanFingerprint();
+
+      if (
+        phase3aReviewState &&
+        phase3aReviewState.status ===
+          "pass" &&
+        phase3aReviewState.fingerprint ===
+          fingerprint &&
+        fingerprint
+      ) {
+        const date =
+          new Date(
+            phase3aReviewState.passedAt
+          );
+
+        phase3ReviewStatus.innerHTML =
+          `<span class="phase3-review-good">✅ Phase 3-A 閱讀驗收已 PASS。</span>` +
+          `<br>此 PASS 對應目前這一版文章切片與接縫。` +
+          `<br>驗收時間：${date.toLocaleString()}`;
+
+        return;
+      }
+
+      if (
+        phase3aReviewState &&
+        phase3aReviewState.status ===
+          "pass"
+      ) {
+        phase3ReviewStatus.innerHTML =
+          `<span class="phase3-review-warn">⚠️ 先前的 PASS 已失效。</span>` +
+          `<br>文章切片或接縫資料已改變，請重新建立預覽並再次檢查。`;
+
+        return;
+      }
+
+      phase3ReviewStatus.textContent =
+        "尚未完成 Phase 3-A 人工閱讀驗收。";
+    }
+
+
+    function buildPhase3AReader() {
+      if (!phase3APlanIsReady()) {
+        alert(
+          "請先建立有效的 Phase 2-E 完整文章虛擬文件。"
+        );
+        return;
+      }
+
+      phase3aReaderBuilt =
+        true;
+
+      renderPhase3AReader();
+
+      phase3TopButton.disabled =
+        false;
+
+      phase3PassButton.disabled =
+        false;
+
+      phase3ReaderShell.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+
+
+    function renderPhase3AReader() {
+      clearPhase3APreviewUrls();
+
+      phase3Reader.innerHTML =
+        "";
+
+      if (!phase3APlanIsReady()) {
+        phase3aReaderBuilt =
+          false;
+
+        phase3Reader.innerHTML =
+          `<div class="phase3-reader-empty">目前沒有有效的完整文章可重建。</div>`;
+
+        phase3TopButton.disabled =
+          true;
+
+        phase3PassButton.disabled =
+          true;
+
+        return;
+      }
+
+      const plan =
+        phase2eArticlePlan;
+
+      const chain =
+        plan.chain;
+
+      const showSeams =
+        Boolean(
+          phase3ShowSeams.checked
+        );
+
+      const showSources =
+        Boolean(
+          phase3ShowSources.checked
+        );
+
+      chain.slices.forEach(
+        (
+          slice,
+          sliceIndex
+        ) => {
+          if (
+            sliceIndex > 0 &&
+            showSeams &&
+            slice.incomingEdge
+          ) {
+            const marker =
+              document.createElement(
+                "div"
+              );
+
+            marker.className =
+              "phase3-seam-marker";
+
+            const previousSlice =
+              chain.slices[
+                sliceIndex - 1
+              ];
+
+            marker.textContent =
+              `接縫 ${sliceIndex}｜` +
+              `第 ${previousSlice.displayNumber} → ${slice.displayNumber} 張` +
+              `｜移除下一張頂部 ${Math.round(
+                Number(
+                  slice.incomingEdge
+                    .overlapPixels
+                ) || 0
+              )} px`;
+
+            phase3Reader.appendChild(
+              marker
+            );
+          }
+
+          const imageData =
+            getPhase2DImageById(
+              slice.imageId
+            );
+
+          if (!imageData) {
+            const missing =
+              document.createElement(
+                "div"
+              );
+
+            missing.className =
+              "phase3-reader-empty";
+
+            missing.textContent =
+              `第 ${slice.displayNumber} 張原始圖片不存在。`;
+
+            phase3Reader.appendChild(
+              missing
+            );
+
+            return;
+          }
+
+          const sourceWidth =
+            Math.max(
+              1,
+              Number(
+                slice.sourceWidth
+              ) || 1
+            );
+
+          const sourceHeight =
+            Math.max(
+              1,
+              Number(
+                slice.sourceHeight
+              ) || 1
+            );
+
+          const cropTop =
+            Math.max(
+              0,
+              Number(
+                slice.cropTop
+              ) || 0
+            );
+
+          const retainedHeight =
+            Math.max(
+              1,
+              Number(
+                slice.retainedHeight
+              ) || 1
+            );
+
+          const holder =
+            document.createElement(
+              "div"
+            );
+
+          holder.className =
+            "phase3-reader-slice";
+
+          /*
+            CSS aspect-ratio 直接用原圖尺寸比例，
+            不需要知道手機目前實際顯示寬度。
+          */
+          holder.style.aspectRatio =
+            `${sourceWidth} / ${retainedHeight}`;
+
+          const originalBlob =
+            getRenderableImageBlob(
+              imageData.blob,
+              imageData.type,
+              imageData.name
+            );
+
+          if (
+            !(originalBlob instanceof Blob)
+          ) {
+            holder.innerHTML =
+              `<div class="phase3-reader-empty">第 ${slice.displayNumber} 張原圖無法讀取。</div>`;
+
+            phase3Reader.appendChild(
+              holder
+            );
+
+            return;
+          }
+
+          const img =
+            document.createElement(
+              "img"
+            );
+
+          img.alt =
+            `第 ${slice.displayNumber} 張重建文章切片`;
+
+          img.loading =
+            "lazy";
+
+          img.decoding =
+            "async";
+
+          img.src =
+            createPhase3APreviewUrl(
+              originalBlob
+            );
+
+          /*
+            translateY 的百分比是以 img 自身高度計算：
+            cropTop / sourceHeight 可精確轉成響應式垂直位移。
+          */
+          const cropPercentage =
+            cropTop /
+            sourceHeight *
+            100;
+
+          img.style.transform =
+            `translateY(-${cropPercentage}%)`;
+
+          holder.appendChild(
+            img
+          );
+
+          if (showSources) {
+            const badge =
+              document.createElement(
+                "div"
+              );
+
+            badge.className =
+              "phase3-source-badge";
+
+            badge.textContent =
+              `來源第 ${slice.displayNumber} 張｜` +
+              `保留 y=${Math.round(slice.cropTop)}～${Math.round(slice.cropBottom)} px`;
+
+            holder.appendChild(
+              badge
+            );
+          }
+
+          phase3Reader.appendChild(
+            holder
+          );
+        }
+      );
+    }
+
+
+    function scrollPhase3AToTop() {
+      if (!phase3aReaderBuilt) {
+        return;
+      }
+
+      phase3ReaderShell.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+
+
+    async function markPhase3AReconstructionPass() {
+      if (
+        !phase3aReaderBuilt ||
+        !phase3APlanIsReady()
+      ) {
+        alert(
+          "請先建立高畫質重建文章預覽，並從頭到尾檢查一次。"
+        );
+        return;
+      }
+
+      const confirmed =
+        confirm(
+          "請確認：你已從文章開頭一路檢查到結尾，沒有發現整段重複、漏段或順序錯誤。要把 Phase 3-A 標記為 PASS 嗎？"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      phase3aReviewState = {
+        version:
+          PHASE3A_VERSION,
+        status:
+          "pass",
+        fingerprint:
+          getPhase3APlanFingerprint(),
+        passedAt:
+          Date.now()
+      };
+
+      await saveSetting(
+        PHASE3A_REVIEW_KEY,
+        phase3aReviewState
+      );
+
+      renderPhase3AReviewStatus();
+    }
+
+
+    async function clearPhase3AReviewState() {
+      const confirmed =
+        confirm(
+          "確定要清除 Phase 3-A 閱讀驗收狀態嗎？文章原圖、Phase 2-E 工作區與接縫資料都不會被刪除。"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      phase3aReviewState = null;
+
+      await saveSetting(
+        PHASE3A_REVIEW_KEY,
+        null
+      );
+
+      renderPhase3AReviewStatus();
+    }
+
 
     /*
       =========================
