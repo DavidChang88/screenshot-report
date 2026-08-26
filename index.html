@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Screenshot Report｜Phase 2-D</title>
+  <title>Screenshot Report｜Phase 2-E</title>
 
   <style>
     * {
@@ -782,6 +782,276 @@
       font-weight: 800;
     }
 
+
+    /*
+      =========================
+      Phase 2-E
+      乾淨文章工作區
+      =========================
+    */
+
+    .article-workspace-panel {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 16px;
+      background: #eef8ff;
+      border: 1px solid #b9daf2;
+    }
+
+    .article-workspace-panel h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    .article-workspace-panel p {
+      margin: 0 0 12px;
+      color: #5f6368;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .article-range-card,
+    .article-status-card,
+    .article-plan-card {
+      padding: 12px;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid #cfe4f4;
+      margin-top: 10px;
+    }
+
+    .article-range-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .article-range-grid label {
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .article-range-grid select {
+      width: 100%;
+      min-height: 48px;
+      margin-top: 6px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid #c8ccd0;
+      background: white;
+      font: inherit;
+      font-size: 15px;
+    }
+
+    .article-checkbox {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-top: 12px;
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .article-checkbox input {
+      width: 24px;
+      height: 24px;
+      flex: 0 0 auto;
+      margin: 1px 0 0;
+    }
+
+    .article-control-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .article-control-grid button {
+      margin: 0;
+    }
+
+    .article-create-button {
+      background: #1769aa;
+    }
+
+    .article-analyze-button {
+      background: #126e82;
+    }
+
+    .article-stop-button {
+      background: #d6a64b;
+      color: #1d1d1f;
+    }
+
+    .article-build-button {
+      background: #287a49;
+    }
+
+    .article-export-button {
+      background: #6254a3;
+    }
+
+    .article-progress-track {
+      height: 12px;
+      margin-top: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #e4e8ec;
+    }
+
+    .article-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #126e82;
+      transition: width 0.2s ease;
+    }
+
+    .article-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .article-summary-item {
+      padding: 12px;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid #cfe4f4;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .article-summary-item strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 22px;
+    }
+
+    .article-pair-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .article-pair-card {
+      padding: 12px;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid #cfe4f4;
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .article-pair-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      font-weight: 900;
+      font-size: 16px;
+    }
+
+    .article-badge {
+      flex: 0 0 auto;
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .article-badge.confirmed {
+      background: #def4e6;
+      color: #17643a;
+    }
+
+    .article-badge.high {
+      background: #e4f5ea;
+      color: #17643a;
+    }
+
+    .article-badge.medium {
+      background: #fff3cd;
+      color: #7a5800;
+    }
+
+    .article-badge.low,
+    .article-badge.error,
+    .article-badge.rejected {
+      background: #fde2df;
+      color: #a83227;
+    }
+
+    .article-badge.pending {
+      background: #eceff2;
+      color: #555;
+    }
+
+    .article-review-button {
+      margin-top: 10px;
+      background: #e9e9ee;
+      color: #1d1d1f;
+    }
+
+    .article-ready {
+      color: #17643a;
+      font-weight: 900;
+    }
+
+    .article-not-ready {
+      color: #9a3412;
+      font-weight: 900;
+    }
+
+    .article-preview {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid #cfe4f4;
+      max-height: 760px;
+      overflow: auto;
+    }
+
+    .article-preview-empty {
+      padding: 28px 12px;
+      text-align: center;
+      color: #777;
+      line-height: 1.6;
+    }
+
+    .article-slice {
+      position: relative;
+      overflow: hidden;
+      margin: 0 auto;
+      background: #f2f2f2;
+      max-width: 420px;
+    }
+
+    .article-slice img {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: auto;
+      max-width: none;
+      display: block;
+    }
+
+    .article-seam-label {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 6px 8px;
+      text-align: center;
+      background: #e7f6ea;
+      color: #166534;
+      border-top: 2px solid #2f855a;
+      border-bottom: 2px solid #2f855a;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.4;
+    }
     .order-help {
       margin-top: 14px;
       padding: 10px;
@@ -1403,6 +1673,175 @@
           </div>
         </div>
 
+        <div
+          id="articleWorkspacePanel"
+          class="article-workspace-panel"
+        >
+          <h3>
+            Phase 2-E｜第一篇完整文章工作區
+          </h3>
+
+          <p>
+            只處理你指定的連續文章截圖，不會把前面的混合測試圖片帶進來。
+            這一階段的目標是把同一篇文章的所有接縫逐一確認，最後形成 1 條完整文件鏈。
+          </p>
+
+          <div class="article-range-card">
+            <strong>
+              文章截圖範圍
+            </strong>
+
+            <div class="article-range-grid">
+              <label>
+                第一張
+                <select id="articleStartSelect"></select>
+              </label>
+
+              <label>
+                最後一張
+                <select id="articleEndSelect"></select>
+              </label>
+            </div>
+
+            <label class="article-checkbox">
+              <input
+                id="articleIgnoreBrowserChrome"
+                type="checkbox"
+                checked
+              >
+              <span>
+                忽略手機截圖最上方與最下方固定列
+                （建議與 Phase 2-A / 2-B 保持相同）
+              </span>
+            </label>
+
+            <div class="article-control-grid">
+              <button
+                class="article-create-button"
+                onclick="createPhase2EWorkspace()"
+              >
+                建立／更新文章工作區
+              </button>
+            </div>
+          </div>
+
+          <div
+            id="articleWorkspaceStatus"
+            class="article-status-card"
+          >
+            尚未建立文章工作區。
+          </div>
+
+          <div class="article-control-grid">
+            <button
+              id="articleAnalyzeButton"
+              class="article-analyze-button"
+              onclick="startOrResumePhase2EAnalysis()"
+              disabled
+            >
+              ▶ 分析這篇文章的所有接縫
+            </button>
+
+            <button
+              id="articleStopButton"
+              class="article-stop-button"
+              onclick="requestStopPhase2EAnalysis()"
+              disabled
+            >
+              ■ 停止
+            </button>
+
+            <button
+              class="secondary-button"
+              onclick="clearPhase2EWorkspaceResults()"
+            >
+              清除文章接縫分析結果
+            </button>
+          </div>
+
+          <div class="article-status-card">
+            <div id="articleProgressText">
+              等待建立文章工作區。
+            </div>
+
+            <div class="article-progress-track">
+              <div
+                id="articleProgressFill"
+                class="article-progress-fill"
+              ></div>
+            </div>
+          </div>
+
+          <div class="article-summary-grid">
+            <div class="article-summary-item">
+              文章截圖
+              <strong id="articleImageCount">0</strong>
+            </div>
+
+            <div class="article-summary-item">
+              接縫總數
+              <strong id="articlePairCount">0</strong>
+            </div>
+
+            <div class="article-summary-item">
+              已人工確認
+              <strong id="articleConfirmedCount">0</strong>
+            </div>
+
+            <div class="article-summary-item">
+              待人工確認
+              <strong id="articleReviewCount">0</strong>
+            </div>
+          </div>
+
+          <div
+            id="articlePairList"
+            class="article-pair-list"
+          ></div>
+
+          <div class="article-plan-card">
+            <strong>
+              完整文章虛擬文件
+            </strong>
+
+            <div
+              id="articlePlanStatus"
+              style="margin-top:8px;line-height:1.6;"
+            >
+              需要先把所有接縫人工確認完成。
+            </div>
+
+            <div class="article-control-grid">
+              <button
+                id="articleBuildPlanButton"
+                class="article-build-button"
+                onclick="buildPhase2EArticlePlan()"
+                disabled
+              >
+                建立第一份完整文章虛擬文件
+              </button>
+
+              <button
+                id="articleExportPlanButton"
+                class="article-export-button"
+                onclick="exportPhase2EArticlePlanJson()"
+                disabled
+              >
+                匯出文章虛擬文件 JSON
+              </button>
+            </div>
+          </div>
+
+          <div
+            id="articlePreview"
+            class="article-preview"
+          >
+            <div class="article-preview-empty">
+              當全部接縫確認完成後，這裡會顯示第 19～24 張形成的單一連續文章預覽。
+            </div>
+          </div>
+        </div>
+
         <div class="order-help">
           ◀ = 往前移一格　
           ▶ = 往後移一格　
@@ -1558,6 +1997,57 @@
     const virtualBreakList =
       document.getElementById("virtualBreakList");
 
+    const articleStartSelect =
+      document.getElementById("articleStartSelect");
+
+    const articleEndSelect =
+      document.getElementById("articleEndSelect");
+
+    const articleIgnoreBrowserChrome =
+      document.getElementById("articleIgnoreBrowserChrome");
+
+    const articleWorkspaceStatus =
+      document.getElementById("articleWorkspaceStatus");
+
+    const articleAnalyzeButton =
+      document.getElementById("articleAnalyzeButton");
+
+    const articleStopButton =
+      document.getElementById("articleStopButton");
+
+    const articleProgressText =
+      document.getElementById("articleProgressText");
+
+    const articleProgressFill =
+      document.getElementById("articleProgressFill");
+
+    const articleImageCount =
+      document.getElementById("articleImageCount");
+
+    const articlePairCount =
+      document.getElementById("articlePairCount");
+
+    const articleConfirmedCount =
+      document.getElementById("articleConfirmedCount");
+
+    const articleReviewCount =
+      document.getElementById("articleReviewCount");
+
+    const articlePairList =
+      document.getElementById("articlePairList");
+
+    const articlePlanStatus =
+      document.getElementById("articlePlanStatus");
+
+    const articleBuildPlanButton =
+      document.getElementById("articleBuildPlanButton");
+
+    const articleExportPlanButton =
+      document.getElementById("articleExportPlanButton");
+
+    const articlePreview =
+      document.getElementById("articlePreview");
+
     const PHASE2C_STATE_KEY =
       "phase2cBatchState:v1";
 
@@ -1566,6 +2056,14 @@
 
     const PHASE2D_PLAN_VERSION = 1;
 
+    const PHASE2E_WORKSPACE_KEY =
+      "phase2eArticleWorkspace:v1";
+
+    const PHASE2E_ARTICLE_PLAN_KEY =
+      "phase2eArticlePlan:v1";
+
+    const PHASE2E_VERSION = 1;
+
     let phase2cState = null;
     let phase2cRunning = false;
     let phase2cStopRequested = false;
@@ -1573,6 +2071,13 @@
 
     let phase2dPlan = null;
     const phase2dPreviewUrls =
+      new Set();
+
+    let phase2eWorkspace = null;
+    let phase2eArticlePlan = null;
+    let phase2eRunning = false;
+    let phase2eStopRequested = false;
+    const phase2ePreviewUrls =
       new Set();
 
     let lastOverlapCandidate = null;
@@ -1591,6 +2096,7 @@
       function() {
         clearPreviewUrls();
         clearPhase2DPreviewUrls();
+        clearPhase2EPreviewUrls();
       }
     );
 
@@ -1646,6 +2152,8 @@
         await loadImagesFromDatabase();
         await loadPhase2CBatchState();
         await loadPhase2DPlan();
+        populatePhase2ERangeSelectors();
+        await loadPhase2EWorkspace();
         await updateStorageInfo();
       }
       catch (error) {
@@ -4103,6 +4611,1573 @@
 
 
 
+
+
+    /*
+      =========================
+      Phase 2-E
+      第一篇完整文章工作區
+      =========================
+    */
+
+    function populatePhase2ERangeSelectors() {
+      const previousStart =
+        articleStartSelect.value;
+
+      const previousEnd =
+        articleEndSelect.value;
+
+      articleStartSelect.innerHTML = "";
+      articleEndSelect.innerHTML = "";
+
+      projectImages.forEach(
+        (item, index) => {
+          const startOption =
+            document.createElement(
+              "option"
+            );
+
+          startOption.value =
+            String(item.id);
+
+          startOption.textContent =
+            `第 ${index + 1} 張｜${item.width || "?"}×${item.height || "?"}`;
+
+          articleStartSelect.appendChild(
+            startOption
+          );
+
+          const endOption =
+            startOption.cloneNode(true);
+
+          articleEndSelect.appendChild(
+            endOption
+          );
+        }
+      );
+
+      const ids =
+        projectImages.map(
+          item => String(item.id)
+        );
+
+      const hasPreviousStart =
+        Boolean(
+          previousStart &&
+          ids.includes(previousStart)
+        );
+
+      const hasPreviousEnd =
+        Boolean(
+          previousEnd &&
+          ids.includes(previousEnd)
+        );
+
+      if (hasPreviousStart) {
+        articleStartSelect.value =
+          previousStart;
+      }
+
+      if (hasPreviousEnd) {
+        articleEndSelect.value =
+          previousEnd;
+      }
+
+      if (
+        !hasPreviousStart ||
+        !hasPreviousEnd
+      ) {
+        selectLatestBatchForPhase2E();
+      }
+    }
+
+
+    function selectLatestBatchForPhase2E() {
+      if (
+        projectImages.length === 0
+      ) {
+        return;
+      }
+
+      const maxBatch =
+        Math.max(
+          ...projectImages.map(
+            item =>
+              Number(
+                item.batchNumber
+              ) || 1
+          )
+        );
+
+      const indices = [];
+
+      projectImages.forEach(
+        (item, index) => {
+          if (
+            Number(
+              item.batchNumber
+            ) === maxBatch
+          ) {
+            indices.push(index);
+          }
+        }
+      );
+
+      if (indices.length >= 2) {
+        articleStartSelect.value =
+          String(
+            projectImages[
+              indices[0]
+            ].id
+          );
+
+        articleEndSelect.value =
+          String(
+            projectImages[
+              indices[
+                indices.length - 1
+              ]
+            ].id
+          );
+      }
+    }
+
+
+    function getPhase2ESelectedRange() {
+      const startId =
+        Number(
+          articleStartSelect.value
+        );
+
+      const endId =
+        Number(
+          articleEndSelect.value
+        );
+
+      const startIndex =
+        projectImages.findIndex(
+          item =>
+            Number(item.id) ===
+            startId
+        );
+
+      const endIndex =
+        projectImages.findIndex(
+          item =>
+            Number(item.id) ===
+            endId
+        );
+
+      if (
+        startIndex < 0 ||
+        endIndex < 0 ||
+        endIndex <= startIndex
+      ) {
+        return null;
+      }
+
+      return {
+        startIndex: startIndex,
+        endIndex: endIndex,
+        imageIds:
+          projectImages
+            .slice(
+              startIndex,
+              endIndex + 1
+            )
+            .map(
+              item => item.id
+            )
+      };
+    }
+
+
+    function phase2EWorkspaceMatchesCurrentProject() {
+      if (
+        !phase2eWorkspace ||
+        !Array.isArray(
+          phase2eWorkspace.imageIds
+        ) ||
+        phase2eWorkspace.imageIds.length < 2
+      ) {
+        return false;
+      }
+
+      const currentIndices =
+        phase2eWorkspace.imageIds.map(
+          imageId =>
+            projectImages.findIndex(
+              item =>
+                Number(item.id) ===
+                Number(imageId)
+            )
+        );
+
+      if (
+        currentIndices.some(
+          index => index < 0
+        )
+      ) {
+        return false;
+      }
+
+      for (
+        let i = 1;
+        i < currentIndices.length;
+        i++
+      ) {
+        if (
+          currentIndices[i] !==
+          currentIndices[i - 1] + 1
+        ) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+
+    async function loadPhase2EWorkspace() {
+      try {
+        const savedWorkspace =
+          await getSetting(
+            PHASE2E_WORKSPACE_KEY
+          );
+
+        phase2eWorkspace =
+          savedWorkspace &&
+          savedWorkspace.value
+            ? savedWorkspace.value
+            : null;
+
+        const savedPlan =
+          await getSetting(
+            PHASE2E_ARTICLE_PLAN_KEY
+          );
+
+        phase2eArticlePlan =
+          savedPlan &&
+          savedPlan.value
+            ? savedPlan.value
+            : null;
+      }
+      catch (error) {
+        console.warn(
+          "讀取 Phase 2-E 工作區失敗：",
+          error
+        );
+
+        phase2eWorkspace = null;
+        phase2eArticlePlan = null;
+      }
+
+      if (
+        phase2eWorkspace &&
+        phase2EWorkspaceMatchesCurrentProject()
+      ) {
+        const firstId =
+          phase2eWorkspace.imageIds[0];
+
+        const lastId =
+          phase2eWorkspace.imageIds[
+            phase2eWorkspace.imageIds.length - 1
+          ];
+
+        articleStartSelect.value =
+          String(firstId);
+
+        articleEndSelect.value =
+          String(lastId);
+
+        articleIgnoreBrowserChrome.checked =
+          Boolean(
+            phase2eWorkspace.ignoreChrome
+          );
+      }
+      else if (phase2eWorkspace) {
+        articleWorkspaceStatus.textContent =
+          "⚠️ 已保存的文章工作區與目前圖片順序不一致，請重新建立工作區。";
+      }
+      else {
+        selectLatestBatchForPhase2E();
+      }
+
+      renderPhase2EWorkspace();
+      renderPhase2EArticlePlan();
+    }
+
+
+    async function savePhase2EWorkspace() {
+      await saveSetting(
+        PHASE2E_WORKSPACE_KEY,
+        phase2eWorkspace
+      );
+    }
+
+
+    async function savePhase2EArticlePlan() {
+      await saveSetting(
+        PHASE2E_ARTICLE_PLAN_KEY,
+        phase2eArticlePlan
+      );
+    }
+
+
+    async function createPhase2EWorkspace() {
+      if (phase2eRunning) {
+        alert(
+          "請先停止目前的文章接縫分析。"
+        );
+        return;
+      }
+
+      const range =
+        getPhase2ESelectedRange();
+
+      if (!range) {
+        alert(
+          "請選擇至少 2 張、而且第一張必須位於最後一張之前。"
+        );
+        return;
+      }
+
+      const previousIds =
+        phase2eWorkspace &&
+        Array.isArray(
+          phase2eWorkspace.imageIds
+        )
+          ? phase2eWorkspace.imageIds
+          : [];
+
+      const sameRange =
+        previousIds.length ===
+          range.imageIds.length &&
+        previousIds.every(
+          (id, index) =>
+            Number(id) ===
+            Number(
+              range.imageIds[index]
+            )
+        ) &&
+        Boolean(
+          phase2eWorkspace &&
+          phase2eWorkspace.ignoreChrome
+        ) ===
+          Boolean(
+            articleIgnoreBrowserChrome.checked
+          );
+
+      if (!sameRange) {
+        phase2eWorkspace = {
+          version:
+            PHASE2E_VERSION,
+          imageIds:
+            range.imageIds,
+          ignoreChrome:
+            Boolean(
+              articleIgnoreBrowserChrome.checked
+            ),
+          results: [],
+          nextPairOffset: 0,
+          completed: false,
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        };
+
+        phase2eArticlePlan = null;
+        await savePhase2EArticlePlan();
+      }
+      else {
+        phase2eWorkspace.updatedAt =
+          Date.now();
+      }
+
+      await savePhase2EWorkspace();
+
+      renderPhase2EWorkspace();
+      renderPhase2EArticlePlan();
+
+      articleWorkspaceStatus.innerHTML =
+        `✅ 文章工作區已建立：<strong>第 ${range.startIndex + 1}～${range.endIndex + 1} 張</strong>` +
+        `<br>共 ${range.imageIds.length} 張，同一工作區只分析這些圖片。`;
+    }
+
+
+    function getPhase2EGlobalIndex(
+      imageId
+    ) {
+      return projectImages.findIndex(
+        item =>
+          Number(item.id) ===
+          Number(imageId)
+      );
+    }
+
+
+    function getPhase2EResult(
+      localPairIndex
+    ) {
+      if (
+        !phase2eWorkspace ||
+        !Array.isArray(
+          phase2eWorkspace.results
+        )
+      ) {
+        return null;
+      }
+
+      return phase2eWorkspace.results.find(
+        result =>
+          Number(
+            result.localPairIndex
+          ) ===
+          Number(localPairIndex)
+      ) || null;
+    }
+
+
+    function upsertPhase2EResult(
+      result
+    ) {
+      if (!phase2eWorkspace) {
+        return;
+      }
+
+      if (
+        !Array.isArray(
+          phase2eWorkspace.results
+        )
+      ) {
+        phase2eWorkspace.results = [];
+      }
+
+      const index =
+        phase2eWorkspace.results
+          .findIndex(
+            item =>
+              Number(
+                item.localPairIndex
+              ) ===
+              Number(
+                result.localPairIndex
+              )
+          );
+
+      if (index >= 0) {
+        phase2eWorkspace.results[index] =
+          result;
+      }
+      else {
+        phase2eWorkspace.results.push(
+          result
+        );
+      }
+    }
+
+
+    async function analyzePhase2EPair(
+      localPairIndex
+    ) {
+      if (
+        !phase2eWorkspace ||
+        !phase2EWorkspaceMatchesCurrentProject()
+      ) {
+        return {
+          localPairIndex:
+            localPairIndex,
+          status: "error",
+          message:
+            "文章工作區與目前圖片順序不一致"
+        };
+      }
+
+      const aId =
+        phase2eWorkspace.imageIds[
+          localPairIndex
+        ];
+
+      const bId =
+        phase2eWorkspace.imageIds[
+          localPairIndex + 1
+        ];
+
+      const globalIndex =
+        getPhase2EGlobalIndex(
+          aId
+        );
+
+      if (
+        globalIndex < 0 ||
+        globalIndex >=
+          projectImages.length - 1 ||
+        Number(
+          projectImages[
+            globalIndex + 1
+          ].id
+        ) !== Number(bId)
+      ) {
+        return {
+          localPairIndex:
+            localPairIndex,
+          aId: aId,
+          bId: bId,
+          status: "error",
+          message:
+            "這兩張目前已不是相鄰圖片",
+          analyzedAt: Date.now()
+        };
+      }
+
+      const base =
+        await analyzePhase2CPair(
+          globalIndex,
+          Boolean(
+            phase2eWorkspace.ignoreChrome
+          )
+        );
+
+      return {
+        ...base,
+        localPairIndex:
+          localPairIndex,
+        globalPairIndex:
+          globalIndex,
+        aId: aId,
+        bId: bId
+      };
+    }
+
+
+    async function startOrResumePhase2EAnalysis() {
+      if (
+        !phase2eWorkspace ||
+        !phase2EWorkspaceMatchesCurrentProject()
+      ) {
+        alert(
+          "請先建立有效的 Phase 2-E 文章工作區。"
+        );
+        return;
+      }
+
+      if (phase2eRunning) {
+        return;
+      }
+
+      phase2eRunning = true;
+      phase2eStopRequested = false;
+
+      articleAnalyzeButton.disabled =
+        true;
+      articleStopButton.disabled =
+        false;
+
+      const totalPairs =
+        phase2eWorkspace.imageIds.length - 1;
+
+      try {
+        let startOffset =
+          Math.max(
+            0,
+            Number(
+              phase2eWorkspace.nextPairOffset
+            ) || 0
+          );
+
+        if (
+          phase2eWorkspace.completed ||
+          startOffset >= totalPairs
+        ) {
+          startOffset = 0;
+          phase2eWorkspace.results = [];
+          phase2eWorkspace.completed = false;
+          phase2eWorkspace.nextPairOffset = 0;
+        }
+
+        for (
+          let localPairIndex = startOffset;
+          localPairIndex < totalPairs;
+          localPairIndex++
+        ) {
+          articleProgressText.textContent =
+            `正在分析第 ${localPairIndex + 1} / ${totalPairs} 個接縫…`;
+
+          const result =
+            await analyzePhase2EPair(
+              localPairIndex
+            );
+
+          upsertPhase2EResult(
+            result
+          );
+
+          phase2eWorkspace.nextPairOffset =
+            localPairIndex + 1;
+
+          phase2eWorkspace.updatedAt =
+            Date.now();
+
+          await savePhase2EWorkspace();
+          renderPhase2EWorkspace();
+
+          if (phase2eStopRequested) {
+            break;
+          }
+
+          await new Promise(
+            resolve =>
+              setTimeout(
+                resolve,
+                0
+              )
+          );
+        }
+
+        if (
+          phase2eWorkspace.nextPairOffset >=
+          totalPairs
+        ) {
+          phase2eWorkspace.completed =
+            true;
+
+          articleProgressText.textContent =
+            `✅ 文章接縫分析完成：${totalPairs} / ${totalPairs}`;
+        }
+        else {
+          articleProgressText.textContent =
+            `⏸ 已停止：完成 ${phase2eWorkspace.nextPairOffset} / ${totalPairs}，可繼續`;
+        }
+
+        phase2eWorkspace.updatedAt =
+          Date.now();
+
+        await savePhase2EWorkspace();
+        renderPhase2EWorkspace();
+      }
+      catch (error) {
+        console.error(error);
+        articleProgressText.textContent =
+          "❌ 文章接縫分析失敗：" +
+          String(
+            error.message || error
+          );
+      }
+      finally {
+        phase2eRunning = false;
+        phase2eStopRequested = false;
+        articleStopButton.disabled =
+          true;
+        renderPhase2EWorkspace();
+      }
+    }
+
+
+    function requestStopPhase2EAnalysis() {
+      if (!phase2eRunning) {
+        return;
+      }
+
+      phase2eStopRequested = true;
+      articleStopButton.disabled =
+        true;
+      articleStopButton.textContent =
+        "正在停止…";
+      articleProgressText.textContent =
+        "收到停止要求；完成目前這一組後停止。";
+    }
+
+
+    async function clearPhase2EWorkspaceResults() {
+      if (phase2eRunning) {
+        alert(
+          "請先停止目前分析。"
+        );
+        return;
+      }
+
+      if (!phase2eWorkspace) {
+        return;
+      }
+
+      const confirmed =
+        confirm(
+          "確定要清除 Phase 2-E 自動分析結果嗎？Phase 2-B 已人工確認的接縫不會被刪除。"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      phase2eWorkspace.results = [];
+      phase2eWorkspace.nextPairOffset = 0;
+      phase2eWorkspace.completed = false;
+      phase2eWorkspace.updatedAt =
+        Date.now();
+
+      phase2eArticlePlan = null;
+
+      await savePhase2EWorkspace();
+      await savePhase2EArticlePlan();
+
+      renderPhase2EWorkspace();
+      renderPhase2EArticlePlan();
+    }
+
+
+    function phase2EStatusInfo(
+      status
+    ) {
+      const map = {
+        confirmed: {
+          label: "✅ 已人工確認",
+          className: "confirmed"
+        },
+        high: {
+          label: "✅ 高信心候選",
+          className: "high"
+        },
+        medium: {
+          label: "⚠️ 中信心",
+          className: "medium"
+        },
+        low: {
+          label: "❗低信心",
+          className: "low"
+        },
+        duplicate: {
+          label: "♻ 完全重複",
+          className: "rejected"
+        },
+        rejected: {
+          label: "✕ 已拒絕",
+          className: "rejected"
+        },
+        none: {
+          label: "❌ 無候選",
+          className: "error"
+        },
+        error: {
+          label: "❌ 錯誤",
+          className: "error"
+        }
+      };
+
+      return map[status] || {
+        label: "⌛ 尚未分析",
+        className: "pending"
+      };
+    }
+
+
+    function renderPhase2EWorkspace() {
+      if (
+        !phase2eWorkspace ||
+        !phase2EWorkspaceMatchesCurrentProject()
+      ) {
+        articleImageCount.textContent =
+          "0";
+        articlePairCount.textContent =
+          "0";
+        articleConfirmedCount.textContent =
+          "0";
+        articleReviewCount.textContent =
+          "0";
+        articleAnalyzeButton.disabled =
+          true;
+        articleStopButton.disabled =
+          true;
+        articlePairList.innerHTML = "";
+        articleProgressFill.style.width =
+          "0%";
+        return;
+      }
+
+      const ids =
+        phase2eWorkspace.imageIds;
+
+      const totalPairs =
+        ids.length - 1;
+
+      const results =
+        Array.isArray(
+          phase2eWorkspace.results
+        )
+          ? phase2eWorkspace.results
+          : [];
+
+      const confirmedCount =
+        results.filter(
+          item =>
+            item.status ===
+            "confirmed"
+        ).length;
+
+      const reviewCount =
+        Math.max(
+          0,
+          totalPairs -
+          confirmedCount
+        );
+
+      articleImageCount.textContent =
+        String(ids.length);
+      articlePairCount.textContent =
+        String(totalPairs);
+      articleConfirmedCount.textContent =
+        String(confirmedCount);
+      articleReviewCount.textContent =
+        String(reviewCount);
+
+      const firstIndex =
+        getPhase2EGlobalIndex(
+          ids[0]
+        );
+      const lastIndex =
+        getPhase2EGlobalIndex(
+          ids[ids.length - 1]
+        );
+
+      articleWorkspaceStatus.innerHTML =
+        `✅ 工作區：<strong>第 ${firstIndex + 1}～${lastIndex + 1} 張</strong>` +
+        `<br>${ids.length} 張文章截圖｜${totalPairs} 個相鄰接縫` +
+        `<br>模式：${phase2eWorkspace.ignoreChrome ? "忽略上下固定列" : "完整畫面"}`;
+
+      const completed =
+        Math.min(
+          Number(
+            phase2eWorkspace.nextPairOffset
+          ) || 0,
+          totalPairs
+        );
+
+      const percentage =
+        totalPairs > 0
+          ? completed /
+            totalPairs * 100
+          : 0;
+
+      articleProgressFill.style.width =
+        `${percentage}%`;
+
+      if (!phase2eRunning) {
+        articleAnalyzeButton.disabled =
+          false;
+
+        articleAnalyzeButton.textContent =
+          phase2eWorkspace.completed
+            ? "↻ 重新分析文章接縫"
+            : (
+                completed > 0
+                  ? "▶ 繼續文章接縫分析"
+                  : "▶ 分析這篇文章的所有接縫"
+              );
+
+        articleStopButton.disabled =
+          true;
+        articleStopButton.textContent =
+          "■ 停止";
+      }
+
+      if (
+        phase2eWorkspace.completed
+      ) {
+        articleProgressText.textContent =
+          `✅ 文章接縫分析完成：${totalPairs} / ${totalPairs}`;
+      }
+      else if (
+        completed > 0 &&
+        !phase2eRunning
+      ) {
+        articleProgressText.textContent =
+          `⏸ 已完成 ${completed} / ${totalPairs}，可繼續`;
+      }
+      else if (
+        completed === 0 &&
+        !phase2eRunning
+      ) {
+        articleProgressText.textContent =
+          "尚未開始分析文章接縫。";
+      }
+
+      articlePairList.innerHTML = "";
+
+      for (
+        let localPairIndex = 0;
+        localPairIndex < totalPairs;
+        localPairIndex++
+      ) {
+        const aId = ids[localPairIndex];
+        const bId = ids[localPairIndex + 1];
+        const aIndex =
+          getPhase2EGlobalIndex(aId);
+        const bIndex =
+          getPhase2EGlobalIndex(bId);
+        const result =
+          getPhase2EResult(
+            localPairIndex
+          );
+        const info =
+          phase2EStatusInfo(
+            result && result.status
+          );
+
+        const card =
+          document.createElement(
+            "div"
+          );
+        card.className =
+          "article-pair-card";
+
+        const head =
+          document.createElement(
+            "div"
+          );
+        head.className =
+          "article-pair-head";
+
+        const title =
+          document.createElement(
+            "div"
+          );
+        title.textContent =
+          `第 ${aIndex + 1} 張 → 第 ${bIndex + 1} 張`;
+
+        const badge =
+          document.createElement(
+            "span"
+          );
+        badge.className =
+          `article-badge ${info.className}`;
+        badge.textContent =
+          info.label;
+
+        head.appendChild(title);
+        head.appendChild(badge);
+        card.appendChild(head);
+
+        if (result) {
+          const detail =
+            document.createElement(
+              "div"
+            );
+          detail.style.marginTop =
+            "7px";
+
+          const overlapText =
+            Number.isFinite(
+              Number(
+                result.overlapPixels
+              )
+            )
+              ? `${Math.round(Number(result.overlapPixels))} px`
+              : "—";
+
+          const similarityText =
+            Number.isFinite(
+              Number(
+                result.similarity
+              )
+            )
+              ? `${Number(result.similarity).toFixed(1)}%`
+              : "—";
+
+          detail.innerHTML =
+            `重疊：<strong>${overlapText}</strong>` +
+            `｜相似度：<strong>${similarityText}</strong>`;
+
+          card.appendChild(detail);
+        }
+
+        if (
+          !result ||
+          result.status !==
+            "confirmed"
+        ) {
+          const review =
+            document.createElement(
+              "button"
+            );
+          review.className =
+            "article-review-button";
+          review.textContent =
+            "人工確認這一組";
+          review.onclick =
+            function() {
+              openPhase2EPairForReview(
+                localPairIndex
+              );
+            };
+
+          card.appendChild(review);
+        }
+        else {
+          const note =
+            document.createElement(
+              "div"
+            );
+          note.style.marginTop =
+            "7px";
+          note.className =
+            "article-ready";
+          note.textContent =
+            "此接縫已鎖定使用 Phase 2-B 人工確認值。";
+          card.appendChild(note);
+        }
+
+        articlePairList.appendChild(card);
+      }
+
+      const allConfirmed =
+        totalPairs > 0 &&
+        confirmedCount ===
+          totalPairs;
+
+      articleBuildPlanButton.disabled =
+        !allConfirmed;
+
+      if (allConfirmed) {
+        articlePlanStatus.innerHTML =
+          `<span class="article-ready">✅ ${totalPairs} / ${totalPairs} 接縫全部人工確認完成。</span>` +
+          `<br>可以建立 1 條完整文章虛擬文件。`;
+      }
+      else {
+        articlePlanStatus.innerHTML =
+          `<span class="article-not-ready">尚有 ${totalPairs - confirmedCount} 個接縫未人工確認。</span>` +
+          `<br>請逐一使用「人工確認這一組」。`;
+      }
+    }
+
+
+    async function openPhase2EPairForReview(
+      localPairIndex
+    ) {
+      if (
+        !phase2eWorkspace ||
+        !phase2EWorkspaceMatchesCurrentProject()
+      ) {
+        return;
+      }
+
+      const aId =
+        phase2eWorkspace.imageIds[
+          localPairIndex
+        ];
+      const bId =
+        phase2eWorkspace.imageIds[
+          localPairIndex + 1
+        ];
+
+      overlapASelect.value =
+        String(aId);
+      overlapBSelect.value =
+        String(bId);
+      ignoreBrowserChrome.checked =
+        Boolean(
+          phase2eWorkspace.ignoreChrome
+        );
+
+      resetSeamReview(
+        "正在開啟文章接縫人工確認…"
+      );
+
+      overlapPanel.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+      await new Promise(
+        resolve =>
+          setTimeout(
+            resolve,
+            250
+          )
+      );
+
+      await runOverlapPrototype();
+    }
+
+
+    async function refreshPhase2EWorkspaceForCurrentSeamPair() {
+      if (
+        !phase2eWorkspace ||
+        !phase2EWorkspaceMatchesCurrentProject() ||
+        !lastOverlapCandidate
+      ) {
+        return;
+      }
+
+      const localPairIndex =
+        phase2eWorkspace.imageIds
+          .findIndex(
+            (
+              imageId,
+              index
+            ) =>
+              index <
+                phase2eWorkspace.imageIds.length - 1 &&
+              Number(imageId) ===
+                Number(
+                  lastOverlapCandidate.aId
+                ) &&
+              Number(
+                phase2eWorkspace.imageIds[
+                  index + 1
+                ]
+              ) ===
+                Number(
+                  lastOverlapCandidate.bId
+                )
+          );
+
+      if (localPairIndex < 0) {
+        return;
+      }
+
+      const refreshed =
+        await analyzePhase2EPair(
+          localPairIndex
+        );
+
+      upsertPhase2EResult(
+        refreshed
+      );
+
+      phase2eWorkspace.updatedAt =
+        Date.now();
+
+      await savePhase2EWorkspace();
+
+      phase2eArticlePlan = null;
+      await savePhase2EArticlePlan();
+
+      renderPhase2EWorkspace();
+      renderPhase2EArticlePlan();
+    }
+
+
+    function phase2EArticlePlanMatchesWorkspace() {
+      if (
+        !phase2eArticlePlan ||
+        !phase2eWorkspace ||
+        !phase2EWorkspaceMatchesCurrentProject()
+      ) {
+        return false;
+      }
+
+      if (
+        !Array.isArray(
+          phase2eArticlePlan.imageIds
+        ) ||
+        phase2eArticlePlan.imageIds.length !==
+          phase2eWorkspace.imageIds.length
+      ) {
+        return false;
+      }
+
+      return phase2eArticlePlan.imageIds.every(
+        (id, index) =>
+          Number(id) ===
+          Number(
+            phase2eWorkspace.imageIds[index]
+          )
+      ) &&
+      Boolean(
+        phase2eArticlePlan.ignoreChrome
+      ) ===
+      Boolean(
+        phase2eWorkspace.ignoreChrome
+      );
+    }
+
+
+    async function buildPhase2EArticlePlan() {
+      if (
+        !phase2eWorkspace ||
+        !phase2EWorkspaceMatchesCurrentProject()
+      ) {
+        alert(
+          "請先建立有效的文章工作區。"
+        );
+        return;
+      }
+
+      const totalPairs =
+        phase2eWorkspace.imageIds.length - 1;
+
+      const confirmedResults = [];
+
+      for (
+        let localPairIndex = 0;
+        localPairIndex < totalPairs;
+        localPairIndex++
+      ) {
+        const result =
+          getPhase2EResult(
+            localPairIndex
+          );
+
+        if (
+          !result ||
+          result.status !==
+            "confirmed"
+        ) {
+          alert(
+            "仍有未人工確認的接縫，暫時不能建立完整文章。"
+          );
+          return;
+        }
+
+        confirmedResults.push(
+          result
+        );
+      }
+
+      const ignoreChrome =
+        Boolean(
+          phase2eWorkspace.ignoreChrome
+        );
+
+      const slices = [];
+      const seams = [];
+
+      const firstId =
+        phase2eWorkspace.imageIds[0];
+      const firstIndex =
+        getPhase2EGlobalIndex(
+          firstId
+        );
+      const firstImage =
+        projectImages[firstIndex];
+      const firstBounds =
+        getContentPixelBounds(
+          firstImage,
+          ignoreChrome
+        );
+
+      slices.push(
+        createPhase2DSlice(
+          firstImage,
+          firstIndex,
+          firstBounds.top,
+          firstBounds.bottom,
+          null
+        )
+      );
+
+      for (
+        let localPairIndex = 0;
+        localPairIndex < totalPairs;
+        localPairIndex++
+      ) {
+        const result =
+          confirmedResults[
+            localPairIndex
+          ];
+        const nextId =
+          phase2eWorkspace.imageIds[
+            localPairIndex + 1
+          ];
+        const nextIndex =
+          getPhase2EGlobalIndex(
+            nextId
+          );
+        const nextImage =
+          projectImages[nextIndex];
+        const bounds =
+          getContentPixelBounds(
+            nextImage,
+            ignoreChrome
+          );
+
+        const overlapPixels =
+          Math.max(
+            0,
+            Math.min(
+              bounds.height - 1,
+              Math.round(
+                Number(
+                  result.overlapPixels
+                ) || 0
+              )
+            )
+          );
+
+        const seam = {
+          localPairIndex:
+            localPairIndex,
+          fromImageId:
+            result.aId,
+          toImageId:
+            result.bId,
+          overlapPixels:
+            overlapPixels,
+          similarity:
+            result.similarity,
+          status:
+            "confirmed"
+        };
+
+        seams.push(seam);
+
+        slices.push(
+          createPhase2DSlice(
+            nextImage,
+            nextIndex,
+            bounds.top +
+              overlapPixels,
+            bounds.bottom,
+            seam
+          )
+        );
+      }
+
+      const chain =
+        finalizePhase2DChain({
+          id:
+            "phase2e-article-chain-1",
+          slices:
+            slices,
+          acceptedEdges:
+            seams
+        });
+
+      phase2eArticlePlan = {
+        version:
+          PHASE2E_VERSION,
+        imageIds:
+          [...phase2eWorkspace.imageIds],
+        ignoreChrome:
+          ignoreChrome,
+        builtAt: Date.now(),
+        chainCount: 1,
+        acceptedSeamCount:
+          seams.length,
+        breakCount: 0,
+        sliceCount:
+          slices.length,
+        chain:
+          chain,
+        seams:
+          seams
+      };
+
+      await savePhase2EArticlePlan();
+      renderPhase2EArticlePlan();
+
+      articlePlanStatus.innerHTML =
+        `<span class="article-ready">✅ 第一份完整文章虛擬文件已建立。</span>` +
+        `<br>1 條文件鏈｜${seams.length} 個已確認接縫｜0 斷點｜${slices.length} 切片`;
+    }
+
+
+    function clearPhase2EPreviewUrls() {
+      for (
+        const url of
+        phase2ePreviewUrls
+      ) {
+        try {
+          URL.revokeObjectURL(url);
+        }
+        catch (error) {
+          console.warn(error);
+        }
+      }
+
+      phase2ePreviewUrls.clear();
+    }
+
+
+    function createPhase2EPreviewUrl(
+      blob
+    ) {
+      const url =
+        URL.createObjectURL(blob);
+      phase2ePreviewUrls.add(url);
+      return url;
+    }
+
+
+    function renderPhase2EArticlePlan() {
+      clearPhase2EPreviewUrls();
+
+      if (
+        !phase2eArticlePlan ||
+        !phase2EArticlePlanMatchesWorkspace()
+      ) {
+        articleExportPlanButton.disabled =
+          true;
+
+        if (
+          !phase2eArticlePlan
+        ) {
+          articlePreview.innerHTML =
+            `<div class="article-preview-empty">所有接縫確認完成後，可建立 1 條完整文章預覽。</div>`;
+        }
+        return;
+      }
+
+      articleExportPlanButton.disabled =
+        false;
+
+      const plan =
+        phase2eArticlePlan;
+
+      articlePlanStatus.innerHTML =
+        `<span class="article-ready">✅ 完整文章虛擬文件有效。</span>` +
+        `<br>1 條文件鏈｜${plan.acceptedSeamCount} 已確認接縫｜0 斷點｜${plan.sliceCount} 切片`;
+
+      articlePreview.innerHTML = "";
+
+      const chain = plan.chain;
+
+      chain.slices.forEach(
+        (slice, sliceIndex) => {
+          if (
+            sliceIndex > 0 &&
+            slice.incomingEdge
+          ) {
+            const label =
+              document.createElement(
+                "div"
+              );
+            label.className =
+              "article-seam-label";
+            label.textContent =
+              `接縫 ${sliceIndex}：移除下一張頂部 ${Math.round(slice.incomingEdge.overlapPixels)} px｜人工確認`;
+            articlePreview.appendChild(
+              label
+            );
+          }
+
+          const imageData =
+            getPhase2DImageById(
+              slice.imageId
+            );
+
+          if (!imageData) {
+            return;
+          }
+
+          const holder =
+            document.createElement(
+              "div"
+            );
+          holder.className =
+            "article-slice";
+
+          const sourceWidth =
+            Math.max(
+              1,
+              Number(
+                slice.sourceWidth
+              ) || 1
+            );
+          const sourceHeight =
+            Math.max(
+              1,
+              Number(
+                slice.sourceHeight
+              ) || 1
+            );
+          const retainedHeight =
+            Math.max(
+              1,
+              Number(
+                slice.retainedHeight
+              ) || 1
+            );
+          const previewBaseWidth =
+            420;
+          const previewHeight =
+            retainedHeight /
+            sourceWidth *
+            previewBaseWidth;
+
+          holder.style.height =
+            `${Math.max(24, previewHeight)}px`;
+
+          const img =
+            document.createElement(
+              "img"
+            );
+          img.alt =
+            `第 ${slice.displayNumber} 張文章虛擬切片`;
+
+          const blob =
+            imageData.thumbnailBlob
+              instanceof Blob
+              ? imageData.thumbnailBlob
+              : (
+                  imageData.blob
+                    instanceof Blob
+                    ? imageData.blob
+                    : null
+                );
+
+          if (!blob) {
+            holder.textContent =
+              `第 ${slice.displayNumber} 張預覽不可用`;
+            articlePreview.appendChild(
+              holder
+            );
+            return;
+          }
+
+          img.src =
+            createPhase2EPreviewUrl(
+              blob
+            );
+
+          const fullPreviewHeight =
+            sourceHeight /
+            sourceWidth *
+            previewBaseWidth;
+          const topOffset =
+            slice.cropTop /
+            sourceHeight *
+            fullPreviewHeight;
+
+          img.style.height =
+            `${fullPreviewHeight}px`;
+          img.style.top =
+            `${-topOffset}px`;
+
+          holder.appendChild(img);
+          articlePreview.appendChild(
+            holder
+          );
+        }
+      );
+    }
+
+
+    function exportPhase2EArticlePlanJson() {
+      if (
+        !phase2eArticlePlan ||
+        !phase2EArticlePlanMatchesWorkspace()
+      ) {
+        alert(
+          "請先建立有效的完整文章虛擬文件。"
+        );
+        return;
+      }
+
+      downloadTextFile(
+        "phase2e-first-complete-article.json",
+        JSON.stringify(
+          {
+            schema:
+              "screenshot-report.phase2e.complete-article.v1",
+            exportedAt:
+              new Date().toISOString(),
+            plan:
+              phase2eArticlePlan
+          },
+          null,
+          2
+        )
+      );
+    }
 
     /*
       =========================
@@ -7745,6 +9820,7 @@
 
 
         await refreshPhase2CResultForCurrentSeamPair();
+        await refreshPhase2EWorkspaceForCurrentSeamPair();
       }
       catch (error) {
         console.error(error);
@@ -7803,6 +9879,7 @@
 
 
         await refreshPhase2CResultForCurrentSeamPair();
+        await refreshPhase2EWorkspaceForCurrentSeamPair();
       }
       catch (error) {
         console.error(error);
