@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Screenshot Report｜Phase 2-B</title>
+  <title>Screenshot Report｜Phase 2-C</title>
 
   <style>
     * {
@@ -353,6 +353,202 @@
       background: white;
       font-size: 14px;
       line-height: 1.55;
+    }
+
+
+    /*
+      =========================
+      Phase 2-C
+      整批相鄰截圖分析
+      =========================
+    */
+
+    .batch-overlap-panel {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 14px;
+      background: #eef8f1;
+      border: 1px solid #cbe8d3;
+    }
+
+    .batch-overlap-panel h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .batch-overlap-panel p {
+      margin: 0 0 12px;
+      color: #5f6368;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .batch-overlap-option {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 11px 12px;
+      border-radius: 10px;
+      background: white;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .batch-overlap-option input {
+      width: 22px;
+      height: 22px;
+      margin: 0;
+      flex: 0 0 auto;
+    }
+
+    .batch-control-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .batch-control-grid button {
+      margin: 0;
+      padding: 13px 8px;
+      font-size: 15px;
+    }
+
+    .batch-start-button {
+      background: #16834f;
+    }
+
+    .batch-stop-button {
+      background: #d97706;
+    }
+
+    .batch-progress-box {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      background: white;
+    }
+
+    .batch-progress-track {
+      width: 100%;
+      height: 12px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e5e7eb;
+      margin-top: 8px;
+    }
+
+    .batch-progress-fill {
+      width: 0%;
+      height: 100%;
+      background: #16834f;
+      transition: width 0.18s ease;
+    }
+
+    .batch-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .batch-summary-item {
+      padding: 10px;
+      border-radius: 10px;
+      background: white;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .batch-summary-item strong {
+      display: block;
+      margin-top: 2px;
+      font-size: 18px;
+    }
+
+    .batch-list {
+      display: grid;
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    .batch-pair-card {
+      padding: 12px;
+      border-radius: 11px;
+      background: white;
+      border: 1px solid #dde3df;
+    }
+
+    .batch-pair-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .batch-pair-name {
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .batch-status-badge {
+      flex: 0 0 auto;
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .batch-status-confirmed {
+      color: #075b34;
+      background: #dff5e8;
+    }
+
+    .batch-status-high {
+      color: #075b34;
+      background: #e8f5ec;
+    }
+
+    .batch-status-medium {
+      color: #7a4b00;
+      background: #fff0c7;
+    }
+
+    .batch-status-low,
+    .batch-status-error,
+    .batch-status-rejected {
+      color: #9f241b;
+      background: #ffe1dd;
+    }
+
+    .batch-status-duplicate {
+      color: #4f46e5;
+      background: #ebe9ff;
+    }
+
+    .batch-status-pending {
+      color: #5f6368;
+      background: #eceff1;
+    }
+
+    .batch-pair-meta {
+      margin-top: 8px;
+      color: #555;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .batch-pair-card button {
+      margin-top: 9px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    .batch-note {
+      margin-top: 10px;
+      color: #5f6368;
+      font-size: 12px;
+      line-height: 1.5;
     }
 
     .order-help {
@@ -745,6 +941,105 @@
           </div>
         </div>
 
+        <div
+          id="batchOverlapPanel"
+          class="batch-overlap-panel"
+        >
+          <h3>
+            Phase 2-C｜整批相鄰截圖分析
+          </h3>
+
+          <p>
+            依照目前截圖順序，自動分析 1→2、2→3、3→4……。
+            每完成一組就保存結果；中途停止或關閉網頁後可以繼續。
+            已人工確認的接縫不會被自動結果覆蓋。
+          </p>
+
+          <label class="batch-overlap-option">
+            <input
+              id="batchIgnoreBrowserChrome"
+              type="checkbox"
+              checked
+            >
+            <span>
+              整批分析時忽略手機截圖最上方與最下方固定列
+              （應與 Phase 2-A／2-B 使用相同模式）
+            </span>
+          </label>
+
+          <div class="batch-control-grid">
+            <button
+              id="batchStartButton"
+              class="batch-start-button"
+              onclick="startOrResumeBatchOverlap()"
+            >
+              ▶ 開始整批分析
+            </button>
+
+            <button
+              id="batchStopButton"
+              class="batch-stop-button"
+              onclick="stopBatchOverlap()"
+              disabled
+            >
+              ■ 停止
+            </button>
+          </div>
+
+          <button
+            class="secondary-button"
+            onclick="clearPhase2CBatchResults()"
+          >
+            清除 Phase 2-C 批次結果
+          </button>
+
+          <div class="batch-progress-box">
+            <div id="batchProgressText">
+              尚未開始整批分析
+            </div>
+
+            <div class="batch-progress-track">
+              <div
+                id="batchProgressFill"
+                class="batch-progress-fill"
+              ></div>
+            </div>
+          </div>
+
+          <div class="batch-summary-grid">
+            <div class="batch-summary-item">
+              已人工確認
+              <strong id="batchConfirmedCount">0</strong>
+            </div>
+
+            <div class="batch-summary-item">
+              高信心候選
+              <strong id="batchHighCount">0</strong>
+            </div>
+
+            <div class="batch-summary-item">
+              待人工確認
+              <strong id="batchReviewCount">0</strong>
+            </div>
+
+            <div class="batch-summary-item">
+              完全重複／已拒絕
+              <strong id="batchExcludedCount">0</strong>
+            </div>
+          </div>
+
+          <div
+            id="batchResultList"
+            class="batch-list"
+          ></div>
+
+          <div class="batch-note">
+            「高信心候選」目前仍只是自動候選，不等於人工確認。
+            Phase 2-D 建立虛擬文件前，系統會優先採用已人工確認值；
+            中／低信心、錯誤或無候選組合應先人工檢查。
+          </div>
+        </div>
+
         <div class="order-help">
           ◀ = 往前移一格　
           ▶ = 往後移一格　
@@ -834,6 +1129,44 @@
     const seamReviewStatus =
       document.getElementById("seamReviewStatus");
 
+    const batchIgnoreBrowserChrome =
+      document.getElementById("batchIgnoreBrowserChrome");
+
+    const batchStartButton =
+      document.getElementById("batchStartButton");
+
+    const batchStopButton =
+      document.getElementById("batchStopButton");
+
+    const batchProgressText =
+      document.getElementById("batchProgressText");
+
+    const batchProgressFill =
+      document.getElementById("batchProgressFill");
+
+    const batchConfirmedCount =
+      document.getElementById("batchConfirmedCount");
+
+    const batchHighCount =
+      document.getElementById("batchHighCount");
+
+    const batchReviewCount =
+      document.getElementById("batchReviewCount");
+
+    const batchExcludedCount =
+      document.getElementById("batchExcludedCount");
+
+    const batchResultList =
+      document.getElementById("batchResultList");
+
+    const PHASE2C_STATE_KEY =
+      "phase2cBatchState:v1";
+
+    let phase2cState = null;
+    let phase2cRunning = false;
+    let phase2cStopRequested = false;
+    const phase2cFeatureCache = new Map();
+
     let lastOverlapCandidate = null;
     let currentSeamOverlapPixels = 0;
     let automaticSeamOverlapPixels = 0;
@@ -877,6 +1210,13 @@
       }
     );
 
+    batchIgnoreBrowserChrome.addEventListener(
+      "change",
+      function() {
+        renderPhase2CBatchState();
+      }
+    );
+
     async function startApp() {
       try {
         db = await openDatabase();
@@ -885,6 +1225,7 @@
           "✅ 本機資料庫已啟用";
 
         await loadImagesFromDatabase();
+        await loadPhase2CBatchState();
         await updateStorageInfo();
       }
       catch (error) {
@@ -1689,6 +2030,12 @@
 
       updateThumbnailSummary();
       updateOverlapSelectors();
+
+      /*
+        截圖新增、刪除或排序後，
+        立即檢查 Phase 2-C 舊結果是否已失效。
+      */
+      renderPhase2CBatchState();
     }
 
 
@@ -3336,6 +3683,1230 @@
 
 
 
+
+    /*
+      =========================
+      Phase 2-C
+      整批相鄰截圖分析
+      =========================
+    */
+
+    function getPhase2CProjectSignature() {
+      return projectImages
+        .map(item => String(item.id))
+        .join(",");
+    }
+
+
+    function createEmptyPhase2CState(
+      ignoreChrome
+    ) {
+      return {
+        version: 1,
+        signature:
+          getPhase2CProjectSignature(),
+        ignoreChrome:
+          Boolean(ignoreChrome),
+        totalPairs:
+          Math.max(
+            0,
+            projectImages.length - 1
+          ),
+        nextPairIndex: 0,
+        completed: false,
+        stopped: false,
+        results: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      };
+    }
+
+
+    function phase2CStateMatchesCurrentProject(
+      state = phase2cState
+    ) {
+      if (!state) {
+        return false;
+      }
+
+      return (
+        state.signature ===
+          getPhase2CProjectSignature() &&
+        Boolean(state.ignoreChrome) ===
+          Boolean(
+            batchIgnoreBrowserChrome.checked
+          ) &&
+        Number(state.totalPairs) ===
+          Math.max(
+            0,
+            projectImages.length - 1
+          )
+      );
+    }
+
+
+    async function savePhase2CBatchState() {
+      if (!phase2cState) {
+        await saveSetting(
+          PHASE2C_STATE_KEY,
+          null
+        );
+        return;
+      }
+
+      phase2cState.updatedAt =
+        Date.now();
+
+      await saveSetting(
+        PHASE2C_STATE_KEY,
+        phase2cState
+      );
+    }
+
+
+    async function loadPhase2CBatchState() {
+      try {
+        const saved =
+          await getSetting(
+            PHASE2C_STATE_KEY
+          );
+
+        phase2cState =
+          saved && saved.value
+            ? saved.value
+            : null;
+      }
+      catch (error) {
+        console.warn(
+          "讀取 Phase 2-C 批次狀態失敗：",
+          error
+        );
+
+        phase2cState = null;
+      }
+
+      renderPhase2CBatchState();
+    }
+
+
+    function getPhase2CResultByPairIndex(
+      pairIndex
+    ) {
+      if (
+        !phase2cState ||
+        !Array.isArray(
+          phase2cState.results
+        )
+      ) {
+        return null;
+      }
+
+      return phase2cState.results.find(
+        item =>
+          Number(item.pairIndex) ===
+          Number(pairIndex)
+      ) || null;
+    }
+
+
+    function upsertPhase2CResult(
+      result
+    ) {
+      if (!phase2cState) {
+        return;
+      }
+
+      if (
+        !Array.isArray(
+          phase2cState.results
+        )
+      ) {
+        phase2cState.results = [];
+      }
+
+      const existingIndex =
+        phase2cState.results.findIndex(
+          item =>
+            Number(item.pairIndex) ===
+            Number(result.pairIndex)
+        );
+
+      if (existingIndex >= 0) {
+        phase2cState.results[
+          existingIndex
+        ] = result;
+      }
+      else {
+        phase2cState.results.push(
+          result
+        );
+      }
+
+      phase2cState.results.sort(
+        (a, b) =>
+          Number(a.pairIndex) -
+          Number(b.pairIndex)
+      );
+    }
+
+
+    function getPhase2CStatusDisplay(
+      result
+    ) {
+      const status =
+        result && result.status
+          ? result.status
+          : "pending";
+
+      const map = {
+        confirmed: {
+          text: "✅ 已人工確認",
+          className:
+            "batch-status-confirmed"
+        },
+        high: {
+          text: "✅ 高信心候選",
+          className:
+            "batch-status-high"
+        },
+        medium: {
+          text: "⚠️ 中信心",
+          className:
+            "batch-status-medium"
+        },
+        low: {
+          text: "❗低信心",
+          className:
+            "batch-status-low"
+        },
+        duplicate: {
+          text: "♻ 完全重複",
+          className:
+            "batch-status-duplicate"
+        },
+        rejected: {
+          text: "✕ 已人工拒絕",
+          className:
+            "batch-status-rejected"
+        },
+        none: {
+          text: "❗找不到候選",
+          className:
+            "batch-status-low"
+        },
+        error: {
+          text: "❌ 分析錯誤",
+          className:
+            "batch-status-error"
+        },
+        pending: {
+          text: "⏳ 尚未分析",
+          className:
+            "batch-status-pending"
+        }
+      };
+
+      return map[status] ||
+        map.pending;
+    }
+
+
+    function getPhase2CCounts() {
+      const counts = {
+        confirmed: 0,
+        high: 0,
+        review: 0,
+        excluded: 0
+      };
+
+      if (
+        !phase2cState ||
+        !Array.isArray(
+          phase2cState.results
+        )
+      ) {
+        return counts;
+      }
+
+      for (
+        const result of
+        phase2cState.results
+      ) {
+        if (
+          result.status ===
+          "confirmed"
+        ) {
+          counts.confirmed++;
+        }
+        else if (
+          result.status === "high"
+        ) {
+          counts.high++;
+        }
+        else if (
+          result.status ===
+            "duplicate" ||
+          result.status ===
+            "rejected"
+        ) {
+          counts.excluded++;
+        }
+        else {
+          counts.review++;
+        }
+      }
+
+      return counts;
+    }
+
+
+    function renderPhase2CBatchState() {
+      const totalPairs =
+        Math.max(
+          0,
+          projectImages.length - 1
+        );
+
+      const stateMatches =
+        phase2CStateMatchesCurrentProject();
+
+      if (!phase2cState) {
+        batchProgressText.textContent =
+          totalPairs > 0
+            ? `尚未開始｜目前共有 ${totalPairs} 組相鄰截圖`
+            : "至少需要 2 張截圖";
+
+        batchProgressFill.style.width =
+          "0%";
+
+        batchStartButton.textContent =
+          "▶ 開始整批分析";
+
+        batchConfirmedCount.textContent =
+          "0";
+        batchHighCount.textContent =
+          "0";
+        batchReviewCount.textContent =
+          "0";
+        batchExcludedCount.textContent =
+          "0";
+
+        renderPhase2CPairList(
+          null,
+          totalPairs
+        );
+
+        return;
+      }
+
+      if (!stateMatches) {
+        batchProgressText.textContent =
+          "⚠️ 截圖數量、順序或分析模式已變更；按開始會建立新的批次分析。";
+
+        batchProgressFill.style.width =
+          "0%";
+
+        batchStartButton.textContent =
+          "▶ 依目前順序重新開始";
+
+        batchConfirmedCount.textContent =
+          "0";
+        batchHighCount.textContent =
+          "0";
+        batchReviewCount.textContent =
+          "0";
+        batchExcludedCount.textContent =
+          "0";
+
+        renderPhase2CPairList(
+          null,
+          totalPairs
+        );
+
+        return;
+      }
+
+      const completedCount =
+        Math.min(
+          Number(
+            phase2cState.nextPairIndex
+          ) || 0,
+          totalPairs
+        );
+
+      const percentage =
+        totalPairs > 0
+          ? (
+              completedCount /
+              totalPairs
+            ) * 100
+          : 0;
+
+      batchProgressFill.style.width =
+        `${percentage.toFixed(1)}%`;
+
+      if (phase2cRunning) {
+        batchProgressText.textContent =
+          `正在分析 ${completedCount} / ${totalPairs} 組…`;
+      }
+      else if (
+        phase2cState.completed ||
+        completedCount >= totalPairs
+      ) {
+        batchProgressText.textContent =
+          `✅ 整批分析完成：${completedCount} / ${totalPairs} 組`;
+      }
+      else if (
+        phase2cState.stopped
+      ) {
+        batchProgressText.textContent =
+          `⏸ 已停止：完成 ${completedCount} / ${totalPairs} 組，可繼續`;
+      }
+      else {
+        batchProgressText.textContent =
+          `已保存進度：${completedCount} / ${totalPairs} 組`;
+      }
+
+      if (
+        phase2cState.completed ||
+        completedCount >= totalPairs
+      ) {
+        batchStartButton.textContent =
+          "↻ 重新分析全部";
+      }
+      else if (
+        completedCount > 0
+      ) {
+        batchStartButton.textContent =
+          "▶ 繼續整批分析";
+      }
+      else {
+        batchStartButton.textContent =
+          "▶ 開始整批分析";
+      }
+
+      const counts =
+        getPhase2CCounts();
+
+      batchConfirmedCount.textContent =
+        String(counts.confirmed);
+      batchHighCount.textContent =
+        String(counts.high);
+      batchReviewCount.textContent =
+        String(counts.review);
+      batchExcludedCount.textContent =
+        String(counts.excluded);
+
+      renderPhase2CPairList(
+        phase2cState,
+        totalPairs
+      );
+    }
+
+
+    function renderPhase2CPairList(
+      state,
+      totalPairs
+    ) {
+      batchResultList.innerHTML = "";
+
+      if (totalPairs <= 0) {
+        return;
+      }
+
+      for (
+        let pairIndex = 0;
+        pairIndex < totalPairs;
+        pairIndex++
+      ) {
+        const a =
+          projectImages[pairIndex];
+
+        const b =
+          projectImages[pairIndex + 1];
+
+        if (!a || !b) {
+          continue;
+        }
+
+        const result =
+          state &&
+          Array.isArray(state.results)
+            ? state.results.find(
+                item =>
+                  Number(
+                    item.pairIndex
+                  ) === pairIndex
+              ) || null
+            : null;
+
+        const statusDisplay =
+          getPhase2CStatusDisplay(
+            result
+          );
+
+        const card =
+          document.createElement("div");
+
+        card.className =
+          "batch-pair-card";
+
+        const top =
+          document.createElement("div");
+
+        top.className =
+          "batch-pair-top";
+
+        const name =
+          document.createElement("div");
+
+        name.className =
+          "batch-pair-name";
+
+        name.textContent =
+          `第 ${pairIndex + 1} 張 → 第 ${pairIndex + 2} 張`;
+
+        const badge =
+          document.createElement("div");
+
+        badge.className =
+          "batch-status-badge " +
+          statusDisplay.className;
+
+        badge.textContent =
+          statusDisplay.text;
+
+        top.appendChild(name);
+        top.appendChild(badge);
+
+        const meta =
+          document.createElement("div");
+
+        meta.className =
+          "batch-pair-meta";
+
+        if (!result) {
+          meta.textContent =
+            "尚未分析";
+        }
+        else if (
+          result.status ===
+          "duplicate"
+        ) {
+          meta.textContent =
+            "兩張檔案指紋完全相同，應在重複圖片階段處理。";
+        }
+        else if (
+          result.status ===
+          "rejected"
+        ) {
+          meta.textContent =
+            "這一組已由人工標記為不是正確重疊。";
+        }
+        else if (
+          result.status ===
+          "error"
+        ) {
+          meta.textContent =
+            `錯誤：${result.message || "未知錯誤"}`;
+        }
+        else if (
+          result.status === "none"
+        ) {
+          meta.textContent =
+            "找不到可用的重疊候選，建議人工檢查圖片順序。";
+        }
+        else {
+          const overlapText =
+            Number.isFinite(
+              Number(
+                result.overlapPixels
+              )
+            )
+              ? `${Math.round(result.overlapPixels)} px`
+              : "—";
+
+          const similarityText =
+            Number.isFinite(
+              Number(result.similarity)
+            )
+              ? `${Number(result.similarity).toFixed(1)}%`
+              : "—";
+
+          meta.innerHTML =
+            `重疊：<strong>${overlapText}</strong>` +
+            `｜相似度：<strong>${similarityText}</strong>` +
+            (
+              result.widthWarning
+                ? "<br>⚠️ 兩張原圖寬度差異較大"
+                : ""
+            ) +
+            (
+              result.status ===
+              "confirmed"
+                ? "<br>此值來自 Phase 2-B 人工確認，不會被自動分析覆蓋。"
+                : ""
+            );
+        }
+
+        card.appendChild(top);
+        card.appendChild(meta);
+
+        if (
+          result &&
+          result.status !==
+            "duplicate"
+        ) {
+          const reviewButton =
+            document.createElement(
+              "button"
+            );
+
+          reviewButton.className =
+            "secondary-button";
+
+          reviewButton.textContent =
+            result.status ===
+              "confirmed"
+              ? "查看／重新人工確認"
+              : "人工確認這一組";
+
+          reviewButton.onclick =
+            function() {
+              openPhase2CPairForReview(
+                pairIndex
+              );
+            };
+
+          card.appendChild(
+            reviewButton
+          );
+        }
+
+        batchResultList.appendChild(
+          card
+        );
+      }
+    }
+
+
+    async function getPhase2CCachedFeatures(
+      item,
+      ignoreChrome
+    ) {
+      const key =
+        `${ignoreChrome ? 1 : 0}:${item.id}`;
+
+      if (
+        phase2cFeatureCache.has(key)
+      ) {
+        return phase2cFeatureCache.get(
+          key
+        );
+      }
+
+      const features =
+        await buildOverlapFeatures(
+          item,
+          ignoreChrome
+        );
+
+      phase2cFeatureCache.set(
+        key,
+        features
+      );
+
+      return features;
+    }
+
+
+    async function analyzePhase2CPair(
+      pairIndex,
+      ignoreChrome
+    ) {
+      const a =
+        projectImages[pairIndex];
+
+      const b =
+        projectImages[pairIndex + 1];
+
+      if (!a || !b) {
+        return {
+          pairIndex: pairIndex,
+          status: "error",
+          message:
+            "找不到相鄰截圖",
+          analyzedAt: Date.now()
+        };
+      }
+
+      const savedSeam =
+        await getSetting(
+          seamSettingKey(
+            a.id,
+            b.id
+          )
+        );
+
+      if (
+        savedSeam &&
+        savedSeam.value &&
+        savedSeam.value.ignoreChrome ===
+          Boolean(ignoreChrome)
+      ) {
+        if (
+          savedSeam.value.status ===
+          "confirmed"
+        ) {
+          return {
+            pairIndex: pairIndex,
+            aId: a.id,
+            bId: b.id,
+            status: "confirmed",
+            confidenceLevel:
+              savedSeam.value
+                .confidenceLevel ||
+              "人工確認",
+            overlapPixels:
+              Number(
+                savedSeam.value
+                  .overlapPixels
+              ) || 0,
+            automaticPixels:
+              Number(
+                savedSeam.value
+                  .automaticPixels
+              ) || null,
+            similarity:
+              Number(
+                savedSeam.value
+                  .similarity
+              ) || null,
+            ignoreChrome:
+              Boolean(ignoreChrome),
+            analyzedAt: Date.now()
+          };
+        }
+
+        if (
+          savedSeam.value.status ===
+          "rejected"
+        ) {
+          return {
+            pairIndex: pairIndex,
+            aId: a.id,
+            bId: b.id,
+            status: "rejected",
+            ignoreChrome:
+              Boolean(ignoreChrome),
+            analyzedAt: Date.now()
+          };
+        }
+      }
+
+      if (
+        a.fingerprint &&
+        b.fingerprint &&
+        a.fingerprint ===
+          b.fingerprint
+      ) {
+        return {
+          pairIndex: pairIndex,
+          aId: a.id,
+          bId: b.id,
+          status: "duplicate",
+          ignoreChrome:
+            Boolean(ignoreChrome),
+          analyzedAt: Date.now()
+        };
+      }
+
+      try {
+        const [
+          featuresA,
+          featuresB
+        ] =
+          await Promise.all([
+            getPhase2CCachedFeatures(
+              a,
+              ignoreChrome
+            ),
+            getPhase2CCachedFeatures(
+              b,
+              ignoreChrome
+            )
+          ]);
+
+        const widthRatio =
+          (
+            Number(a.width) > 0 &&
+            Number(b.width) > 0
+          )
+            ? Math.min(
+                Number(a.width),
+                Number(b.width)
+              ) /
+              Math.max(
+                Number(a.width),
+                Number(b.width)
+              )
+            : 1;
+
+        const overlapResult =
+          findBestOverlap(
+            featuresA,
+            featuresB
+          );
+
+        if (!overlapResult.best) {
+          return {
+            pairIndex: pairIndex,
+            aId: a.id,
+            bId: b.id,
+            status: "none",
+            widthRatio: widthRatio,
+            widthWarning:
+              widthRatio < 0.90,
+            ignoreChrome:
+              Boolean(ignoreChrome),
+            analyzedAt: Date.now()
+          };
+        }
+
+        const best =
+          overlapResult.best;
+
+        const second =
+          overlapResult.second;
+
+        let confidence =
+          classifyOverlapConfidence(
+            best,
+            second
+          );
+
+        const pxPerRowA =
+          featuresA
+            .originalContentHeight /
+          featuresA.analysisHeight;
+
+        const pxPerRowB =
+          featuresB
+            .originalContentHeight /
+          featuresB.analysisHeight;
+
+        const estimatedPixels =
+          Math.round(
+            best.overlapRows *
+            (
+              pxPerRowA +
+              pxPerRowB
+            ) /
+            2
+          );
+
+        const similarity =
+          Math.max(
+            0,
+            Math.min(
+              100,
+              (1 - best.score) * 100
+            )
+          );
+
+        const margin =
+          second
+            ? Math.max(
+                0,
+                (
+                  second.score -
+                  best.score
+                ) * 100
+              )
+            : 0;
+
+        /*
+          寬度差異大時，即使演算法給高信心，
+          也降為「低」以強制人工確認。
+        */
+        let status =
+          confidence.level === "高"
+            ? "high"
+            : (
+                confidence.level ===
+                  "中"
+                  ? "medium"
+                  : "low"
+              );
+
+        if (widthRatio < 0.90) {
+          status = "low";
+          confidence = {
+            ...confidence,
+            level: "低"
+          };
+        }
+
+        return {
+          pairIndex: pairIndex,
+          aId: a.id,
+          bId: b.id,
+          status: status,
+          confidenceLevel:
+            confidence.level,
+          overlapPixels:
+            estimatedPixels,
+          similarity: similarity,
+          candidateMargin: margin,
+          widthRatio: widthRatio,
+          widthWarning:
+            widthRatio < 0.90,
+          ignoreChrome:
+            Boolean(ignoreChrome),
+          analyzedAt: Date.now()
+        };
+      }
+      catch (error) {
+        console.error(
+          "Phase 2-C pair error",
+          pairIndex,
+          error
+        );
+
+        return {
+          pairIndex: pairIndex,
+          aId: a.id,
+          bId: b.id,
+          status: "error",
+          message:
+            String(
+              error.message ||
+              error
+            ),
+          ignoreChrome:
+            Boolean(ignoreChrome),
+          analyzedAt: Date.now()
+        };
+      }
+    }
+
+
+    async function startOrResumeBatchOverlap() {
+      if (projectImages.length < 2) {
+        alert(
+          "至少需要 2 張截圖才能進行整批分析。"
+        );
+        return;
+      }
+
+      if (phase2cRunning) {
+        return;
+      }
+
+      const ignoreChrome =
+        Boolean(
+          batchIgnoreBrowserChrome.checked
+        );
+
+      const totalPairs =
+        projectImages.length - 1;
+
+      const stateMatches =
+        phase2CStateMatchesCurrentProject();
+
+      if (
+        phase2cState &&
+        stateMatches &&
+        (
+          phase2cState.completed ||
+          Number(
+            phase2cState.nextPairIndex
+          ) >= totalPairs
+        )
+      ) {
+        const restart =
+          confirm(
+            "這一批已分析完成。要重新分析全部相鄰截圖嗎？已人工確認的接縫仍會保留。"
+          );
+
+        if (!restart) {
+          return;
+        }
+
+        phase2cState =
+          createEmptyPhase2CState(
+            ignoreChrome
+          );
+
+        phase2cFeatureCache.clear();
+
+        await savePhase2CBatchState();
+      }
+      else if (!stateMatches) {
+        phase2cState =
+          createEmptyPhase2CState(
+            ignoreChrome
+          );
+
+        phase2cFeatureCache.clear();
+
+        await savePhase2CBatchState();
+      }
+
+      if (!phase2cState) {
+        phase2cState =
+          createEmptyPhase2CState(
+            ignoreChrome
+          );
+
+        await savePhase2CBatchState();
+      }
+
+      phase2cRunning = true;
+      phase2cStopRequested = false;
+      phase2cState.stopped = false;
+      phase2cState.completed = false;
+
+      batchStartButton.disabled = true;
+      batchStopButton.disabled = false;
+      batchIgnoreBrowserChrome.disabled = true;
+
+      renderPhase2CBatchState();
+
+      try {
+        let pairIndex =
+          Math.max(
+            0,
+            Number(
+              phase2cState.nextPairIndex
+            ) || 0
+          );
+
+        for (
+          ;
+          pairIndex < totalPairs;
+          pairIndex++
+        ) {
+          if (phase2cStopRequested) {
+            break;
+          }
+
+          batchProgressText.textContent =
+            `正在分析第 ${pairIndex + 1} / ${totalPairs} 組：` +
+            `第 ${pairIndex + 1} 張 → 第 ${pairIndex + 2} 張`;
+
+          const result =
+            await analyzePhase2CPair(
+              pairIndex,
+              ignoreChrome
+            );
+
+          upsertPhase2CResult(
+            result
+          );
+
+          phase2cState.nextPairIndex =
+            pairIndex + 1;
+
+          await savePhase2CBatchState();
+
+          renderPhase2CBatchState();
+
+          /*
+            每完成一組就讓出主執行緒，
+            降低 iPhone 長時間凍結的風險。
+          */
+          await new Promise(
+            resolve =>
+              setTimeout(
+                resolve,
+                180
+              )
+          );
+        }
+
+        if (
+          phase2cStopRequested &&
+          Number(
+            phase2cState.nextPairIndex
+          ) < totalPairs
+        ) {
+          phase2cState.stopped = true;
+          phase2cState.completed = false;
+        }
+        else {
+          phase2cState.stopped = false;
+          phase2cState.completed = true;
+          phase2cState.nextPairIndex =
+            totalPairs;
+        }
+
+        await savePhase2CBatchState();
+      }
+      finally {
+        phase2cRunning = false;
+        phase2cStopRequested = false;
+
+        batchStartButton.disabled = false;
+        batchStopButton.disabled = true;
+        batchStopButton.textContent =
+          "■ 停止";
+        batchIgnoreBrowserChrome.disabled = false;
+
+        renderPhase2CBatchState();
+      }
+    }
+
+
+    function stopBatchOverlap() {
+      if (!phase2cRunning) {
+        return;
+      }
+
+      phase2cStopRequested = true;
+
+      batchStopButton.disabled = true;
+      batchStopButton.textContent =
+        "正在停止…";
+
+      batchProgressText.textContent =
+        "收到停止要求；完成目前這一組後停止。";
+    }
+
+
+    async function clearPhase2CBatchResults() {
+      if (phase2cRunning) {
+        alert(
+          "請先停止目前的整批分析。"
+        );
+        return;
+      }
+
+      const confirmed =
+        confirm(
+          "確定要清除 Phase 2-C 批次分析結果嗎？Phase 2-B 已人工確認的接縫不會被刪除。"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      phase2cState = null;
+      phase2cFeatureCache.clear();
+
+      await savePhase2CBatchState();
+
+      renderPhase2CBatchState();
+    }
+
+
+    async function openPhase2CPairForReview(
+      pairIndex
+    ) {
+      const a =
+        projectImages[pairIndex];
+
+      const b =
+        projectImages[pairIndex + 1];
+
+      if (!a || !b) {
+        alert(
+          "找不到這一組截圖。"
+        );
+        return;
+      }
+
+      const ignoreChrome =
+        phase2cState &&
+        phase2CStateMatchesCurrentProject()
+          ? Boolean(
+              phase2cState.ignoreChrome
+            )
+          : Boolean(
+              batchIgnoreBrowserChrome.checked
+            );
+
+      overlapASelect.value =
+        String(a.id);
+
+      overlapBSelect.value =
+        String(b.id);
+
+      ignoreBrowserChrome.checked =
+        ignoreChrome;
+
+      resetSeamReview(
+        "正在開啟這一組人工確認…"
+      );
+
+      overlapPanel.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+      await new Promise(
+        resolve =>
+          setTimeout(
+            resolve,
+            250
+          )
+      );
+
+      await runOverlapPrototype();
+    }
+
+
+    async function refreshPhase2CResultForCurrentSeamPair() {
+      if (
+        !phase2cState ||
+        !phase2CStateMatchesCurrentProject() ||
+        !lastOverlapCandidate
+      ) {
+        return;
+      }
+
+      const pairIndex =
+        projectImages.findIndex(
+          item =>
+            Number(item.id) ===
+            Number(
+              lastOverlapCandidate.aId
+            )
+        );
+
+      if (
+        pairIndex < 0 ||
+        pairIndex >=
+          projectImages.length - 1 ||
+        Number(
+          projectImages[
+            pairIndex + 1
+          ].id
+        ) !==
+          Number(
+            lastOverlapCandidate.bId
+          )
+      ) {
+        return;
+      }
+
+      const refreshed =
+        await analyzePhase2CPair(
+          pairIndex,
+          Boolean(
+            phase2cState.ignoreChrome
+          )
+        );
+
+      upsertPhase2CResult(
+        refreshed
+      );
+
+      await savePhase2CBatchState();
+
+      renderPhase2CBatchState();
+    }
+
     /*
       =========================
       Phase 2-B
@@ -4280,6 +5851,9 @@
             <br>
             原始截圖沒有被裁切或修改。
           `;
+
+
+        await refreshPhase2CResultForCurrentSeamPair();
       }
       catch (error) {
         console.error(error);
@@ -4335,6 +5909,9 @@
 
         seamReviewStatus.textContent =
           "✕ 已標記為不是正確重疊。原始截圖仍完整保留。";
+
+
+        await refreshPhase2CResultForCurrentSeamPair();
       }
       catch (error) {
         console.error(error);
