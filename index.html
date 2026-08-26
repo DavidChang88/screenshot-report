@@ -118,6 +118,105 @@
       line-height: 1.5;
     }
 
+
+    .overlap-panel {
+      margin-top: 14px;
+      padding: 16px;
+      border-radius: 14px;
+      background: #eef6ff;
+      border: 1px solid #d7e8ff;
+    }
+
+    .overlap-panel h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .overlap-panel p {
+      margin: 0 0 12px;
+      color: #5f6368;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .overlap-select-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .overlap-field label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #444;
+    }
+
+    .overlap-field select {
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 12px;
+      border: 1px solid #c8ccd0;
+      border-radius: 10px;
+      background: white;
+      color: #1d1d1f;
+      font: inherit;
+      font-size: 15px;
+    }
+
+    .overlap-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #444;
+    }
+
+    .overlap-option input {
+      width: 20px;
+      height: 20px;
+      margin: 1px 0 0;
+      flex: 0 0 auto;
+    }
+
+    #analyzeOverlapButton {
+      margin-top: 12px;
+    }
+
+    #overlapResult {
+      margin-top: 12px;
+      background: white;
+      line-height: 1.65;
+    }
+
+    .overlap-result-title {
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .overlap-result-good {
+      color: #16794a;
+    }
+
+    .overlap-result-warn {
+      color: #9a6500;
+    }
+
+    .overlap-result-bad {
+      color: #b42318;
+    }
+
+    .overlap-metrics {
+      margin-top: 8px;
+      padding: 10px;
+      border-radius: 10px;
+      background: #f5f5f7;
+      font-size: 14px;
+    }
+
     .order-help {
       margin-top: 14px;
       padding: 10px;
@@ -311,6 +410,70 @@
           預覽縮圖：等待檢查
         </div>
 
+        <div
+          id="overlapPanel"
+          class="overlap-panel"
+        >
+          <h3>
+            Phase 2-A｜兩張截圖重疊測試
+          </h3>
+
+          <p>
+            請選擇同一篇文章中「前一張」與「下一張」連續截圖。
+            本階段只分析，不會裁切、刪除或修改原圖。
+          </p>
+
+          <div class="overlap-select-grid">
+            <div class="overlap-field">
+              <label for="overlapASelect">
+                A｜前一張截圖
+              </label>
+              <select id="overlapASelect">
+                <option value="">
+                  尚無可選圖片
+                </option>
+              </select>
+            </div>
+
+            <div class="overlap-field">
+              <label for="overlapBSelect">
+                B｜下一張截圖
+              </label>
+              <select id="overlapBSelect">
+                <option value="">
+                  尚無可選圖片
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <label class="overlap-option">
+            <input
+              id="ignoreBrowserChrome"
+              type="checkbox"
+              checked
+            >
+            <span>
+              忽略手機截圖最上方與最下方固定列
+              （Safari／Chrome 一般建議開啟）
+            </span>
+          </label>
+
+          <button
+            id="analyzeOverlapButton"
+            onclick="runOverlapPrototype()"
+          >
+            分析這兩張的重疊
+          </button>
+
+          <div
+            id="overlapResult"
+            class="status"
+          >
+            等待選擇兩張連續截圖
+          </div>
+        </div>
+
         <div class="order-help">
           ◀ = 往前移一格　
           ▶ = 往後移一格　
@@ -337,6 +500,16 @@
     const THUMBNAIL_MAX_WIDTH = 360;
     const THUMBNAIL_JPEG_QUALITY = 0.78;
 
+    /*
+      Phase 2-A：小尺寸重疊分析設定。
+      不建立超長圖，也不修改原圖。
+    */
+    const OVERLAP_ANALYSIS_WIDTH = 144;
+    const OVERLAP_BLOCKS = 24;
+    const OVERLAP_TOP_IGNORE = 0.08;
+    const OVERLAP_BOTTOM_IGNORE = 0.12;
+    const OVERLAP_SIDE_IGNORE = 0.05;
+
     let db = null;
     let projectImages = [];
     let batchCount = 0;
@@ -353,6 +526,22 @@
     const batchInfo = document.getElementById("batchInfo");
     const qualitySummary = document.getElementById("qualitySummary");
     const thumbnailSummary = document.getElementById("thumbnailSummary");
+
+    const overlapASelect =
+      document.getElementById("overlapASelect");
+
+    const overlapBSelect =
+      document.getElementById("overlapBSelect");
+
+    const ignoreBrowserChrome =
+      document.getElementById("ignoreBrowserChrome");
+
+    const analyzeOverlapButton =
+      document.getElementById("analyzeOverlapButton");
+
+    const overlapResult =
+      document.getElementById("overlapResult");
+
     const previewGrid = document.getElementById("previewGrid");
     const storageStatus = document.getElementById("storageStatus");
     const addButton = document.getElementById("addButton");
@@ -1175,6 +1364,7 @@
       );
 
       updateThumbnailSummary();
+      updateOverlapSelectors();
     }
 
 
@@ -2160,6 +2350,915 @@
         `需注意 ${warningCount} 張｜` +
         `可能重複 ${duplicateIds.size} 張`;
     }
+
+
+    /*
+      =========================
+      Phase 2-A
+      兩張相鄰截圖重疊偵測原型
+      =========================
+    */
+
+    function getProjectImageById(idValue) {
+      const id = Number(idValue);
+
+      return projectImages.find(
+        item => Number(item.id) === id
+      ) || null;
+    }
+
+
+    function updateOverlapSelectors() {
+      const oldA = overlapASelect.value;
+      const oldB = overlapBSelect.value;
+
+      overlapASelect.innerHTML = "";
+      overlapBSelect.innerHTML = "";
+
+      if (projectImages.length < 2) {
+        const optionA =
+          document.createElement("option");
+
+        optionA.value = "";
+        optionA.textContent =
+          "至少需要 2 張截圖";
+
+        const optionB =
+          optionA.cloneNode(true);
+
+        overlapASelect.appendChild(optionA);
+        overlapBSelect.appendChild(optionB);
+
+        overlapASelect.disabled = true;
+        overlapBSelect.disabled = true;
+        analyzeOverlapButton.disabled = true;
+
+        overlapResult.textContent =
+          "至少需要 2 張截圖才能測試重疊";
+
+        return;
+      }
+
+      overlapASelect.disabled = false;
+      overlapBSelect.disabled = false;
+      analyzeOverlapButton.disabled = false;
+
+      projectImages.forEach(
+        (item, index) => {
+          const label =
+            `第 ${index + 1} 張｜` +
+            `${item.width || "?"}×` +
+            `${item.height || "?"}`;
+
+          const optionA =
+            document.createElement("option");
+
+          optionA.value = String(item.id);
+          optionA.textContent = label;
+
+          const optionB =
+            optionA.cloneNode(true);
+
+          overlapASelect.appendChild(optionA);
+          overlapBSelect.appendChild(optionB);
+        }
+      );
+
+      const validIds =
+        new Set(
+          projectImages.map(
+            item => String(item.id)
+          )
+        );
+
+      if (
+        validIds.has(oldA) &&
+        validIds.has(oldB) &&
+        oldA !== oldB
+      ) {
+        overlapASelect.value = oldA;
+        overlapBSelect.value = oldB;
+        return;
+      }
+
+      /*
+        預設選最後兩張。
+        若使用者剛加入一組測試圖，
+        通常可以直接按「分析」。
+      */
+      const a =
+        projectImages[
+          projectImages.length - 2
+        ];
+
+      const b =
+        projectImages[
+          projectImages.length - 1
+        ];
+
+      overlapASelect.value =
+        String(a.id);
+
+      overlapBSelect.value =
+        String(b.id);
+
+      overlapResult.textContent =
+        `已預選第 ${projectImages.length - 1} 張` +
+        `與第 ${projectImages.length} 張，等待分析`;
+    }
+
+
+    async function buildOverlapFeatures(
+      item,
+      ignoreChrome
+    ) {
+      const sourceBlob =
+        (
+          item.thumbnailBlob
+            instanceof Blob &&
+          item.thumbnailBlob.size > 0
+        )
+          ? item.thumbnailBlob
+          : getRenderableImageBlob(
+              item.blob,
+              item.type,
+              item.name
+            );
+
+      if (!(sourceBlob instanceof Blob)) {
+        throw new Error(
+          "找不到可分析的圖片資料"
+        );
+      }
+
+      const loaded =
+        await loadImageElementFromBlob(
+          sourceBlob,
+          sourceBlob.type,
+          item.name
+        );
+
+      const image = loaded.image;
+
+      try {
+        const scale =
+          Math.min(
+            1,
+            OVERLAP_ANALYSIS_WIDTH /
+              image.naturalWidth
+          );
+
+        const width =
+          Math.max(
+            32,
+            Math.round(
+              image.naturalWidth * scale
+            )
+          );
+
+        const height =
+          Math.max(
+            32,
+            Math.round(
+              image.naturalHeight * scale
+            )
+          );
+
+        const canvas =
+          document.createElement("canvas");
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const context =
+          canvas.getContext(
+            "2d",
+            {
+              willReadFrequently: true
+            }
+          );
+
+        if (!context) {
+          throw new Error(
+            "無法建立影像分析 Canvas"
+          );
+        }
+
+        context.drawImage(
+          image,
+          0,
+          0,
+          width,
+          height
+        );
+
+        const rgba =
+          context.getImageData(
+            0,
+            0,
+            width,
+            height
+          ).data;
+
+        const topFraction =
+          ignoreChrome
+            ? OVERLAP_TOP_IGNORE
+            : 0;
+
+        const bottomFraction =
+          ignoreChrome
+            ? OVERLAP_BOTTOM_IGNORE
+            : 0;
+
+        const startY =
+          Math.max(
+            0,
+            Math.floor(
+              height * topFraction
+            )
+          );
+
+        const endY =
+          Math.min(
+            height,
+            Math.ceil(
+              height *
+              (1 - bottomFraction)
+            )
+          );
+
+        const startX =
+          Math.max(
+            0,
+            Math.floor(
+              width *
+              OVERLAP_SIDE_IGNORE
+            )
+          );
+
+        const endX =
+          Math.min(
+            width,
+            Math.ceil(
+              width *
+              (1 - OVERLAP_SIDE_IGNORE)
+            )
+          );
+
+        const usableWidth =
+          Math.max(
+            1,
+            endX - startX
+          );
+
+        const blockCount =
+          Math.min(
+            OVERLAP_BLOCKS,
+            usableWidth
+          );
+
+        const rows = [];
+
+        for (
+          let y = startY;
+          y < endY;
+          y++
+        ) {
+          const row =
+            new Uint8Array(
+              blockCount
+            );
+
+          for (
+            let block = 0;
+            block < blockCount;
+            block++
+          ) {
+            const x0 =
+              startX +
+              Math.floor(
+                usableWidth *
+                block /
+                blockCount
+              );
+
+            const x1 =
+              startX +
+              Math.floor(
+                usableWidth *
+                (block + 1) /
+                blockCount
+              );
+
+            let sum = 0;
+            let count = 0;
+
+            for (
+              let x = x0;
+              x < Math.max(
+                x0 + 1,
+                x1
+              );
+              x++
+            ) {
+              const safeX =
+                Math.min(
+                  x,
+                  endX - 1
+                );
+
+              const offset =
+                (
+                  y * width +
+                  safeX
+                ) * 4;
+
+              const gray =
+                (
+                  rgba[offset] * 77 +
+                  rgba[offset + 1] * 150 +
+                  rgba[offset + 2] * 29
+                ) >> 8;
+
+              sum += gray;
+              count++;
+            }
+
+            row[block] =
+              count > 0
+                ? Math.round(
+                    sum / count
+                  )
+                : 0;
+          }
+
+          rows.push(row);
+        }
+
+        const gradients =
+          rows.map(
+            () =>
+              new Uint8Array(
+                blockCount
+              )
+          );
+
+        for (
+          let y = 1;
+          y < rows.length;
+          y++
+        ) {
+          for (
+            let block = 0;
+            block < blockCount;
+            block++
+          ) {
+            gradients[y][block] =
+              Math.abs(
+                rows[y][block] -
+                rows[y - 1][block]
+              );
+          }
+        }
+
+        canvas.width = 1;
+        canvas.height = 1;
+
+        const originalHeight =
+          Number(
+            item.height ||
+            image.naturalHeight
+          );
+
+        return {
+          rows: rows,
+          gradients: gradients,
+          blockCount: blockCount,
+
+          originalContentHeight:
+            originalHeight *
+            (
+              1 -
+              topFraction -
+              bottomFraction
+            ),
+
+          analysisHeight:
+            rows.length
+        };
+      }
+      finally {
+        URL.revokeObjectURL(
+          loaded.url
+        );
+      }
+    }
+
+
+    function evaluateOverlapCandidate(
+      a,
+      b,
+      overlapRows,
+      maxOverlapRows
+    ) {
+      let rawDifference = 0;
+      let gradientDifference = 0;
+      let gradientEnergy = 0;
+      let count = 0;
+
+      const blocks =
+        Math.min(
+          a.blockCount,
+          b.blockCount
+        );
+
+      for (
+        let y = 0;
+        y < overlapRows;
+        y++
+      ) {
+        const aIndex =
+          a.rows.length -
+          overlapRows +
+          y;
+
+        const bIndex = y;
+
+        for (
+          let block = 0;
+          block < blocks;
+          block++
+        ) {
+          const aRaw =
+            a.rows[aIndex][block];
+
+          const bRaw =
+            b.rows[bIndex][block];
+
+          const aGradient =
+            a.gradients[aIndex][block];
+
+          const bGradient =
+            b.gradients[bIndex][block];
+
+          rawDifference +=
+            Math.abs(
+              aRaw - bRaw
+            );
+
+          gradientDifference +=
+            Math.abs(
+              aGradient -
+              bGradient
+            );
+
+          gradientEnergy +=
+            (
+              aGradient +
+              bGradient
+            ) / 2;
+
+          count++;
+        }
+      }
+
+      if (count === 0) {
+        return null;
+      }
+
+      const rawMae =
+        rawDifference /
+        count /
+        255;
+
+      const gradientMae =
+        gradientDifference /
+        count /
+        255;
+
+      const information =
+        gradientEnergy /
+        count /
+        255;
+
+      /*
+        邊緣特徵權重較高，
+        避免大片白底造成假重疊。
+      */
+      let score =
+        rawMae * 0.38 +
+        gradientMae * 0.62;
+
+      const minimumInformation =
+        0.012;
+
+      if (
+        information <
+        minimumInformation
+      ) {
+        score +=
+          (
+            minimumInformation -
+            information
+          ) * 2.5;
+      }
+
+      const evidenceRatio =
+        overlapRows /
+        maxOverlapRows;
+
+      score +=
+        (1 - evidenceRatio) *
+        0.008;
+
+      return {
+        overlapRows: overlapRows,
+        score: score,
+        information: information
+      };
+    }
+
+
+    function findBestOverlap(a, b) {
+      const minHeight =
+        Math.min(
+          a.rows.length,
+          b.rows.length
+        );
+
+      const minOverlap =
+        Math.max(
+          18,
+          Math.round(
+            minHeight * 0.10
+          )
+        );
+
+      const maxOverlap =
+        Math.max(
+          minOverlap,
+          Math.round(
+            minHeight * 0.85
+          )
+        );
+
+      const candidates = [];
+
+      for (
+        let overlap = minOverlap;
+        overlap <= maxOverlap;
+        overlap += 2
+      ) {
+        const result =
+          evaluateOverlapCandidate(
+            a,
+            b,
+            overlap,
+            maxOverlap
+          );
+
+        if (result) {
+          candidates.push(result);
+        }
+      }
+
+      candidates.sort(
+        (left, right) =>
+          left.score -
+          right.score
+      );
+
+      const best =
+        candidates[0] || null;
+
+      if (!best) {
+        return {
+          best: null,
+          second: null
+        };
+      }
+
+      const second =
+        candidates.find(
+          item =>
+            Math.abs(
+              item.overlapRows -
+              best.overlapRows
+            ) >= 10
+        ) || null;
+
+      return {
+        best: best,
+        second: second
+      };
+    }
+
+
+    function classifyOverlapConfidence(
+      best,
+      second
+    ) {
+      if (!best) {
+        return {
+          level: "無",
+          className:
+            "overlap-result-bad",
+          recommendation:
+            "找不到可用的重疊候選"
+        };
+      }
+
+      const margin =
+        second
+          ? second.score -
+            best.score
+          : 0;
+
+      if (
+        best.score <= 0.085 &&
+        margin >= 0.010 &&
+        best.information >= 0.010
+      ) {
+        return {
+          level: "高",
+          className:
+            "overlap-result-good",
+          recommendation:
+            "可作為自動拼接候選"
+        };
+      }
+
+      if (
+        best.score <= 0.16 &&
+        margin >= 0.004
+      ) {
+        return {
+          level: "中",
+          className:
+            "overlap-result-warn",
+          recommendation:
+            "偵測到候選，但建議人工確認"
+        };
+      }
+
+      return {
+        level: "低",
+        className:
+          "overlap-result-bad",
+        recommendation:
+          "目前不建議自動拼接，請確認是否為真正連續截圖"
+      };
+    }
+
+
+    async function runOverlapPrototype() {
+      const a =
+        getProjectImageById(
+          overlapASelect.value
+        );
+
+      const b =
+        getProjectImageById(
+          overlapBSelect.value
+        );
+
+      if (!a || !b) {
+        alert(
+          "請先選擇兩張截圖。"
+        );
+        return;
+      }
+
+      if (
+        Number(a.id) ===
+        Number(b.id)
+      ) {
+        alert(
+          "A 與 B 不能選同一張截圖。"
+        );
+        return;
+      }
+
+      const aIndex =
+        projectImages.indexOf(a);
+
+      const bIndex =
+        projectImages.indexOf(b);
+
+      if (
+        a.fingerprint &&
+        b.fingerprint &&
+        a.fingerprint ===
+          b.fingerprint
+      ) {
+        overlapResult.innerHTML =
+          `
+            <div class="overlap-result-title overlap-result-warn">
+              ⚠️ 這兩張是相同檔案
+            </div>
+
+            請改選真正「前後連續、但不是完全相同」的兩張網站截圖。
+            完全重複檔案應在前面的重複檢查階段處理。
+          `;
+        return;
+      }
+
+      analyzeOverlapButton.disabled =
+        true;
+
+      analyzeOverlapButton.textContent =
+        "正在分析…";
+
+      overlapResult.textContent =
+        `正在分析第 ${aIndex + 1} 張` +
+        ` → 第 ${bIndex + 1} 張…`;
+
+      try {
+        const ignoreChrome =
+          ignoreBrowserChrome.checked;
+
+        const [
+          featuresA,
+          featuresB
+        ] =
+          await Promise.all([
+            buildOverlapFeatures(
+              a,
+              ignoreChrome
+            ),
+            buildOverlapFeatures(
+              b,
+              ignoreChrome
+            )
+          ]);
+
+        const widthRatio =
+          (
+            Number(a.width) > 0 &&
+            Number(b.width) > 0
+          )
+            ? Math.min(
+                Number(a.width),
+                Number(b.width)
+              ) /
+              Math.max(
+                Number(a.width),
+                Number(b.width)
+              )
+            : 1;
+
+        const result =
+          findBestOverlap(
+            featuresA,
+            featuresB
+          );
+
+        if (!result.best) {
+          overlapResult.innerHTML =
+            `
+              <div class="overlap-result-title overlap-result-bad">
+                ❌ 找不到重疊候選
+              </div>
+              請確認兩張是否為同一篇文章的連續截圖。
+            `;
+          return;
+        }
+
+        const best = result.best;
+        const second = result.second;
+
+        const confidence =
+          classifyOverlapConfidence(
+            best,
+            second
+          );
+
+        const pxPerRowA =
+          featuresA
+            .originalContentHeight /
+          featuresA.analysisHeight;
+
+        const pxPerRowB =
+          featuresB
+            .originalContentHeight /
+          featuresB.analysisHeight;
+
+        const estimatedPixels =
+          Math.round(
+            best.overlapRows *
+            (
+              pxPerRowA +
+              pxPerRowB
+            ) /
+            2
+          );
+
+        const similarity =
+          Math.max(
+            0,
+            Math.min(
+              100,
+              (1 - best.score) * 100
+            )
+          );
+
+        const margin =
+          second
+            ? Math.max(
+                0,
+                (
+                  second.score -
+                  best.score
+                ) * 100
+              )
+            : 0;
+
+        const browserModeText =
+          ignoreChrome
+            ? "已忽略上下固定列"
+            : "完整畫面分析";
+
+        const sizeWarning =
+          widthRatio < 0.90
+            ? `
+              <br>
+              ⚠️ 兩張原圖寬度差異較大，
+              本次結果只適合當候選參考。
+            `
+            : "";
+
+        const icon =
+          confidence.level === "高"
+            ? "✅"
+            : (
+                confidence.level === "中"
+                  ? "⚠️"
+                  : "❗"
+              );
+
+        overlapResult.innerHTML =
+          `
+            <div class="overlap-result-title ${confidence.className}">
+              ${icon}
+              重疊信心：${confidence.level}
+            </div>
+
+            第 ${aIndex + 1} 張
+            →
+            第 ${bIndex + 1} 張
+
+            <div class="overlap-metrics">
+              估計內容重疊：
+              <strong>${estimatedPixels} px</strong>
+              <br>
+
+              相似度分數：
+              <strong>${similarity.toFixed(1)}%</strong>
+              <br>
+
+              最佳候選優勢：
+              <strong>${margin.toFixed(2)}</strong>
+              <br>
+
+              分析模式：
+              <strong>${browserModeText}</strong>
+              <br>
+
+              建議：
+              <strong>${confidence.recommendation}</strong>
+
+              ${sizeWarning}
+            </div>
+
+            <div style="margin-top:8px;font-size:13px;color:#666;">
+              注意：此處的 px 是內容重疊估計值，
+              尚未真正裁切或拼接原圖。
+            </div>
+          `;
+      }
+      catch (error) {
+        console.error(error);
+
+        overlapResult.innerHTML =
+          `
+            <div class="overlap-result-title overlap-result-bad">
+              ❌ 重疊分析失敗
+            </div>
+            ${String(
+              error.message ||
+              error
+            )}
+          `;
+      }
+      finally {
+        analyzeOverlapButton.disabled =
+          false;
+
+        analyzeOverlapButton.textContent =
+          "分析這兩張的重疊";
+      }
+    }
+
 
     async function updateStorageInfo() {
       const storageUsage =
