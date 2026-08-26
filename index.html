@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Screenshot Report</title>
+  <title>Screenshot Report｜Phase 2-B</title>
 
   <style>
     * {
@@ -217,6 +217,144 @@
       font-size: 14px;
     }
 
+
+    /*
+      =========================
+      Phase 2-B
+      接縫預覽與人工確認
+      =========================
+    */
+
+    .seam-panel {
+      display: none;
+      margin-top: 14px;
+      padding: 16px;
+      border-radius: 14px;
+      background: #f4f0ff;
+      border: 1px solid #dfd6ff;
+    }
+
+    .seam-panel h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .seam-panel p {
+      margin: 0 0 12px;
+      color: #5f6368;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .seam-summary {
+      padding: 12px;
+      border-radius: 10px;
+      background: white;
+      line-height: 1.65;
+      font-size: 14px;
+    }
+
+    .seam-canvas-wrap {
+      margin-top: 12px;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid #d8d8dc;
+    }
+
+    .seam-preview-title {
+      padding: 10px 12px 0;
+      font-size: 13px;
+      font-weight: 800;
+      color: #444;
+    }
+
+    .seam-canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      background: white;
+    }
+
+    .seam-help {
+      padding: 8px 12px 12px;
+      color: #666;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .seam-adjust-title {
+      margin-top: 14px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .seam-adjust-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .seam-adjust-grid button {
+      margin: 0;
+      padding: 11px 5px;
+      border-radius: 9px;
+      background: #e9e9ee;
+      color: #1d1d1f;
+      font-size: 14px;
+    }
+
+    .seam-current-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      background: white;
+    }
+
+    .seam-current-row input {
+      width: 112px;
+      min-height: 42px;
+      border: 1px solid #c8ccd0;
+      border-radius: 9px;
+      padding: 8px 10px;
+      font: inherit;
+      font-size: 16px;
+      text-align: right;
+    }
+
+    .seam-action-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .seam-action-grid button {
+      margin: 0;
+    }
+
+    .confirm-button {
+      background: #16834f;
+    }
+
+    .reject-button {
+      background: #c9342c;
+    }
+
+    .seam-review-status {
+      margin-top: 12px;
+      padding: 11px;
+      border-radius: 10px;
+      background: white;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
     .order-help {
       margin-top: 14px;
       padding: 10px;
@@ -415,7 +553,7 @@
           class="overlap-panel"
         >
           <h3>
-            Phase 2-A｜兩張截圖重疊測試
+            Phase 2-A｜兩張截圖重疊分析
           </h3>
 
           <p>
@@ -471,6 +609,139 @@
             class="status"
           >
             等待選擇兩張連續截圖
+          </div>
+        </div>
+
+        <div
+          id="seamPanel"
+          class="seam-panel"
+        >
+          <h3>
+            Phase 2-B｜接縫預覽與人工確認
+          </h3>
+
+          <p>
+            系統不會直接裁掉原圖。請先看「接縫預覽」與
+            「重疊區疊合」，必要時微調 px，最後再確認。
+          </p>
+
+          <div
+            id="seamSummary"
+            class="seam-summary"
+          >
+            請先完成 Phase 2-A 重疊分析。
+          </div>
+
+          <div class="seam-canvas-wrap">
+            <div class="seam-preview-title">
+              接縫預覽
+            </div>
+
+            <canvas
+              id="seamPreviewCanvas"
+              class="seam-canvas"
+              width="720"
+              height="560"
+            ></canvas>
+
+            <div class="seam-help">
+              紅線上方來自前一張截圖，紅線下方來自下一張截圖。
+              如果文字、圖片或表格在紅線附近自然接續，接縫通常正確。
+            </div>
+          </div>
+
+          <div class="seam-canvas-wrap">
+            <div class="seam-preview-title">
+              重疊區疊合檢查
+            </div>
+
+            <canvas
+              id="overlapOverlayCanvas"
+              class="seam-canvas"
+              width="720"
+              height="320"
+            ></canvas>
+
+            <div class="seam-help">
+              這裡把兩張截圖的重疊區以 50% 透明度疊在一起。
+              越清楚、越少「重影」，代表候選位置越合理。
+            </div>
+          </div>
+
+          <div class="seam-adjust-title">
+            手動微調重疊量
+          </div>
+
+          <div class="seam-adjust-grid">
+            <button onclick="adjustSeamOverlap(-100)">
+              −100 px
+            </button>
+            <button onclick="adjustSeamOverlap(-20)">
+              −20 px
+            </button>
+            <button onclick="adjustSeamOverlap(-5)">
+              −5 px
+            </button>
+
+            <button onclick="adjustSeamOverlap(5)">
+              ＋5 px
+            </button>
+            <button onclick="adjustSeamOverlap(20)">
+              ＋20 px
+            </button>
+            <button onclick="adjustSeamOverlap(100)">
+              ＋100 px
+            </button>
+          </div>
+
+          <div class="seam-current-row">
+            <div>
+              目前重疊量
+              <br>
+              <small id="seamAutoHint">
+                自動候選：尚未分析
+              </small>
+            </div>
+
+            <input
+              id="seamOverlapInput"
+              type="number"
+              min="1"
+              step="1"
+              inputmode="numeric"
+              aria-label="目前重疊量像素"
+              onchange="applySeamInput()"
+            >
+          </div>
+
+          <div class="seam-action-grid">
+            <button
+              class="secondary-button"
+              onclick="resetSeamToAuto()"
+            >
+              ↺ 恢復自動候選值
+            </button>
+
+            <button
+              class="confirm-button"
+              onclick="confirmCurrentSeam()"
+            >
+              ✓ 接縫正確，保存確認結果
+            </button>
+
+            <button
+              class="reject-button"
+              onclick="rejectCurrentSeam()"
+            >
+              ✕ 這兩張不是正確重疊
+            </button>
+          </div>
+
+          <div
+            id="seamReviewStatus"
+            class="seam-review-status"
+          >
+            尚未確認。
           </div>
         </div>
 
@@ -542,6 +813,32 @@
     const overlapResult =
       document.getElementById("overlapResult");
 
+    const seamPanel =
+      document.getElementById("seamPanel");
+
+    const seamSummary =
+      document.getElementById("seamSummary");
+
+    const seamPreviewCanvas =
+      document.getElementById("seamPreviewCanvas");
+
+    const overlapOverlayCanvas =
+      document.getElementById("overlapOverlayCanvas");
+
+    const seamOverlapInput =
+      document.getElementById("seamOverlapInput");
+
+    const seamAutoHint =
+      document.getElementById("seamAutoHint");
+
+    const seamReviewStatus =
+      document.getElementById("seamReviewStatus");
+
+    let lastOverlapCandidate = null;
+    let currentSeamOverlapPixels = 0;
+    let automaticSeamOverlapPixels = 0;
+    let seamPreviewRenderToken = 0;
+
     const previewGrid = document.getElementById("previewGrid");
     const storageStatus = document.getElementById("storageStatus");
     const addButton = document.getElementById("addButton");
@@ -551,6 +848,33 @@
     window.addEventListener(
       "pagehide",
       clearPreviewUrls
+    );
+
+    overlapASelect.addEventListener(
+      "change",
+      function() {
+        resetSeamReview(
+          "A 圖片已變更，請重新分析重疊。"
+        );
+      }
+    );
+
+    overlapBSelect.addEventListener(
+      "change",
+      function() {
+        resetSeamReview(
+          "B 圖片已變更，請重新分析重疊。"
+        );
+      }
+    );
+
+    ignoreBrowserChrome.addEventListener(
+      "change",
+      function() {
+        resetSeamReview(
+          "分析模式已變更，請重新分析重疊。"
+        );
+      }
     );
 
     async function startApp() {
@@ -3011,6 +3335,1020 @@
     }
 
 
+
+    /*
+      =========================
+      Phase 2-B
+      接縫視覺化與人工確認
+      =========================
+    */
+
+    function clampNumber(
+      value,
+      minimum,
+      maximum
+    ) {
+      return Math.min(
+        maximum,
+        Math.max(
+          minimum,
+          value
+        )
+      );
+    }
+
+
+    function getContentPixelBounds(
+      item,
+      ignoreChrome
+    ) {
+      const height =
+        Math.max(
+          1,
+          Number(item.height) || 1
+        );
+
+      const top =
+        ignoreChrome
+          ? Math.round(
+              height *
+              OVERLAP_TOP_IGNORE
+            )
+          : 0;
+
+      const bottom =
+        ignoreChrome
+          ? Math.round(
+              height *
+              (
+                1 -
+                OVERLAP_BOTTOM_IGNORE
+              )
+            )
+          : height;
+
+      return {
+        top: top,
+        bottom: Math.max(
+          top + 1,
+          bottom
+        ),
+        height:
+          Math.max(
+            1,
+            bottom - top
+          )
+      };
+    }
+
+
+    function seamSettingKey(
+      aId,
+      bId
+    ) {
+      return (
+        "confirmedSeam:" +
+        String(aId) +
+        ":" +
+        String(bId)
+      );
+    }
+
+
+    function clearCanvas(
+      canvas,
+      message
+    ) {
+      const context =
+        canvas.getContext("2d");
+
+      context.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      context.fillStyle =
+        "#ffffff";
+
+      context.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      if (message) {
+        context.fillStyle =
+          "#666666";
+
+        context.font =
+          '24px "PingFang TC", "Noto Sans TC", sans-serif';
+
+        context.textAlign =
+          "center";
+
+        context.textBaseline =
+          "middle";
+
+        context.fillText(
+          message,
+          canvas.width / 2,
+          canvas.height / 2
+        );
+      }
+    }
+
+
+    function resetSeamReview(
+      message =
+        "請先完成 Phase 2-A 重疊分析。"
+    ) {
+      lastOverlapCandidate = null;
+      currentSeamOverlapPixels = 0;
+      automaticSeamOverlapPixels = 0;
+
+      seamPanel.style.display =
+        "none";
+
+      seamSummary.textContent =
+        message;
+
+      seamOverlapInput.value =
+        "";
+
+      seamAutoHint.textContent =
+        "自動候選：尚未分析";
+
+      seamReviewStatus.textContent =
+        "尚未確認。";
+
+      clearCanvas(
+        seamPreviewCanvas,
+        "等待重疊分析"
+      );
+
+      clearCanvas(
+        overlapOverlayCanvas,
+        "等待重疊分析"
+      );
+    }
+
+
+    function getSeamMaximumPixels() {
+      if (!lastOverlapCandidate) {
+        return 1;
+      }
+
+      const a =
+        getProjectImageById(
+          lastOverlapCandidate.aId
+        );
+
+      const b =
+        getProjectImageById(
+          lastOverlapCandidate.bId
+        );
+
+      if (!a || !b) {
+        return 1;
+      }
+
+      const ignoreChrome =
+        lastOverlapCandidate
+          .ignoreChrome;
+
+      const boundsA =
+        getContentPixelBounds(
+          a,
+          ignoreChrome
+        );
+
+      const boundsB =
+        getContentPixelBounds(
+          b,
+          ignoreChrome
+        );
+
+      return Math.max(
+        1,
+        Math.floor(
+          Math.min(
+            boundsA.height,
+            boundsB.height
+          ) * 0.90
+        )
+      );
+    }
+
+
+    function updateSeamText() {
+      if (!lastOverlapCandidate) {
+        return;
+      }
+
+      const difference =
+        currentSeamOverlapPixels -
+        automaticSeamOverlapPixels;
+
+      const differenceText =
+        difference === 0
+          ? "與自動值相同"
+          : (
+              difference > 0
+                ? `比自動值多 ${difference} px`
+                : `比自動值少 ${Math.abs(difference)} px`
+            );
+
+      seamOverlapInput.value =
+        String(
+          currentSeamOverlapPixels
+        );
+
+      seamAutoHint.textContent =
+        `自動候選：${automaticSeamOverlapPixels} px｜${differenceText}`;
+
+      seamSummary.innerHTML =
+        `
+          第 ${lastOverlapCandidate.aIndex + 1} 張
+          →
+          第 ${lastOverlapCandidate.bIndex + 1} 張
+          <br>
+
+          自動候選：
+          <strong>
+            ${automaticSeamOverlapPixels} px
+          </strong>
+          ｜目前：
+          <strong>
+            ${currentSeamOverlapPixels} px
+          </strong>
+          <br>
+
+          Phase 2-A 信心：
+          <strong>
+            ${lastOverlapCandidate.confidenceLevel}
+          </strong>
+          ｜相似度：
+          <strong>
+            ${lastOverlapCandidate.similarity.toFixed(1)}%
+          </strong>
+        `;
+    }
+
+
+    async function loadOriginalImageForSeam(
+      item
+    ) {
+      const sourceBlob =
+        getRenderableImageBlob(
+          item.blob,
+          item.type,
+          item.name
+        );
+
+      if (!(sourceBlob instanceof Blob)) {
+        throw new Error(
+          "找不到原始截圖資料"
+        );
+      }
+
+      return loadImageElementFromBlob(
+        sourceBlob,
+        sourceBlob.type,
+        item.name
+      );
+    }
+
+
+    function drawScaledCrop(
+      context,
+      image,
+      sourceY,
+      sourceHeight,
+      destinationY,
+      destinationHeight,
+      outputWidth
+    ) {
+      const safeY =
+        clampNumber(
+          sourceY,
+          0,
+          Math.max(
+            0,
+            image.naturalHeight - 1
+          )
+        );
+
+      const safeHeight =
+        Math.max(
+          1,
+          Math.min(
+            sourceHeight,
+            image.naturalHeight -
+            safeY
+          )
+        );
+
+      context.drawImage(
+        image,
+        0,
+        safeY,
+        image.naturalWidth,
+        safeHeight,
+        0,
+        destinationY,
+        outputWidth,
+        destinationHeight
+      );
+    }
+
+
+    async function renderSeamPreview() {
+      if (!lastOverlapCandidate) {
+        return;
+      }
+
+      const renderToken =
+        ++seamPreviewRenderToken;
+
+      const a =
+        getProjectImageById(
+          lastOverlapCandidate.aId
+        );
+
+      const b =
+        getProjectImageById(
+          lastOverlapCandidate.bId
+        );
+
+      if (!a || !b) {
+        resetSeamReview(
+          "找不到原始圖片，請重新分析。"
+        );
+        return;
+      }
+
+      seamReviewStatus.textContent =
+        "正在更新接縫預覽…";
+
+      let loadedA = null;
+      let loadedB = null;
+
+      try {
+        [
+          loadedA,
+          loadedB
+        ] =
+          await Promise.all([
+            loadOriginalImageForSeam(a),
+            loadOriginalImageForSeam(b)
+          ]);
+
+        if (
+          renderToken !==
+          seamPreviewRenderToken
+        ) {
+          return;
+        }
+
+        const imageA =
+          loadedA.image;
+
+        const imageB =
+          loadedB.image;
+
+        const ignoreChrome =
+          lastOverlapCandidate
+            .ignoreChrome;
+
+        const boundsAItem =
+          getContentPixelBounds(
+            a,
+            ignoreChrome
+          );
+
+        const boundsBItem =
+          getContentPixelBounds(
+            b,
+            ignoreChrome
+          );
+
+        const aHeightScale =
+          imageA.naturalHeight /
+          Math.max(
+            1,
+            Number(a.height) ||
+            imageA.naturalHeight
+          );
+
+        const bHeightScale =
+          imageB.naturalHeight /
+          Math.max(
+            1,
+            Number(b.height) ||
+            imageB.naturalHeight
+          );
+
+        const aContentTop =
+          boundsAItem.top *
+          aHeightScale;
+
+        const aContentBottom =
+          boundsAItem.bottom *
+          aHeightScale;
+
+        const bContentTop =
+          boundsBItem.top *
+          bHeightScale;
+
+        const bContentBottom =
+          boundsBItem.bottom *
+          bHeightScale;
+
+        const overlapA =
+          currentSeamOverlapPixels *
+          aHeightScale;
+
+        const overlapB =
+          currentSeamOverlapPixels *
+          bHeightScale;
+
+
+        /*
+          接縫預覽：
+          A 保留到內容底部，
+          B 從「頂部 + 重疊量」開始接。
+        */
+        const seamContext =
+          seamPreviewCanvas
+            .getContext("2d");
+
+        const outputWidth =
+          seamPreviewCanvas.width;
+
+        const segmentHeight =
+          seamPreviewCanvas.height / 2;
+
+        seamContext.fillStyle =
+          "#ffffff";
+
+        seamContext.fillRect(
+          0,
+          0,
+          seamPreviewCanvas.width,
+          seamPreviewCanvas.height
+        );
+
+        const scaleA =
+          outputWidth /
+          imageA.naturalWidth;
+
+        const scaleB =
+          outputWidth /
+          imageB.naturalWidth;
+
+        const desiredSourceA =
+          segmentHeight /
+          scaleA;
+
+        const desiredSourceB =
+          segmentHeight /
+          scaleB;
+
+        const sourceHeightA =
+          Math.min(
+            desiredSourceA,
+            aContentBottom -
+            aContentTop
+          );
+
+        const sourceHeightB =
+          Math.min(
+            desiredSourceB,
+            Math.max(
+              1,
+              bContentBottom -
+              (
+                bContentTop +
+                overlapB
+              )
+            )
+          );
+
+        drawScaledCrop(
+          seamContext,
+          imageA,
+          Math.max(
+            aContentTop,
+            aContentBottom -
+            sourceHeightA
+          ),
+          sourceHeightA,
+          segmentHeight -
+          sourceHeightA * scaleA,
+          sourceHeightA * scaleA,
+          outputWidth
+        );
+
+        drawScaledCrop(
+          seamContext,
+          imageB,
+          clampNumber(
+            bContentTop +
+            overlapB,
+            bContentTop,
+            Math.max(
+              bContentTop,
+              bContentBottom -
+              1
+            )
+          ),
+          sourceHeightB,
+          segmentHeight,
+          sourceHeightB * scaleB,
+          outputWidth
+        );
+
+        seamContext.strokeStyle =
+          "#d92d20";
+
+        seamContext.lineWidth = 6;
+
+        seamContext.beginPath();
+
+        seamContext.moveTo(
+          0,
+          segmentHeight
+        );
+
+        seamContext.lineTo(
+          outputWidth,
+          segmentHeight
+        );
+
+        seamContext.stroke();
+
+
+        /*
+          重疊區疊合：
+          取重疊區中間一段，
+          A 與 B 各 50% alpha。
+        */
+        const overlayContext =
+          overlapOverlayCanvas
+            .getContext("2d");
+
+        const overlayWidth =
+          overlapOverlayCanvas.width;
+
+        const overlayHeight =
+          overlapOverlayCanvas.height;
+
+        overlayContext.fillStyle =
+          "#ffffff";
+
+        overlayContext.fillRect(
+          0,
+          0,
+          overlayWidth,
+          overlayHeight
+        );
+
+        const overlayScaleA =
+          overlayWidth /
+          imageA.naturalWidth;
+
+        const overlayScaleB =
+          overlayWidth /
+          imageB.naturalWidth;
+
+        const desiredOverlaySourceA =
+          overlayHeight /
+          overlayScaleA;
+
+        const desiredOverlaySourceB =
+          overlayHeight /
+          overlayScaleB;
+
+        const sampleHeightA =
+          Math.max(
+            1,
+            Math.min(
+              overlapA,
+              desiredOverlaySourceA
+            )
+          );
+
+        const sampleHeightB =
+          Math.max(
+            1,
+            Math.min(
+              overlapB,
+              desiredOverlaySourceB
+            )
+          );
+
+        const aOverlapStart =
+          aContentBottom -
+          overlapA;
+
+        const bOverlapStart =
+          bContentTop;
+
+        const aSampleY =
+          clampNumber(
+            aOverlapStart +
+            Math.max(
+              0,
+              (
+                overlapA -
+                sampleHeightA
+              ) / 2
+            ),
+            aContentTop,
+            Math.max(
+              aContentTop,
+              aContentBottom -
+              sampleHeightA
+            )
+          );
+
+        const bSampleY =
+          clampNumber(
+            bOverlapStart +
+            Math.max(
+              0,
+              (
+                overlapB -
+                sampleHeightB
+              ) / 2
+            ),
+            bContentTop,
+            Math.max(
+              bContentTop,
+              bContentBottom -
+              sampleHeightB
+            )
+          );
+
+        overlayContext.globalAlpha =
+          0.50;
+
+        drawScaledCrop(
+          overlayContext,
+          imageA,
+          aSampleY,
+          sampleHeightA,
+          0,
+          overlayHeight,
+          overlayWidth
+        );
+
+        drawScaledCrop(
+          overlayContext,
+          imageB,
+          bSampleY,
+          sampleHeightB,
+          0,
+          overlayHeight,
+          overlayWidth
+        );
+
+        overlayContext.globalAlpha =
+          1.0;
+
+        overlayContext.strokeStyle =
+          "rgba(0,0,0,0.22)";
+
+        overlayContext.lineWidth = 2;
+
+        overlayContext.strokeRect(
+          1,
+          1,
+          overlayWidth - 2,
+          overlayHeight - 2
+        );
+
+
+        updateSeamText();
+
+        seamReviewStatus.textContent =
+          "預覽已更新。請觀察紅線附近是否自然接續，以及疊合圖是否有明顯重影。";
+      }
+      catch (error) {
+        console.error(error);
+
+        clearCanvas(
+          seamPreviewCanvas,
+          "接縫預覽失敗"
+        );
+
+        clearCanvas(
+          overlapOverlayCanvas,
+          "疊合預覽失敗"
+        );
+
+        seamReviewStatus.textContent =
+          "⚠️ 預覽建立失敗：" +
+          String(
+            error.message ||
+            error
+          );
+      }
+      finally {
+        if (loadedA && loadedA.url) {
+          URL.revokeObjectURL(
+            loadedA.url
+          );
+        }
+
+        if (loadedB && loadedB.url) {
+          URL.revokeObjectURL(
+            loadedB.url
+          );
+        }
+      }
+    }
+
+
+    async function initializeSeamReview(
+      candidate
+    ) {
+      lastOverlapCandidate =
+        candidate;
+
+      automaticSeamOverlapPixels =
+        Math.max(
+          1,
+          Math.round(
+            candidate.estimatedPixels
+          )
+        );
+
+      currentSeamOverlapPixels =
+        automaticSeamOverlapPixels;
+
+      seamPanel.style.display =
+        "block";
+
+      seamReviewStatus.textContent =
+        "尚未確認。";
+
+      try {
+        const saved =
+          await getSetting(
+            seamSettingKey(
+              candidate.aId,
+              candidate.bId
+            )
+          );
+
+        if (
+          saved &&
+          saved.value &&
+          saved.value.status ===
+            "confirmed" &&
+          saved.value.ignoreChrome ===
+            candidate.ignoreChrome
+        ) {
+          currentSeamOverlapPixels =
+            Math.max(
+              1,
+              Number(
+                saved.value
+                  .overlapPixels
+              ) ||
+              automaticSeamOverlapPixels
+            );
+
+          seamReviewStatus.textContent =
+            "✅ 已載入先前人工確認的接縫值。";
+        }
+      }
+      catch (error) {
+        console.warn(
+          "讀取已確認接縫失敗：",
+          error
+        );
+      }
+
+      currentSeamOverlapPixels =
+        clampNumber(
+          currentSeamOverlapPixels,
+          1,
+          getSeamMaximumPixels()
+        );
+
+      updateSeamText();
+
+      await renderSeamPreview();
+
+      seamPanel.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+
+
+    function adjustSeamOverlap(
+      delta
+    ) {
+      if (!lastOverlapCandidate) {
+        alert(
+          "請先完成 Phase 2-A 重疊分析。"
+        );
+        return;
+      }
+
+      currentSeamOverlapPixels =
+        clampNumber(
+          currentSeamOverlapPixels +
+          delta,
+          1,
+          getSeamMaximumPixels()
+        );
+
+      seamReviewStatus.textContent =
+        "已手動微調，尚未保存確認結果。";
+
+      renderSeamPreview();
+    }
+
+
+    function applySeamInput() {
+      if (!lastOverlapCandidate) {
+        return;
+      }
+
+      const requested =
+        Number(
+          seamOverlapInput.value
+        );
+
+      if (!Number.isFinite(requested)) {
+        seamOverlapInput.value =
+          String(
+            currentSeamOverlapPixels
+          );
+        return;
+      }
+
+      currentSeamOverlapPixels =
+        clampNumber(
+          Math.round(requested),
+          1,
+          getSeamMaximumPixels()
+        );
+
+      seamReviewStatus.textContent =
+        "已手動輸入重疊量，尚未保存確認結果。";
+
+      renderSeamPreview();
+    }
+
+
+    function resetSeamToAuto() {
+      if (!lastOverlapCandidate) {
+        return;
+      }
+
+      currentSeamOverlapPixels =
+        automaticSeamOverlapPixels;
+
+      seamReviewStatus.textContent =
+        "已恢復 Phase 2-A 自動候選值，尚未保存確認結果。";
+
+      renderSeamPreview();
+    }
+
+
+    async function confirmCurrentSeam() {
+      if (!lastOverlapCandidate) {
+        alert(
+          "請先完成 Phase 2-A 重疊分析。"
+        );
+        return;
+      }
+
+      try {
+        await saveSetting(
+          seamSettingKey(
+            lastOverlapCandidate.aId,
+            lastOverlapCandidate.bId
+          ),
+          {
+            status:
+              "confirmed",
+
+            aId:
+              lastOverlapCandidate.aId,
+
+            bId:
+              lastOverlapCandidate.bId,
+
+            overlapPixels:
+              currentSeamOverlapPixels,
+
+            automaticPixels:
+              automaticSeamOverlapPixels,
+
+            ignoreChrome:
+              lastOverlapCandidate
+                .ignoreChrome,
+
+            confidenceLevel:
+              lastOverlapCandidate
+                .confidenceLevel,
+
+            similarity:
+              lastOverlapCandidate
+                .similarity,
+
+            confirmedAt:
+              Date.now()
+          }
+        );
+
+        seamReviewStatus.innerHTML =
+          `
+            ✅ 已保存人工確認結果：
+            <strong>
+              ${currentSeamOverlapPixels} px
+            </strong>
+            <br>
+            原始截圖沒有被裁切或修改。
+          `;
+      }
+      catch (error) {
+        console.error(error);
+
+        seamReviewStatus.textContent =
+          "❌ 保存確認結果失敗：" +
+          String(
+            error.message ||
+            error
+          );
+      }
+    }
+
+
+    async function rejectCurrentSeam() {
+      if (!lastOverlapCandidate) {
+        return;
+      }
+
+      const confirmed =
+        confirm(
+          "確定要把這一組標記為「不是正確重疊」嗎？原始圖片不會被刪除。"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        await saveSetting(
+          seamSettingKey(
+            lastOverlapCandidate.aId,
+            lastOverlapCandidate.bId
+          ),
+          {
+            status:
+              "rejected",
+
+            aId:
+              lastOverlapCandidate.aId,
+
+            bId:
+              lastOverlapCandidate.bId,
+
+            ignoreChrome:
+              lastOverlapCandidate
+                .ignoreChrome,
+
+            rejectedAt:
+              Date.now()
+          }
+        );
+
+        seamReviewStatus.textContent =
+          "✕ 已標記為不是正確重疊。原始截圖仍完整保留。";
+      }
+      catch (error) {
+        console.error(error);
+
+        seamReviewStatus.textContent =
+          "❌ 保存拒絕結果失敗：" +
+          String(
+            error.message ||
+            error
+          );
+      }
+    }
+
+
     async function runOverlapPrototype() {
       const a =
         getProjectImageById(
@@ -3023,6 +4361,10 @@
         );
 
       if (!a || !b) {
+        resetSeamReview(
+          "請先選擇兩張截圖。"
+        );
+
         alert(
           "請先選擇兩張截圖。"
         );
@@ -3033,6 +4375,10 @@
         Number(a.id) ===
         Number(b.id)
       ) {
+        resetSeamReview(
+          "A 與 B 不能選同一張截圖。"
+        );
+
         alert(
           "A 與 B 不能選同一張截圖。"
         );
@@ -3060,6 +4406,11 @@
             請改選真正「前後連續、但不是完全相同」的兩張網站截圖。
             完全重複檔案應在前面的重複檢查階段處理。
           `;
+
+        resetSeamReview(
+          "完全相同的檔案不進行接縫確認。"
+        );
+
         return;
       }
 
@@ -3121,6 +4472,11 @@
               </div>
               請確認兩張是否為同一篇文章的連續截圖。
             `;
+
+          resetSeamReview(
+            "找不到重疊候選，無法建立接縫預覽。"
+          );
+
           return;
         }
 
@@ -3235,9 +4591,46 @@
               尚未真正裁切或拼接原圖。
             </div>
           `;
+
+
+        await initializeSeamReview({
+          aId:
+            a.id,
+
+          bId:
+            b.id,
+
+          aIndex:
+            aIndex,
+
+          bIndex:
+            bIndex,
+
+          estimatedPixels:
+            estimatedPixels,
+
+          ignoreChrome:
+            ignoreChrome,
+
+          confidenceLevel:
+            confidence.level,
+
+          similarity:
+            similarity,
+
+          candidateMargin:
+            margin,
+
+          widthRatio:
+            widthRatio
+        });
       }
       catch (error) {
         console.error(error);
+
+        resetSeamReview(
+          "重疊分析失敗，無法建立接縫預覽。"
+        );
 
         overlapResult.innerHTML =
           `
