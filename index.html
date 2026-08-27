@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Screenshot Report｜Phase 3-B</title>
+  <title>Screenshot Report｜Phase 3-B 列印修正版</title>
 
   <style>
     * {
@@ -1577,6 +1577,10 @@
       line-height: 1.6;
     }
 
+    #phase3bPrintPortal {
+      display: none;
+    }
+
     @media print {
       @page {
         size: A4 portrait;
@@ -1590,51 +1594,35 @@
         background: white !important;
       }
 
-      body * {
-        visibility: hidden !important;
+      body > *:not(#phase3bPrintPortal) {
+        display: none !important;
       }
 
-      #phase3bPrintArea,
-      #phase3bPrintArea * {
-        visibility: visible !important;
-      }
-
-      #phase3bPrintArea {
-        position: absolute !important;
-        inset: 0 auto auto 0 !important;
+      #phase3bPrintPortal {
         display: block !important;
         width: 210mm !important;
         margin: 0 !important;
         padding: 0 !important;
-        gap: 0 !important;
+        background: white !important;
       }
 
-      .phase3b-page-wrap {
+      #phase3bPrintPortal .phase3b-print-page {
+        position: relative !important;
+        display: block !important;
         width: 210mm !important;
-        max-width: none !important;
+        height: 297mm !important;
         margin: 0 !important;
         padding: 0 !important;
+        overflow: hidden !important;
+        background: white !important;
+        box-shadow: none !important;
         break-after: page;
         page-break-after: always;
       }
 
-      .phase3b-page-wrap:last-child {
+      #phase3bPrintPortal .phase3b-print-page:last-child {
         break-after: auto;
         page-break-after: auto;
-      }
-
-      .phase3b-page-screen-label {
-        display: none !important;
-      }
-
-      .phase3b-print-page {
-        width: 210mm !important;
-        height: 297mm !important;
-        aspect-ratio: auto !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        box-shadow: none !important;
-        overflow: hidden !important;
       }
     }
 
@@ -2524,7 +2512,7 @@
                 onclick="openPhase3BPrintDialog()"
                 disabled
               >
-                開啟列印／儲存 PDF
+                開啟 Safari 列印畫面
               </button>
 
               <button
@@ -2882,6 +2870,9 @@
 
     const phase3bPrintArea =
       document.getElementById("phase3bPrintArea");
+
+    const phase3bPrintPortal =
+      document.getElementById("phase3bPrintPortal");
 
     const PHASE2C_STATE_KEY =
       "phase2cBatchState:v1";
@@ -8380,6 +8371,130 @@
     }
 
 
+    function renderPhase3BPrintPortal() {
+      phase3bPrintPortal.innerHTML = "";
+
+      if (
+        !phase3bPlan ||
+        !phase3BPlanMatchesCurrentArticle()
+      ) {
+        return;
+      }
+
+      const showPageNumbers =
+        Boolean(
+          phase3bShowPageNumbers.checked
+        );
+
+      const pageHeightVirtual =
+        Math.max(
+          1,
+          Number(
+            phase3bPlan.pageHeightVirtual
+          ) || 1
+        );
+
+      for (const page of phase3bPlan.pages) {
+        const pageElement =
+          document.createElement("div");
+
+        pageElement.className =
+          "phase3b-print-page";
+
+        for (const fragment of page.fragments) {
+          const imageData =
+            getPhase2DImageById(
+              fragment.imageId
+            );
+
+          if (!imageData) {
+            continue;
+          }
+
+          const url =
+            getPhase3BImageUrl(
+              imageData
+            );
+
+          if (!url) {
+            continue;
+          }
+
+          const holder =
+            document.createElement("div");
+
+          holder.className =
+            "phase3b-page-fragment";
+
+          holder.style.top =
+            `${
+              fragment.pageTopVirtual /
+              pageHeightVirtual *
+              100
+            }%`;
+
+          holder.style.height =
+            `${
+              fragment.pageHeightVirtual /
+              pageHeightVirtual *
+              100
+            }%`;
+
+          const img =
+            document.createElement("img");
+
+          img.alt =
+            `第 ${fragment.displayNumber} 張列印切片`;
+
+          img.loading = "eager";
+          img.decoding = "async";
+          img.src = url;
+
+          const sourceHeightFull =
+            Math.max(
+              1,
+              Number(
+                fragment.sourceHeightFull
+              ) || 1
+            );
+
+          const sourceYOffsetPercent =
+            Math.max(
+              0,
+              Number(
+                fragment.sourceY
+              ) /
+              sourceHeightFull *
+              100
+            );
+
+          img.style.transform =
+            `translateY(-${sourceYOffsetPercent}%)`;
+
+          holder.appendChild(img);
+          pageElement.appendChild(holder);
+        }
+
+        if (showPageNumbers) {
+          const number =
+            document.createElement("div");
+
+          number.className =
+            "phase3b-page-number";
+
+          number.textContent =
+            `${page.pageNumber} / ${phase3bPlan.pageCount}`;
+
+          pageElement.appendChild(number);
+        }
+
+        phase3bPrintPortal.appendChild(
+          pageElement
+        );
+      }
+    }
+
+
     function waitForPhase3BImages() {
       const images =
         Array.from(
@@ -8447,7 +8562,7 @@
     }
 
 
-    async function openPhase3BPrintDialog() {
+    function openPhase3BPrintDialog() {
       if (
         !phase3bPlan ||
         !phase3BPlanMatchesCurrentArticle()
@@ -8458,23 +8573,33 @@
         return;
       }
 
-      phase3bStatus.textContent =
-        "正在準備原圖列印頁面…";
+      renderPhase3BPrintPortal();
 
-      renderPhase3BPrintPages();
+      const images =
+        Array.from(
+          phase3bPrintPortal
+            .querySelectorAll("img")
+        );
 
-      await waitForPhase3BImages();
+      const pending =
+        images.some(
+          image =>
+            !image.complete ||
+            image.naturalWidth <= 0
+        );
+
+      if (pending) {
+        phase3bStatus.innerHTML =
+          `<span class="phase3b-warn">⏳ 原圖仍在載入。</span>` +
+          `<br>請等 1～2 秒，再按一次「開啟 Safari 列印畫面」。`;
+        return;
+      }
 
       phase3bStatus.innerHTML =
-        `<span class="phase3b-good">✅ A4 頁面已載入。</span>` +
-        `<br>即將開啟 Safari 列印畫面；可從列印預覽儲存為 PDF。`;
+        `<span class="phase3b-good">✅ ${phase3bPlan.pageCount} 個 A4 頁面已準備完成。</span>` +
+        `<br>現在由你的按鈕操作直接開啟 Safari 列印畫面。`;
 
-      setTimeout(
-        function() {
-          window.print();
-        },
-        50
-      );
+      window.print();
     }
 
 
@@ -12770,5 +12895,8 @@
       }
     }
   </script>
+
+  <div id="phase3bPrintPortal" aria-hidden="true"></div>
+
 </body>
 </html>
