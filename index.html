@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Screenshot Report｜Phase 3-A</title>
+  <title>Screenshot Report｜Phase 3-B</title>
 
   <style>
     * {
@@ -1366,6 +1366,278 @@
       font-weight: 800;
     }
 
+
+
+    /*
+      =========================
+      Phase 3-B
+      A4 分頁／PDF 列印輸出
+      =========================
+    */
+
+    .phase3b-panel {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 16px;
+      background: #f8f4ff;
+      border: 1px solid #d4c6ec;
+    }
+
+    .phase3b-panel h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    .phase3b-panel p {
+      margin: 0 0 12px;
+      color: #5f6368;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .phase3b-status,
+    .phase3b-card {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid #ddd1ef;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .phase3b-options {
+      display: grid;
+      gap: 9px;
+      margin-top: 10px;
+    }
+
+    .phase3b-options label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .phase3b-options input {
+      width: 24px;
+      height: 24px;
+      flex: 0 0 auto;
+      margin: 0;
+    }
+
+    .phase3b-button-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .phase3b-button-grid button {
+      margin: 0;
+    }
+
+    .phase3b-build-button {
+      background: #6f42c1;
+    }
+
+    .phase3b-print-button {
+      background: #335c81;
+    }
+
+    .phase3b-pass-button {
+      background: #27864f;
+    }
+
+    .phase3b-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .phase3b-summary-item {
+      padding: 12px;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid #ddd1ef;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .phase3b-summary-item strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 22px;
+    }
+
+    .phase3b-preview-shell {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 12px;
+      background: #e9e2f4;
+      border: 1px solid #d4c6ec;
+    }
+
+    .phase3b-preview-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .phase3b-print-area {
+      display: grid;
+      gap: 14px;
+      justify-items: center;
+    }
+
+    .phase3b-page-wrap {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .phase3b-page-screen-label {
+      margin: 0 0 5px;
+      color: #5f4d78;
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .phase3b-print-page {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 210 / 297;
+      overflow: hidden;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.14);
+    }
+
+    .phase3b-page-fragment {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      overflow: hidden;
+      background: white;
+    }
+
+    .phase3b-page-fragment img {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: auto;
+      max-width: none;
+      display: block;
+      margin: 0;
+      padding: 0;
+    }
+
+    .phase3b-page-number {
+      position: absolute;
+      z-index: 5;
+      right: 8px;
+      bottom: 7px;
+      padding: 3px 6px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.84);
+      color: #444;
+      font-size: 10px;
+      line-height: 1.2;
+    }
+
+    .phase3b-empty {
+      padding: 28px 12px;
+      text-align: center;
+      color: #666;
+      line-height: 1.65;
+      background: white;
+      border-radius: 10px;
+    }
+
+    .phase3b-good {
+      color: #176137;
+      font-weight: 800;
+    }
+
+    .phase3b-warn {
+      color: #9a3412;
+      font-weight: 800;
+    }
+
+    .phase3b-note {
+      margin-top: 10px;
+      color: #555;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+
+      html,
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+      }
+
+      body * {
+        visibility: hidden !important;
+      }
+
+      #phase3bPrintArea,
+      #phase3bPrintArea * {
+        visibility: visible !important;
+      }
+
+      #phase3bPrintArea {
+        position: absolute !important;
+        inset: 0 auto auto 0 !important;
+        display: block !important;
+        width: 210mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        gap: 0 !important;
+      }
+
+      .phase3b-page-wrap {
+        width: 210mm !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        break-after: page;
+        page-break-after: always;
+      }
+
+      .phase3b-page-wrap:last-child {
+        break-after: auto;
+        page-break-after: auto;
+      }
+
+      .phase3b-page-screen-label {
+        display: none !important;
+      }
+
+      .phase3b-print-page {
+        width: 210mm !important;
+        height: 297mm !important;
+        aspect-ratio: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        overflow: hidden !important;
+      }
+    }
+
 </style>
 </head>
 
@@ -2197,6 +2469,139 @@
           </div>
         </div>
 
+        <div
+          id="phase3bPanel"
+          class="phase3b-panel"
+        >
+          <h3>
+            Phase 3-B｜A4 分頁與 PDF 輸出原型
+          </h3>
+
+          <p>
+            把 Phase 3-A 的完整重建文章轉成 A4 直式分頁。
+            每一頁仍使用原始截圖的虛擬切片，不建立超長 Canvas。
+            在 iPhone Safari 可透過「列印」流程免費儲存成 PDF。
+          </p>
+
+          <div
+            id="phase3bStatus"
+            class="phase3b-status"
+          >
+            等待有效的完整文章虛擬文件。
+          </div>
+
+          <div class="phase3b-card">
+            <strong>
+              PDF／列印設定
+            </strong>
+
+            <div class="phase3b-options">
+              <label>
+                <input
+                  id="phase3bShowPageNumbers"
+                  type="checkbox"
+                >
+                <span>
+                  在 PDF 頁面右下角顯示頁碼
+                  （預設關閉，避免覆蓋原文）
+                </span>
+              </label>
+            </div>
+
+            <div class="phase3b-button-grid">
+              <button
+                id="phase3bBuildButton"
+                class="phase3b-build-button"
+                onclick="buildPhase3BPrintPlan()"
+                disabled
+              >
+                建立／更新 A4 分頁預覽
+              </button>
+
+              <button
+                id="phase3bPrintButton"
+                class="phase3b-print-button"
+                onclick="openPhase3BPrintDialog()"
+                disabled
+              >
+                開啟列印／儲存 PDF
+              </button>
+
+              <button
+                id="phase3bPassButton"
+                class="phase3b-pass-button"
+                onclick="markPhase3BPass()"
+                disabled
+              >
+                ✓ PDF 分頁預覽正確，標記 Phase 3-B PASS
+              </button>
+
+              <button
+                class="secondary-button"
+                onclick="clearPhase3BPlan()"
+              >
+                清除 Phase 3-B 分頁計畫
+              </button>
+            </div>
+          </div>
+
+          <div class="phase3b-summary-grid">
+            <div class="phase3b-summary-item">
+              A4 頁數
+              <strong id="phase3bPageCount">0</strong>
+            </div>
+
+            <div class="phase3b-summary-item">
+              文章切片
+              <strong id="phase3bSliceCount">0</strong>
+            </div>
+
+            <div class="phase3b-summary-item">
+              每頁虛擬高度
+              <strong id="phase3bPageHeight">0</strong>
+            </div>
+
+            <div class="phase3b-summary-item">
+              文章總高度
+              <strong id="phase3bArticleHeight">0</strong>
+            </div>
+          </div>
+
+          <div
+            id="phase3bReviewStatus"
+            class="phase3b-status"
+          >
+            尚未完成 Phase 3-B 驗收。
+          </div>
+
+          <div class="phase3b-preview-shell">
+            <div class="phase3b-preview-title">
+              <strong>
+                A4 分頁預覽
+              </strong>
+              <span>
+                210 × 297 mm｜無邊界
+              </span>
+            </div>
+
+            <div
+              id="phase3bPrintArea"
+              class="phase3b-print-area"
+            >
+              <div class="phase3b-empty">
+                請先按「建立／更新 A4 分頁預覽」。
+              </div>
+            </div>
+          </div>
+
+          <div class="phase3b-note">
+            <strong>本階段驗收：</strong>
+            頁面順序必須連續，頁與頁之間不能少內容，也不能重複整段。
+            A4 分頁可以切在段落中間，這是列印分頁的正常現象；
+            重點是下一頁必須從上一頁停止的位置繼續。
+          </div>
+        </div>
+
         <div class="order-help">
           ◀ = 往前移一格　
           ▶ = 往後移一格　
@@ -2442,6 +2847,42 @@
     const phase3Reader =
       document.getElementById("phase3Reader");
 
+    const phase3bPanel =
+      document.getElementById("phase3bPanel");
+
+    const phase3bStatus =
+      document.getElementById("phase3bStatus");
+
+    const phase3bShowPageNumbers =
+      document.getElementById("phase3bShowPageNumbers");
+
+    const phase3bBuildButton =
+      document.getElementById("phase3bBuildButton");
+
+    const phase3bPrintButton =
+      document.getElementById("phase3bPrintButton");
+
+    const phase3bPassButton =
+      document.getElementById("phase3bPassButton");
+
+    const phase3bPageCount =
+      document.getElementById("phase3bPageCount");
+
+    const phase3bSliceCount =
+      document.getElementById("phase3bSliceCount");
+
+    const phase3bPageHeight =
+      document.getElementById("phase3bPageHeight");
+
+    const phase3bArticleHeight =
+      document.getElementById("phase3bArticleHeight");
+
+    const phase3bReviewStatus =
+      document.getElementById("phase3bReviewStatus");
+
+    const phase3bPrintArea =
+      document.getElementById("phase3bPrintArea");
+
     const PHASE2C_STATE_KEY =
       "phase2cBatchState:v1";
 
@@ -2462,6 +2903,20 @@
       "phase3aReconstructionReview:v1";
 
     const PHASE3A_VERSION = 1;
+
+    const PHASE3B_PLAN_KEY =
+      "phase3bA4PrintPlan:v1";
+
+    const PHASE3B_REVIEW_KEY =
+      "phase3bA4PrintReview:v1";
+
+    const PHASE3B_VERSION = 1;
+
+    const PHASE3B_A4_WIDTH_MM =
+      210;
+
+    const PHASE3B_A4_HEIGHT_MM =
+      297;
 
     let phase2cState = null;
     let phase2cRunning = false;
@@ -2485,6 +2940,15 @@
     const phase3aPreviewUrls =
       new Set();
 
+    let phase3bPlan = null;
+    let phase3bReviewState = null;
+
+    const phase3bPreviewUrls =
+      new Set();
+
+    const phase3bImageUrlCache =
+      new Map();
+
     let lastOverlapCandidate = null;
     let currentSeamOverlapPixels = 0;
     let automaticSeamOverlapPixels = 0;
@@ -2503,6 +2967,7 @@
         clearPhase2DPreviewUrls();
         clearPhase2EPreviewUrls();
         clearPhase3APreviewUrls();
+        clearPhase3BPreviewUrls();
       }
     );
 
@@ -2566,6 +3031,18 @@
       }
     );
 
+    phase3bShowPageNumbers.addEventListener(
+      "change",
+      function() {
+        if (
+          phase3bPlan &&
+          phase3BPlanMatchesCurrentArticle()
+        ) {
+          renderPhase3BPrintPages();
+        }
+      }
+    );
+
 
     async function startApp() {
       try {
@@ -2580,6 +3057,7 @@
         populatePhase2ERangeSelectors();
         await loadPhase2EWorkspace();
         await loadPhase3AReviewState();
+        await loadPhase3BState();
         await updateStorageInfo();
       }
       catch (error) {
@@ -6765,6 +7243,17 @@
 
 
     function renderPhase3AAvailability() {
+      queueMicrotask(
+        function() {
+          if (
+            typeof renderPhase3BAvailability ===
+            "function"
+          ) {
+            renderPhase3BAvailability();
+          }
+        }
+      );
+
       const ready =
         phase3APlanIsReady();
 
@@ -7222,6 +7711,890 @@
       );
 
       renderPhase3AReviewStatus();
+    }
+
+
+
+    /*
+      =========================
+      Phase 3-B
+      A4 分頁／PDF 列印輸出
+      =========================
+    */
+
+    function getPhase3BArticleFingerprint() {
+      if (!phase3APlanIsReady()) {
+        return "";
+      }
+
+      return getPhase3APlanFingerprint();
+    }
+
+
+    function phase3BPlanMatchesCurrentArticle() {
+      if (!phase3bPlan) {
+        return false;
+      }
+
+      const fingerprint =
+        getPhase3BArticleFingerprint();
+
+      return (
+        phase3bPlan.version ===
+          PHASE3B_VERSION &&
+        phase3bPlan.articleFingerprint ===
+          fingerprint &&
+        Boolean(fingerprint)
+      );
+    }
+
+
+    async function loadPhase3BState() {
+      try {
+        const savedPlan =
+          await getSetting(
+            PHASE3B_PLAN_KEY
+          );
+
+        phase3bPlan =
+          savedPlan &&
+          savedPlan.value
+            ? savedPlan.value
+            : null;
+      }
+      catch (error) {
+        console.warn(
+          "讀取 Phase 3-B 分頁計畫失敗：",
+          error
+        );
+
+        phase3bPlan = null;
+      }
+
+      try {
+        const savedReview =
+          await getSetting(
+            PHASE3B_REVIEW_KEY
+          );
+
+        phase3bReviewState =
+          savedReview &&
+          savedReview.value
+            ? savedReview.value
+            : null;
+      }
+      catch (error) {
+        console.warn(
+          "讀取 Phase 3-B 驗收狀態失敗：",
+          error
+        );
+
+        phase3bReviewState =
+          null;
+      }
+
+      renderPhase3BAvailability();
+    }
+
+
+    function clearPhase3BPreviewUrls() {
+      for (
+        const url of
+        phase3bPreviewUrls
+      ) {
+        try {
+          URL.revokeObjectURL(
+            url
+          );
+        }
+        catch (error) {
+          console.warn(
+            "Phase 3-B Blob URL 回收失敗：",
+            error
+          );
+        }
+      }
+
+      phase3bPreviewUrls.clear();
+      phase3bImageUrlCache.clear();
+    }
+
+
+    function getPhase3BImageUrl(
+      imageData
+    ) {
+      const key =
+        Number(
+          imageData.id
+        );
+
+      if (
+        phase3bImageUrlCache.has(
+          key
+        )
+      ) {
+        return phase3bImageUrlCache.get(
+          key
+        );
+      }
+
+      const blob =
+        getRenderableImageBlob(
+          imageData.blob,
+          imageData.type,
+          imageData.name
+        );
+
+      if (!(blob instanceof Blob)) {
+        return "";
+      }
+
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+      phase3bPreviewUrls.add(
+        url
+      );
+
+      phase3bImageUrlCache.set(
+        key,
+        url
+      );
+
+      return url;
+    }
+
+
+    function renderPhase3BAvailability() {
+      const ready =
+        phase3APlanIsReady();
+
+      if (!ready) {
+        phase3bStatus.innerHTML =
+          `<span class="phase3b-warn">⚠️ 尚無可輸出的完整文章。</span>` +
+          `<br>請先完成 Phase 2-E / Phase 3-A 的完整文章重建。`;
+
+        phase3bPageCount.textContent =
+          "0";
+
+        phase3bSliceCount.textContent =
+          "0";
+
+        phase3bPageHeight.textContent =
+          "0";
+
+        phase3bArticleHeight.textContent =
+          "0";
+
+        phase3bBuildButton.disabled =
+          true;
+
+        phase3bPrintButton.disabled =
+          true;
+
+        phase3bPassButton.disabled =
+          true;
+
+        phase3bPrintArea.innerHTML =
+          `<div class="phase3b-empty">等待完整文章重建資料。</div>`;
+
+        renderPhase3BReviewStatus();
+
+        return;
+      }
+
+      phase3bBuildButton.disabled =
+        false;
+
+      if (
+        phase3bPlan &&
+        phase3BPlanMatchesCurrentArticle()
+      ) {
+        phase3bStatus.innerHTML =
+          `<span class="phase3b-good">✅ A4 分頁計畫有效。</span>` +
+          `<br>${phase3bPlan.pageCount} 頁｜` +
+          `每頁虛擬高度約 ${Math.round(phase3bPlan.pageHeightVirtual)} px｜` +
+          `文章總高度 ${Math.round(phase3bPlan.articleHeightVirtual)} px`;
+
+        phase3bPageCount.textContent =
+          String(
+            phase3bPlan.pageCount
+          );
+
+        phase3bSliceCount.textContent =
+          String(
+            phase3bPlan.sliceCount
+          );
+
+        phase3bPageHeight.textContent =
+          `${Math.round(
+            phase3bPlan.pageHeightVirtual
+          )} px`;
+
+        phase3bArticleHeight.textContent =
+          `${Math.round(
+            phase3bPlan.articleHeightVirtual
+          )} px`;
+
+        phase3bPrintButton.disabled =
+          false;
+
+        phase3bPassButton.disabled =
+          false;
+
+        renderPhase3BPrintPages();
+      }
+      else {
+        phase3bStatus.innerHTML =
+          phase3bPlan
+            ? `<span class="phase3b-warn">⚠️ 舊的 A4 分頁計畫已失效。</span><br>文章切片或接縫已變更，請重新建立。`
+            : `✅ 完整文章已就緒。請建立 A4 分頁預覽。`;
+
+        phase3bPrintButton.disabled =
+          true;
+
+        phase3bPassButton.disabled =
+          true;
+
+        if (phase3bPlan) {
+          phase3bPrintArea.innerHTML =
+            `<div class="phase3b-empty">分頁計畫已過期，請重新建立。</div>`;
+        }
+      }
+
+      renderPhase3BReviewStatus();
+    }
+
+
+    async function buildPhase3BPrintPlan() {
+      if (!phase3APlanIsReady()) {
+        alert(
+          "請先完成有效的完整文章重建。"
+        );
+        return;
+      }
+
+      const chain =
+        phase2eArticlePlan.chain;
+
+      const targetWidth =
+        Math.max(
+          1,
+          Number(
+            chain.targetWidth
+          ) ||
+          Number(
+            chain.slices[0]
+              .sourceWidth
+          ) ||
+          1
+        );
+
+      const pageHeightVirtual =
+        targetWidth *
+        (
+          PHASE3B_A4_HEIGHT_MM /
+          PHASE3B_A4_WIDTH_MM
+        );
+
+      const articleHeightVirtual =
+        Math.max(
+          1,
+          Number(
+            chain.virtualHeight
+          ) || 1
+        );
+
+      const pageCount =
+        Math.max(
+          1,
+          Math.ceil(
+            articleHeightVirtual /
+            pageHeightVirtual
+          )
+        );
+
+      const pages = [];
+
+      for (
+        let pageIndex = 0;
+        pageIndex < pageCount;
+        pageIndex++
+      ) {
+        const pageStart =
+          pageIndex *
+          pageHeightVirtual;
+
+        const pageEnd =
+          Math.min(
+            articleHeightVirtual,
+            pageStart +
+            pageHeightVirtual
+          );
+
+        const fragments = [];
+
+        chain.slices.forEach(
+          (
+            slice,
+            sliceIndex
+          ) => {
+            const sliceStart =
+              Number(
+                slice.virtualYStart
+              ) || 0;
+
+            const sliceEnd =
+              Number(
+                slice.virtualYEnd
+              ) || 0;
+
+            const overlapStart =
+              Math.max(
+                pageStart,
+                sliceStart
+              );
+
+            const overlapEnd =
+              Math.min(
+                pageEnd,
+                sliceEnd
+              );
+
+            if (
+              overlapEnd <=
+              overlapStart
+            ) {
+              return;
+            }
+
+            const scaleToTarget =
+              Math.max(
+                0.000001,
+                Number(
+                  slice.scaleToTarget
+                ) || 1
+              );
+
+            const withinSliceVirtual =
+              overlapStart -
+              sliceStart;
+
+            const sourceY =
+              Number(
+                slice.cropTop
+              ) +
+              (
+                withinSliceVirtual /
+                scaleToTarget
+              );
+
+            const sourceHeight =
+              (
+                overlapEnd -
+                overlapStart
+              ) /
+              scaleToTarget;
+
+            fragments.push({
+              sliceIndex:
+                sliceIndex,
+
+              imageId:
+                slice.imageId,
+
+              displayNumber:
+                slice.displayNumber,
+
+              sourceWidth:
+                slice.sourceWidth,
+
+              sourceHeightFull:
+                slice.sourceHeight,
+
+              sourceY:
+                sourceY,
+
+              sourceHeight:
+                sourceHeight,
+
+              pageTopVirtual:
+                overlapStart -
+                pageStart,
+
+              pageHeightVirtual:
+                overlapEnd -
+                overlapStart
+            });
+          }
+        );
+
+        pages.push({
+          pageNumber:
+            pageIndex + 1,
+
+          pageStart:
+            pageStart,
+
+          pageEnd:
+            pageEnd,
+
+          fragments:
+            fragments
+        });
+      }
+
+      phase3bPlan = {
+        version:
+          PHASE3B_VERSION,
+
+        articleFingerprint:
+          getPhase3BArticleFingerprint(),
+
+        builtAt:
+          Date.now(),
+
+        pageWidthMm:
+          PHASE3B_A4_WIDTH_MM,
+
+        pageHeightMm:
+          PHASE3B_A4_HEIGHT_MM,
+
+        targetWidth:
+          targetWidth,
+
+        pageHeightVirtual:
+          pageHeightVirtual,
+
+        articleHeightVirtual:
+          articleHeightVirtual,
+
+        pageCount:
+          pageCount,
+
+        sliceCount:
+          chain.slices.length,
+
+        pages:
+          pages
+      };
+
+      await saveSetting(
+        PHASE3B_PLAN_KEY,
+        phase3bPlan
+      );
+
+      renderPhase3BAvailability();
+
+      phase3bPanel.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+
+
+    function renderPhase3BPrintPages() {
+      clearPhase3BPreviewUrls();
+
+      phase3bPrintArea.innerHTML =
+        "";
+
+      if (
+        !phase3bPlan ||
+        !phase3BPlanMatchesCurrentArticle()
+      ) {
+        phase3bPrintArea.innerHTML =
+          `<div class="phase3b-empty">請先建立有效的 A4 分頁計畫。</div>`;
+
+        return;
+      }
+
+      const showPageNumbers =
+        Boolean(
+          phase3bShowPageNumbers.checked
+        );
+
+      const pageHeightVirtual =
+        Math.max(
+          1,
+          Number(
+            phase3bPlan.pageHeightVirtual
+          ) || 1
+        );
+
+      for (
+        const page of
+        phase3bPlan.pages
+      ) {
+        const wrap =
+          document.createElement(
+            "div"
+          );
+
+        wrap.className =
+          "phase3b-page-wrap";
+
+        const screenLabel =
+          document.createElement(
+            "div"
+          );
+
+        screenLabel.className =
+          "phase3b-page-screen-label";
+
+        screenLabel.textContent =
+          `A4 第 ${page.pageNumber} / ${phase3bPlan.pageCount} 頁`;
+
+        wrap.appendChild(
+          screenLabel
+        );
+
+        const pageElement =
+          document.createElement(
+            "div"
+          );
+
+        pageElement.className =
+          "phase3b-print-page";
+
+        for (
+          const fragment of
+          page.fragments
+        ) {
+          const imageData =
+            getPhase2DImageById(
+              fragment.imageId
+            );
+
+          if (!imageData) {
+            continue;
+          }
+
+          const url =
+            getPhase3BImageUrl(
+              imageData
+            );
+
+          if (!url) {
+            continue;
+          }
+
+          const holder =
+            document.createElement(
+              "div"
+            );
+
+          holder.className =
+            "phase3b-page-fragment";
+
+          const topPercent =
+            fragment.pageTopVirtual /
+            pageHeightVirtual *
+            100;
+
+          const heightPercent =
+            fragment.pageHeightVirtual /
+            pageHeightVirtual *
+            100;
+
+          holder.style.top =
+            `${topPercent}%`;
+
+          holder.style.height =
+            `${heightPercent}%`;
+
+          const img =
+            document.createElement(
+              "img"
+            );
+
+          img.alt =
+            `第 ${fragment.displayNumber} 張列印切片`;
+
+          img.loading =
+            "eager";
+
+          img.decoding =
+            "async";
+
+          img.src =
+            url;
+
+          const sourceHeightFull =
+            Math.max(
+              1,
+              Number(
+                fragment.sourceHeightFull
+              ) || 1
+            );
+
+          const sourceYOffsetPercent =
+            Math.max(
+              0,
+              Number(
+                fragment.sourceY
+              ) /
+              sourceHeightFull *
+              100
+            );
+
+          img.style.transform =
+            `translateY(-${sourceYOffsetPercent}%)`;
+
+          holder.appendChild(
+            img
+          );
+
+          pageElement.appendChild(
+            holder
+          );
+        }
+
+        if (showPageNumbers) {
+          const pageNumber =
+            document.createElement(
+              "div"
+            );
+
+          pageNumber.className =
+            "phase3b-page-number";
+
+          pageNumber.textContent =
+            `${page.pageNumber} / ${phase3bPlan.pageCount}`;
+
+          pageElement.appendChild(
+            pageNumber
+          );
+        }
+
+        wrap.appendChild(
+          pageElement
+        );
+
+        phase3bPrintArea.appendChild(
+          wrap
+        );
+      }
+    }
+
+
+    function waitForPhase3BImages() {
+      const images =
+        Array.from(
+          phase3bPrintArea
+            .querySelectorAll(
+              "img"
+            )
+        );
+
+      if (images.length === 0) {
+        return Promise.resolve();
+      }
+
+      return Promise.all(
+        images.map(
+          image =>
+            new Promise(
+              resolve => {
+                if (
+                  image.complete &&
+                  image.naturalWidth > 0
+                ) {
+                  resolve();
+                  return;
+                }
+
+                let settled =
+                  false;
+
+                const finish =
+                  function() {
+                    if (settled) {
+                      return;
+                    }
+
+                    settled = true;
+
+                    resolve();
+                  };
+
+                image.addEventListener(
+                  "load",
+                  finish,
+                  {
+                    once: true
+                  }
+                );
+
+                image.addEventListener(
+                  "error",
+                  finish,
+                  {
+                    once: true
+                  }
+                );
+
+                setTimeout(
+                  finish,
+                  5000
+                );
+              }
+            )
+        )
+      );
+    }
+
+
+    async function openPhase3BPrintDialog() {
+      if (
+        !phase3bPlan ||
+        !phase3BPlanMatchesCurrentArticle()
+      ) {
+        alert(
+          "請先建立有效的 A4 分頁預覽。"
+        );
+        return;
+      }
+
+      phase3bStatus.textContent =
+        "正在準備原圖列印頁面…";
+
+      renderPhase3BPrintPages();
+
+      await waitForPhase3BImages();
+
+      phase3bStatus.innerHTML =
+        `<span class="phase3b-good">✅ A4 頁面已載入。</span>` +
+        `<br>即將開啟 Safari 列印畫面；可從列印預覽儲存為 PDF。`;
+
+      setTimeout(
+        function() {
+          window.print();
+        },
+        50
+      );
+    }
+
+
+    function renderPhase3BReviewStatus() {
+      const fingerprint =
+        getPhase3BArticleFingerprint();
+
+      if (
+        phase3bReviewState &&
+        phase3bReviewState.status ===
+          "pass" &&
+        phase3bReviewState.fingerprint ===
+          fingerprint &&
+        fingerprint
+      ) {
+        const date =
+          new Date(
+            phase3bReviewState.passedAt
+          );
+
+        phase3bReviewStatus.innerHTML =
+          `<span class="phase3b-good">✅ Phase 3-B 已 PASS。</span>` +
+          `<br>A4 分頁與目前文章版本一致。` +
+          `<br>驗收時間：${date.toLocaleString()}`;
+
+        return;
+      }
+
+      if (
+        phase3bReviewState &&
+        phase3bReviewState.status ===
+          "pass"
+      ) {
+        phase3bReviewStatus.innerHTML =
+          `<span class="phase3b-warn">⚠️ 先前的 Phase 3-B PASS 已失效。</span>` +
+          `<br>文章內容或接縫已改變，請重新建立分頁並驗收。`;
+
+        return;
+      }
+
+      phase3bReviewStatus.textContent =
+        "尚未完成 Phase 3-B 驗收。";
+    }
+
+
+    async function markPhase3BPass() {
+      if (
+        !phase3bPlan ||
+        !phase3BPlanMatchesCurrentArticle()
+      ) {
+        alert(
+          "請先建立有效的 A4 分頁預覽。"
+        );
+        return;
+      }
+
+      const confirmed =
+        confirm(
+          "請確認：你已檢查 A4 頁面順序，頁與頁之間沒有漏掉內容，也沒有整段重複。要標記 Phase 3-B PASS 嗎？"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      phase3bReviewState = {
+        version:
+          PHASE3B_VERSION,
+
+        status:
+          "pass",
+
+        fingerprint:
+          getPhase3BArticleFingerprint(),
+
+        pageCount:
+          phase3bPlan.pageCount,
+
+        passedAt:
+          Date.now()
+      };
+
+      await saveSetting(
+        PHASE3B_REVIEW_KEY,
+        phase3bReviewState
+      );
+
+      renderPhase3BReviewStatus();
+    }
+
+
+    async function clearPhase3BPlan() {
+      const confirmed =
+        confirm(
+          "確定要清除 Phase 3-B A4 分頁計畫與驗收狀態嗎？原始截圖、Phase 2-E 完整文章與 Phase 3-A 重建資料都不會被刪除。"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      phase3bPlan = null;
+      phase3bReviewState = null;
+
+      await saveSetting(
+        PHASE3B_PLAN_KEY,
+        null
+      );
+
+      await saveSetting(
+        PHASE3B_REVIEW_KEY,
+        null
+      );
+
+      clearPhase3BPreviewUrls();
+
+      phase3bPrintArea.innerHTML =
+        `<div class="phase3b-empty">請重新建立 A4 分頁預覽。</div>`;
+
+      renderPhase3BAvailability();
     }
 
 
