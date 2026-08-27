@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Screenshot Report｜Phase 3-B v3 Direct PDF</title>
+  <title>Screenshot Report｜Phase 3-C-A OCR</title>
 
   <style>
     * {
@@ -1638,6 +1638,210 @@
       }
     }
 
+
+
+    /*
+      =========================
+      Phase 3-C-A
+      單一文章切片 OCR 驗證
+      =========================
+    */
+
+    .phase3c-panel {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 16px;
+      background: #eef7fb;
+      border: 1px solid #b9d7e6;
+    }
+
+    .phase3c-panel h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    .phase3c-panel p {
+      margin: 0 0 12px;
+      color: #5f6368;
+      line-height: 1.65;
+      font-size: 14px;
+    }
+
+    .phase3c-version {
+      margin: 8px 0 12px;
+      padding: 9px 11px;
+      border-radius: 10px;
+      background: #dff3ff;
+      border: 1px solid #8fc8e5;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .phase3c-card,
+    .phase3c-status {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid #c8dfe9;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .phase3c-field {
+      margin-top: 10px;
+    }
+
+    .phase3c-field label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 800;
+    }
+
+    .phase3c-field select {
+      width: 100%;
+      min-height: 48px;
+      padding: 8px 10px;
+      border: 1px solid #bfc7ce;
+      border-radius: 10px;
+      background: white;
+      font-size: 16px;
+      color: #222;
+    }
+
+    .phase3c-button-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .phase3c-button-grid button {
+      margin: 0;
+    }
+
+    .phase3c-start-button {
+      background: #1479a6;
+    }
+
+    .phase3c-stop-button {
+      background: #b9770e;
+    }
+
+    .phase3c-download-button {
+      background: #44617b;
+    }
+
+    .phase3c-pass-button {
+      background: #27864f;
+    }
+
+    .phase3c-progress-wrap {
+      margin-top: 10px;
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #e4e9ed;
+    }
+
+    .phase3c-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: #1686b4;
+      transition: width 0.2s ease;
+    }
+
+    .phase3c-progress-text {
+      margin-top: 6px;
+      font-size: 13px;
+      color: #4c5962;
+      line-height: 1.5;
+    }
+
+    .phase3c-preview-shell {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 12px;
+      background: #dcebf2;
+      border: 1px solid #bdd4de;
+    }
+
+    .phase3c-preview-shell canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 620px;
+      object-fit: contain;
+      background: white;
+      border-radius: 8px;
+    }
+
+    .phase3c-result-meta {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .phase3c-result-meta > div {
+      padding: 10px;
+      border-radius: 10px;
+      background: #f5f8fa;
+      border: 1px solid #dce4e9;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .phase3c-result-meta strong {
+      display: block;
+      margin-top: 3px;
+      font-size: 18px;
+    }
+
+    .phase3c-textarea {
+      width: 100%;
+      min-height: 300px;
+      margin-top: 10px;
+      padding: 12px;
+      box-sizing: border-box;
+      resize: vertical;
+      border: 1px solid #bfcbd2;
+      border-radius: 10px;
+      background: #fff;
+      color: #111;
+      font-family:
+        "PingFang TC",
+        "Noto Sans TC",
+        "Microsoft JhengHei",
+        -apple-system,
+        BlinkMacSystemFont,
+        sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .phase3c-good {
+      color: #176137;
+      font-weight: 800;
+    }
+
+    .phase3c-warn {
+      color: #9a3412;
+      font-weight: 800;
+    }
+
+    .phase3c-note {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      background: #fff7db;
+      border: 1px solid #e3cc7a;
+      color: #5c4a12;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
 </style>
 </head>
 
@@ -2619,6 +2823,194 @@
           </div>
         </div>
 
+        <div
+          id="phase3cPanel"
+          class="phase3c-panel"
+        >
+          <h3>
+            Phase 3-C-A｜單一文章切片 OCR 驗證
+          </h3>
+
+          <div class="phase3c-version">
+            版本：Phase 3-C-A v1｜SINGLE-SLICE-OCR-20260827
+            <br>
+            免費瀏覽器 OCR｜先測 1 張，PASS 後才跑整篇
+          </div>
+
+          <p>
+            本階段只測試一個文章切片。OCR 會直接在你的手機瀏覽器執行，
+            不上傳文章圖片到付費 OCR API。第一次使用時需要網路下載 OCR 引擎與語言資料。
+          </p>
+
+          <div
+            id="phase3cStatus"
+            class="phase3c-status"
+          >
+            等待完整文章資料。
+          </div>
+
+          <div class="phase3c-card">
+            <strong>
+              OCR 測試設定
+            </strong>
+
+            <div class="phase3c-field">
+              <label for="phase3cSliceSelect">
+                測試文章切片
+              </label>
+              <select
+                id="phase3cSliceSelect"
+              ></select>
+            </div>
+
+            <div class="phase3c-field">
+              <label for="phase3cLanguageSelect">
+                原文語言
+              </label>
+              <select
+                id="phase3cLanguageSelect"
+              >
+                <option value="chi_sim+eng" selected>
+                  簡體中文＋英文（目前這篇文章建議）
+                </option>
+                <option value="chi_tra+eng">
+                  繁體中文＋英文
+                </option>
+                <option value="eng">
+                  英文
+                </option>
+              </select>
+            </div>
+
+            <div class="phase3c-button-grid">
+              <button
+                id="phase3cPrepareButton"
+                class="secondary-button"
+                onclick="preparePhase3COcrPreview()"
+                disabled
+              >
+                更新 OCR 輸入預覽
+              </button>
+
+              <button
+                id="phase3cStartButton"
+                class="phase3c-start-button"
+                onclick="runPhase3CSingleSliceOcr()"
+                disabled
+              >
+                開始單一切片 OCR 測試
+              </button>
+
+              <button
+                id="phase3cStopButton"
+                class="phase3c-stop-button"
+                onclick="stopPhase3COcr()"
+                disabled
+              >
+                ■ 停止 OCR
+              </button>
+
+              <button
+                id="phase3cDownloadButton"
+                class="phase3c-download-button"
+                onclick="downloadPhase3COcrText()"
+                disabled
+              >
+                下載 OCR 測試文字 TXT
+              </button>
+
+              <button
+                id="phase3cPassButton"
+                class="phase3c-pass-button"
+                onclick="markPhase3CAPass()"
+                disabled
+              >
+                ✓ 文字可用，標記 Phase 3-C-A PASS
+              </button>
+            </div>
+
+            <div class="phase3c-progress-wrap">
+              <div
+                id="phase3cProgressBar"
+                class="phase3c-progress-bar"
+              ></div>
+            </div>
+
+            <div
+              id="phase3cProgressText"
+              class="phase3c-progress-text"
+            >
+              尚未開始 OCR。
+            </div>
+          </div>
+
+          <div class="phase3c-preview-shell">
+            <strong>
+              OCR 實際輸入影像
+            </strong>
+            <div
+              style="
+                margin: 4px 0 8px;
+                color: #5f6368;
+                font-size: 12px;
+                line-height: 1.5;
+              "
+            >
+              只使用 Phase 2-E 保留下來的文章區域；最大寬度 1200 px，避免手機記憶體壓力。
+            </div>
+
+            <canvas
+              id="phase3cPreviewCanvas"
+              width="1"
+              height="1"
+            ></canvas>
+          </div>
+
+          <div class="phase3c-card">
+            <strong>
+              OCR 辨識結果
+            </strong>
+
+            <div class="phase3c-result-meta">
+              <div>
+                平均信心
+                <strong id="phase3cConfidence">—</strong>
+              </div>
+              <div>
+                字元數
+                <strong id="phase3cCharCount">0</strong>
+              </div>
+              <div>
+                行數
+                <strong id="phase3cLineCount">0</strong>
+              </div>
+              <div>
+                處理時間
+                <strong id="phase3cElapsed">—</strong>
+              </div>
+            </div>
+
+            <textarea
+              id="phase3cText"
+              class="phase3c-textarea"
+              placeholder="OCR 完成後，辨識文字會出現在這裡。你可以直接人工修正；修正後的文字也會用於 TXT 下載。"
+            ></textarea>
+          </div>
+
+          <div
+            id="phase3cReviewStatus"
+            class="phase3c-status"
+          >
+            尚未完成 Phase 3-C-A 人工驗收。
+          </div>
+
+          <div class="phase3c-note">
+            <strong>這一步的 PASS 標準不是 100% 正確。</strong>
+            只要標題與主要段落大致可讀、中文沒有整片變成亂碼、手機沒有閃退，就算 OCR 引擎可用。
+            整篇批次 OCR、段落去重與文字校正會在後續 Phase 3-C-B / 3-C-C 處理。
+          </div>
+        </div>
+
         <div class="order-help">
           ◀ = 往前移一格　
           ▶ = 往後移一格　
@@ -2900,6 +3292,60 @@
     const phase3bPrintArea =
       document.getElementById("phase3bPrintArea");
 
+    const phase3cPanel =
+      document.getElementById("phase3cPanel");
+
+    const phase3cStatus =
+      document.getElementById("phase3cStatus");
+
+    const phase3cSliceSelect =
+      document.getElementById("phase3cSliceSelect");
+
+    const phase3cLanguageSelect =
+      document.getElementById("phase3cLanguageSelect");
+
+    const phase3cPrepareButton =
+      document.getElementById("phase3cPrepareButton");
+
+    const phase3cStartButton =
+      document.getElementById("phase3cStartButton");
+
+    const phase3cStopButton =
+      document.getElementById("phase3cStopButton");
+
+    const phase3cDownloadButton =
+      document.getElementById("phase3cDownloadButton");
+
+    const phase3cPassButton =
+      document.getElementById("phase3cPassButton");
+
+    const phase3cProgressBar =
+      document.getElementById("phase3cProgressBar");
+
+    const phase3cProgressText =
+      document.getElementById("phase3cProgressText");
+
+    const phase3cPreviewCanvas =
+      document.getElementById("phase3cPreviewCanvas");
+
+    const phase3cConfidence =
+      document.getElementById("phase3cConfidence");
+
+    const phase3cCharCount =
+      document.getElementById("phase3cCharCount");
+
+    const phase3cLineCount =
+      document.getElementById("phase3cLineCount");
+
+    const phase3cElapsed =
+      document.getElementById("phase3cElapsed");
+
+    const phase3cText =
+      document.getElementById("phase3cText");
+
+    const phase3cReviewStatus =
+      document.getElementById("phase3cReviewStatus");
+
     const PHASE2C_STATE_KEY =
       "phase2cBatchState:v1";
 
@@ -2935,6 +3381,21 @@
     const PHASE3B_A4_HEIGHT_MM =
       297;
 
+    const PHASE3C_RESULT_KEY =
+      "phase3cSingleSliceOcr:v1";
+
+    const PHASE3C_REVIEW_KEY =
+      "phase3cSingleSliceOcrReview:v1";
+
+    const PHASE3C_VERSION =
+      1;
+
+    const PHASE3C_TESSERACT_CDN =
+      "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+
+    const PHASE3C_MAX_WIDTH =
+      1200;
+
     let phase2cState = null;
     let phase2cRunning = false;
     let phase2cStopRequested = false;
@@ -2965,6 +3426,14 @@
 
     const phase3bImageUrlCache =
       new Map();
+
+    let phase3cResult = null;
+    let phase3cReviewState = null;
+    let phase3cWorker = null;
+    let phase3cScriptPromise = null;
+    let phase3cRunning = false;
+    let phase3cStoppedByUser = false;
+    let phase3cPreparedSliceId = null;
 
     let lastOverlapCandidate = null;
     let currentSeamOverlapPixels = 0;
@@ -3061,6 +3530,41 @@
     );
 
 
+    phase3cSliceSelect.addEventListener(
+      "change",
+      function() {
+        phase3cPreparedSliceId = null;
+        preparePhase3COcrPreview();
+        renderPhase3CResultState();
+      }
+    );
+
+    phase3cLanguageSelect.addEventListener(
+      "change",
+      function() {
+        renderPhase3CResultState();
+      }
+    );
+
+    phase3cText.addEventListener(
+      "input",
+      function() {
+        const text =
+          phase3cText.value || "";
+
+        phase3cCharCount.textContent =
+          String(text.length);
+
+        phase3cLineCount.textContent =
+          String(
+            text
+              ? text.split(/\r?\n/).length
+              : 0
+          );
+      }
+    );
+
+
     async function startApp() {
       try {
         db = await openDatabase();
@@ -3075,6 +3579,7 @@
         await loadPhase2EWorkspace();
         await loadPhase3AReviewState();
         await loadPhase3BState();
+        await loadPhase3CState();
         await updateStorageInfo();
       }
       catch (error) {
@@ -7268,6 +7773,13 @@
           ) {
             renderPhase3BAvailability();
           }
+
+          if (
+            typeof renderPhase3CAvailability ===
+            "function"
+          ) {
+            renderPhase3CAvailability();
+          }
         }
       );
 
@@ -9347,6 +9859,1142 @@
         `<div class="phase3b-empty">請重新建立 A4 分頁預覽。</div>`;
 
       renderPhase3BAvailability();
+    }
+
+
+
+    /*
+      =========================
+      Phase 3-C-A
+      單一文章切片 OCR 驗證
+      =========================
+    */
+
+    function getPhase3CFingerprint() {
+      if (!phase3APlanIsReady()) {
+        return "";
+      }
+
+      return getPhase3APlanFingerprint();
+    }
+
+
+    function getPhase3CSelectedSlice() {
+      if (!phase3APlanIsReady()) {
+        return null;
+      }
+
+      const imageId =
+        Number(
+          phase3cSliceSelect.value
+        );
+
+      if (!Number.isFinite(imageId)) {
+        return null;
+      }
+
+      return (
+        phase2eArticlePlan.chain.slices.find(
+          slice =>
+            Number(slice.imageId) ===
+            imageId
+        ) || null
+      );
+    }
+
+
+    function populatePhase3CSliceSelector() {
+      const previousValue =
+        phase3cSliceSelect.value;
+
+      phase3cSliceSelect.innerHTML =
+        "";
+
+      if (!phase3APlanIsReady()) {
+        return;
+      }
+
+      const slices =
+        phase2eArticlePlan.chain.slices;
+
+      for (const slice of slices) {
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          String(slice.imageId);
+
+        option.textContent =
+          `第 ${slice.displayNumber} 張｜保留 ${Math.round(slice.retainedHeight)} px`;
+
+        phase3cSliceSelect.appendChild(
+          option
+        );
+      }
+
+      const canRestore =
+        slices.some(
+          slice =>
+            String(slice.imageId) ===
+            previousValue
+        );
+
+      if (canRestore) {
+        phase3cSliceSelect.value =
+          previousValue;
+      }
+      else if (slices.length) {
+        phase3cSliceSelect.value =
+          String(slices[0].imageId);
+      }
+    }
+
+
+    async function loadPhase3CState() {
+      try {
+        const saved =
+          await getSetting(
+            PHASE3C_RESULT_KEY
+          );
+
+        phase3cResult =
+          saved && saved.value
+            ? saved.value
+            : null;
+      }
+      catch (error) {
+        console.warn(
+          "讀取 Phase 3-C OCR 結果失敗：",
+          error
+        );
+
+        phase3cResult = null;
+      }
+
+      try {
+        const savedReview =
+          await getSetting(
+            PHASE3C_REVIEW_KEY
+          );
+
+        phase3cReviewState =
+          savedReview &&
+          savedReview.value
+            ? savedReview.value
+            : null;
+      }
+      catch (error) {
+        console.warn(
+          "讀取 Phase 3-C 驗收狀態失敗：",
+          error
+        );
+
+        phase3cReviewState =
+          null;
+      }
+
+      renderPhase3CAvailability();
+    }
+
+
+    function renderPhase3CAvailability() {
+      const ready =
+        phase3APlanIsReady();
+
+      if (!ready) {
+        phase3cStatus.innerHTML =
+          `<span class="phase3c-warn">⚠️ 尚無可 OCR 的完整文章。</span>` +
+          `<br>請先完成 Phase 2-E 的完整文章虛擬文件。`;
+
+        phase3cPrepareButton.disabled =
+          true;
+
+        phase3cStartButton.disabled =
+          true;
+
+        phase3cStopButton.disabled =
+          true;
+
+        phase3cDownloadButton.disabled =
+          true;
+
+        phase3cPassButton.disabled =
+          true;
+
+        renderPhase3CReviewStatus();
+
+        return;
+      }
+
+      populatePhase3CSliceSelector();
+
+      phase3cPrepareButton.disabled =
+        false;
+
+      phase3cStartButton.disabled =
+        false;
+
+      phase3cStatus.innerHTML =
+        `<span class="phase3c-good">✅ OCR 測試資料已就緒。</span>` +
+        `<br>文章第 ${phase2eArticlePlan.chain.slices[0].displayNumber}～` +
+        `${phase2eArticlePlan.chain.slices[phase2eArticlePlan.chain.slices.length - 1].displayNumber} 張` +
+        `｜共 ${phase2eArticlePlan.chain.slices.length} 切片` +
+        `<br>本階段只辨識你選的一張。`;
+
+      renderPhase3CResultState();
+      renderPhase3CReviewStatus();
+
+      if (
+        phase3cPreviewCanvas.width <= 1 ||
+        phase3cPreparedSliceId === null
+      ) {
+        preparePhase3COcrPreview();
+      }
+    }
+
+
+    function renderPhase3CResultState() {
+      const slice =
+        getPhase3CSelectedSlice();
+
+      if (!slice) {
+        phase3cDownloadButton.disabled =
+          true;
+
+        phase3cPassButton.disabled =
+          true;
+
+        return;
+      }
+
+      const language =
+        phase3cLanguageSelect.value;
+
+      const matching =
+        phase3cResult &&
+        phase3cResult.version ===
+          PHASE3C_VERSION &&
+        phase3cResult.articleFingerprint ===
+          getPhase3CFingerprint() &&
+        Number(
+          phase3cResult.imageId
+        ) ===
+          Number(
+            slice.imageId
+          ) &&
+        phase3cResult.language ===
+          language;
+
+      if (!matching) {
+        phase3cConfidence.textContent =
+          "—";
+
+        phase3cCharCount.textContent =
+          "0";
+
+        phase3cLineCount.textContent =
+          "0";
+
+        phase3cElapsed.textContent =
+          "—";
+
+        phase3cText.value =
+          "";
+
+        phase3cDownloadButton.disabled =
+          true;
+
+        phase3cPassButton.disabled =
+          true;
+
+        return;
+      }
+
+      const text =
+        String(
+          phase3cResult.text || ""
+        );
+
+      phase3cText.value =
+        text;
+
+      phase3cConfidence.textContent =
+        Number.isFinite(
+          Number(
+            phase3cResult.confidence
+          )
+        )
+          ? `${Number(
+              phase3cResult.confidence
+            ).toFixed(1)}%`
+          : "—";
+
+      phase3cCharCount.textContent =
+        String(text.length);
+
+      phase3cLineCount.textContent =
+        String(
+          text
+            ? text.split(/\r?\n/).length
+            : 0
+        );
+
+      phase3cElapsed.textContent =
+        Number.isFinite(
+          Number(
+            phase3cResult.elapsedMs
+          )
+        )
+          ? `${(
+              Number(
+                phase3cResult.elapsedMs
+              ) /
+              1000
+            ).toFixed(1)} 秒`
+          : "—";
+
+      const usable =
+        text.trim().length >= 10;
+
+      phase3cDownloadButton.disabled =
+        !usable;
+
+      phase3cPassButton.disabled =
+        !usable;
+    }
+
+
+    function renderPhase3CReviewStatus() {
+      const fingerprint =
+        getPhase3CFingerprint();
+
+      if (
+        phase3cReviewState &&
+        phase3cReviewState.status ===
+          "pass" &&
+        phase3cReviewState.articleFingerprint ===
+          fingerprint &&
+        fingerprint
+      ) {
+        const date =
+          new Date(
+            phase3cReviewState.passedAt
+          );
+
+        phase3cReviewStatus.innerHTML =
+          `<span class="phase3c-good">✅ Phase 3-C-A 已 PASS。</span>` +
+          `<br>已確認單一切片 OCR 在此手機可用。` +
+          `<br>驗收時間：${date.toLocaleString()}`;
+
+        return;
+      }
+
+      if (
+        phase3cReviewState &&
+        phase3cReviewState.status ===
+          "pass"
+      ) {
+        phase3cReviewStatus.innerHTML =
+          `<span class="phase3c-warn">⚠️ 舊的 Phase 3-C-A PASS 已失效。</span>` +
+          `<br>文章版本已改變，請重新測試 OCR。`;
+
+        return;
+      }
+
+      phase3cReviewStatus.textContent =
+        "尚未完成 Phase 3-C-A 人工驗收。";
+    }
+
+
+    async function preparePhase3COcrPreview() {
+      const slice =
+        getPhase3CSelectedSlice();
+
+      if (!slice) {
+        return false;
+      }
+
+      const imageData =
+        getPhase2DImageById(
+          slice.imageId
+        );
+
+      if (!imageData) {
+        phase3cStatus.innerHTML =
+          `<span class="phase3c-warn">❌ 找不到第 ${slice.displayNumber} 張原始圖片。</span>`;
+
+        return false;
+      }
+
+      phase3cPrepareButton.disabled =
+        true;
+
+      phase3cStartButton.disabled =
+        true;
+
+      phase3cProgressText.textContent =
+        `正在準備第 ${slice.displayNumber} 張 OCR 影像…`;
+
+      try {
+        const loaded =
+          await loadImageElementFromBlob(
+            imageData.blob,
+            imageData.type,
+            imageData.name
+          );
+
+        try {
+          const image =
+            loaded.image;
+
+          const sourceWidthReference =
+            Math.max(
+              1,
+              Number(
+                slice.sourceWidth
+              ) || image.naturalWidth
+            );
+
+          const sourceHeightReference =
+            Math.max(
+              1,
+              Number(
+                slice.sourceHeight
+              ) || image.naturalHeight
+            );
+
+          const scaleX =
+            image.naturalWidth /
+            sourceWidthReference;
+
+          const scaleY =
+            image.naturalHeight /
+            sourceHeightReference;
+
+          const cropTop =
+            Math.max(
+              0,
+              Number(
+                slice.cropTop
+              ) || 0
+            );
+
+          const cropBottom =
+            Math.min(
+              sourceHeightReference,
+              Number(
+                slice.cropBottom
+              ) ||
+              sourceHeightReference
+            );
+
+          const cropHeightReference =
+            Math.max(
+              1,
+              cropBottom -
+              cropTop
+            );
+
+          const sx = 0;
+
+          const sy =
+            Math.max(
+              0,
+              cropTop *
+              scaleY
+            );
+
+          const sw =
+            image.naturalWidth;
+
+          const sh =
+            Math.max(
+              1,
+              Math.min(
+                image.naturalHeight -
+                sy,
+                cropHeightReference *
+                scaleY
+              )
+            );
+
+          const outputScale =
+            Math.min(
+              1,
+              PHASE3C_MAX_WIDTH /
+              image.naturalWidth
+            );
+
+          const outputWidth =
+            Math.max(
+              1,
+              Math.round(
+                image.naturalWidth *
+                outputScale
+              )
+            );
+
+          const outputHeight =
+            Math.max(
+              1,
+              Math.round(
+                sh *
+                outputScale
+              )
+            );
+
+          phase3cPreviewCanvas.width =
+            outputWidth;
+
+          phase3cPreviewCanvas.height =
+            outputHeight;
+
+          const context =
+            phase3cPreviewCanvas.getContext(
+              "2d",
+              {
+                alpha: false
+              }
+            );
+
+          if (!context) {
+            throw new Error(
+              "無法建立 OCR Canvas"
+            );
+          }
+
+          context.fillStyle =
+            "#ffffff";
+
+          context.fillRect(
+            0,
+            0,
+            outputWidth,
+            outputHeight
+          );
+
+          context.drawImage(
+            image,
+            sx,
+            sy,
+            sw,
+            sh,
+            0,
+            0,
+            outputWidth,
+            outputHeight
+          );
+
+          phase3cPreparedSliceId =
+            Number(
+              slice.imageId
+            );
+
+          phase3cProgressText.textContent =
+            `✅ 第 ${slice.displayNumber} 張 OCR 輸入已準備：` +
+            `${outputWidth} × ${outputHeight} px`;
+
+          return true;
+        }
+        finally {
+          try {
+            URL.revokeObjectURL(
+              loaded.url
+            );
+          }
+          catch (error) {
+            console.warn(
+              "OCR 預覽 Blob URL 回收失敗：",
+              error
+            );
+          }
+        }
+      }
+      catch (error) {
+        console.error(
+          error
+        );
+
+        phase3cProgressText.textContent =
+          `❌ OCR 輸入準備失敗：${error.message || error}`;
+
+        return false;
+      }
+      finally {
+        phase3cPrepareButton.disabled =
+          false;
+
+        phase3cStartButton.disabled =
+          false;
+      }
+    }
+
+
+    function translatePhase3COcrStatus(
+      status
+    ) {
+      const map = {
+        "loading tesseract core":
+          "載入 OCR 核心",
+        "initializing tesseract":
+          "初始化 OCR 引擎",
+        "loading language traineddata":
+          "下載／載入語言資料",
+        "initializing api":
+          "初始化辨識 API",
+        "recognizing text":
+          "辨識文字"
+      };
+
+      return (
+        map[status] ||
+        status ||
+        "處理中"
+      );
+    }
+
+
+    function loadPhase3COcrEngine() {
+      if (
+        window.Tesseract &&
+        typeof window.Tesseract.createWorker ===
+          "function"
+      ) {
+        return Promise.resolve(
+          window.Tesseract
+        );
+      }
+
+      if (phase3cScriptPromise) {
+        return phase3cScriptPromise;
+      }
+
+      phase3cScriptPromise =
+        new Promise(
+          (
+            resolve,
+            reject
+          ) => {
+            const existing =
+              document.querySelector(
+                'script[data-phase3c-tesseract="1"]'
+              );
+
+            if (existing) {
+              existing.addEventListener(
+                "load",
+                function() {
+                  resolve(
+                    window.Tesseract
+                  );
+                },
+                {
+                  once: true
+                }
+              );
+
+              existing.addEventListener(
+                "error",
+                function() {
+                  reject(
+                    new Error(
+                      "Tesseract.js 載入失敗"
+                    )
+                  );
+                },
+                {
+                  once: true
+                }
+              );
+
+              return;
+            }
+
+            const script =
+              document.createElement(
+                "script"
+              );
+
+            script.src =
+              PHASE3C_TESSERACT_CDN;
+
+            script.async =
+              true;
+
+            script.crossOrigin =
+              "anonymous";
+
+            script.dataset.phase3cTesseract =
+              "1";
+
+            script.onload =
+              function() {
+                if (
+                  window.Tesseract &&
+                  typeof window.Tesseract.createWorker ===
+                    "function"
+                ) {
+                  resolve(
+                    window.Tesseract
+                  );
+                }
+                else {
+                  reject(
+                    new Error(
+                      "OCR 引擎載入後找不到 Tesseract.createWorker"
+                    )
+                  );
+                }
+              };
+
+            script.onerror =
+              function() {
+                reject(
+                  new Error(
+                    "無法從免費 CDN 下載 OCR 引擎，請檢查網路後重試"
+                  )
+                );
+              };
+
+            document.head.appendChild(
+              script
+            );
+          }
+        );
+
+      return phase3cScriptPromise;
+    }
+
+
+    async function runPhase3CSingleSliceOcr() {
+      if (phase3cRunning) {
+        return;
+      }
+
+      const slice =
+        getPhase3CSelectedSlice();
+
+      if (!slice) {
+        alert(
+          "請先選擇文章切片。"
+        );
+        return;
+      }
+
+      if (
+        phase3cPreparedSliceId !==
+        Number(
+          slice.imageId
+        )
+      ) {
+        const prepared =
+          await preparePhase3COcrPreview();
+
+        if (!prepared) {
+          return;
+        }
+      }
+
+      phase3cRunning =
+        true;
+
+      phase3cStoppedByUser =
+        false;
+
+      phase3cStartButton.disabled =
+        true;
+
+      phase3cPrepareButton.disabled =
+        true;
+
+      phase3cStopButton.disabled =
+        false;
+
+      phase3cDownloadButton.disabled =
+        true;
+
+      phase3cPassButton.disabled =
+        true;
+
+      phase3cProgressBar.style.width =
+        "2%";
+
+      phase3cProgressText.textContent =
+        "正在載入免費 OCR 引擎…";
+
+      const startedAt =
+        performance.now();
+
+      try {
+        const Tesseract =
+          await loadPhase3COcrEngine();
+
+        if (phase3cStoppedByUser) {
+          throw new Error(
+            "OCR 已由使用者停止"
+          );
+        }
+
+        const languageValue =
+          phase3cLanguageSelect.value;
+
+        const languages =
+          languageValue.includes("+")
+            ? languageValue.split("+")
+            : languageValue;
+
+        phase3cProgressText.textContent =
+          "正在建立 OCR Worker；第一次可能需要下載語言資料…";
+
+        phase3cWorker =
+          await Tesseract.createWorker(
+            languages,
+            1,
+            {
+              logger:
+                function(message) {
+                  if (
+                    !message ||
+                    phase3cStoppedByUser
+                  ) {
+                    return;
+                  }
+
+                  const progress =
+                    Number(
+                      message.progress
+                    );
+
+                  const percent =
+                    Number.isFinite(progress)
+                      ? Math.max(
+                          3,
+                          Math.min(
+                            99,
+                            Math.round(
+                              progress *
+                              100
+                            )
+                          )
+                        )
+                      : 8;
+
+                  phase3cProgressBar.style.width =
+                    `${percent}%`;
+
+                  phase3cProgressText.textContent =
+                    `${translatePhase3COcrStatus(
+                      message.status
+                    )}` +
+                    (
+                      Number.isFinite(progress)
+                        ? `｜${Math.round(progress * 100)}%`
+                        : ""
+                    );
+                }
+            }
+          );
+
+        if (phase3cStoppedByUser) {
+          throw new Error(
+            "OCR 已由使用者停止"
+          );
+        }
+
+        try {
+          await phase3cWorker.setParameters({
+            preserve_interword_spaces:
+              "1"
+          });
+        }
+        catch (error) {
+          console.warn(
+            "OCR 參數設定略過：",
+            error
+          );
+        }
+
+        const result =
+          await phase3cWorker.recognize(
+            phase3cPreviewCanvas
+          );
+
+        if (phase3cStoppedByUser) {
+          throw new Error(
+            "OCR 已由使用者停止"
+          );
+        }
+
+        const text =
+          String(
+            result &&
+            result.data &&
+            result.data.text
+              ? result.data.text
+              : ""
+          );
+
+        const confidence =
+          Number(
+            result &&
+            result.data
+              ? result.data.confidence
+              : NaN
+          );
+
+        const elapsedMs =
+          performance.now() -
+          startedAt;
+
+        phase3cResult = {
+          version:
+            PHASE3C_VERSION,
+
+          articleFingerprint:
+            getPhase3CFingerprint(),
+
+          imageId:
+            slice.imageId,
+
+          displayNumber:
+            slice.displayNumber,
+
+          language:
+            languageValue,
+
+          confidence:
+            Number.isFinite(
+              confidence
+            )
+              ? confidence
+              : null,
+
+          text:
+            text,
+
+          elapsedMs:
+            elapsedMs,
+
+          createdAt:
+            Date.now()
+        };
+
+        await saveSetting(
+          PHASE3C_RESULT_KEY,
+          phase3cResult
+        );
+
+        phase3cProgressBar.style.width =
+          "100%";
+
+        phase3cProgressText.textContent =
+          `✅ OCR 完成：第 ${slice.displayNumber} 張`;
+
+        phase3cStatus.innerHTML =
+          `<span class="phase3c-good">✅ 單一切片 OCR 已完成。</span>` +
+          `<br>請人工查看下方文字；此階段只驗證 OCR 是否可用。`;
+
+        renderPhase3CResultState();
+      }
+      catch (error) {
+        console.error(
+          error
+        );
+
+        if (phase3cStoppedByUser) {
+          phase3cProgressBar.style.width =
+            "0%";
+
+          phase3cProgressText.textContent =
+            "⏹ OCR 已停止。原始圖片與既有結果不會被刪除。";
+        }
+        else {
+          phase3cProgressBar.style.width =
+            "0%";
+
+          phase3cProgressText.textContent =
+            `❌ OCR 失敗：${error.message || error}`;
+
+          phase3cStatus.innerHTML =
+            `<span class="phase3c-warn">❌ OCR 引擎沒有完成辨識。</span>` +
+            `<br>${error.message || error}` +
+            `<br>請確認網路可連到 jsDelivr 後再試一次。`;
+        }
+      }
+      finally {
+        if (phase3cWorker) {
+          try {
+            await phase3cWorker.terminate();
+          }
+          catch (error) {
+            console.warn(
+              "OCR Worker 終止失敗：",
+              error
+            );
+          }
+        }
+
+        phase3cWorker =
+          null;
+
+        phase3cRunning =
+          false;
+
+        phase3cStartButton.disabled =
+          false;
+
+        phase3cPrepareButton.disabled =
+          false;
+
+        phase3cStopButton.disabled =
+          true;
+
+        renderPhase3CResultState();
+      }
+    }
+
+
+    async function stopPhase3COcr() {
+      if (!phase3cRunning) {
+        return;
+      }
+
+      phase3cStoppedByUser =
+        true;
+
+      phase3cProgressText.textContent =
+        "正在停止 OCR…";
+
+      if (phase3cWorker) {
+        try {
+          await phase3cWorker.terminate();
+        }
+        catch (error) {
+          console.warn(
+            "停止 OCR Worker 時發生錯誤：",
+            error
+          );
+        }
+
+        phase3cWorker = null;
+      }
+    }
+
+
+    function downloadPhase3COcrText() {
+      const text =
+        String(
+          phase3cText.value || ""
+        );
+
+      if (!text.trim()) {
+        alert(
+          "目前沒有可下載的 OCR 文字。"
+        );
+        return;
+      }
+
+      const slice =
+        getPhase3CSelectedSlice();
+
+      const blob =
+        new Blob(
+          [
+            "\ufeff",
+            text
+          ],
+          {
+            type:
+              "text/plain;charset=utf-8"
+          }
+        );
+
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+      const link =
+        document.createElement(
+          "a"
+        );
+
+      link.href =
+        url;
+
+      link.download =
+        `phase3c-ocr-page-${slice ? slice.displayNumber : "test"}.txt`;
+
+      document.body.appendChild(
+        link
+      );
+
+      link.click();
+      link.remove();
+
+      setTimeout(
+        function() {
+          URL.revokeObjectURL(
+            url
+          );
+        },
+        30000
+      );
+    }
+
+
+    async function markPhase3CAPass() {
+      const text =
+        String(
+          phase3cText.value || ""
+        ).trim();
+
+      if (text.length < 10) {
+        alert(
+          "OCR 文字太少，請先完成一次可用的 OCR 測試。"
+        );
+        return;
+      }
+
+      const confirmed =
+        confirm(
+          "請確認：主要標題或段落大致可讀、中文不是整片亂碼，而且手機沒有因 OCR 閃退。要標記 Phase 3-C-A PASS 嗎？"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      phase3cReviewState = {
+        version:
+          PHASE3C_VERSION,
+
+        status:
+          "pass",
+
+        articleFingerprint:
+          getPhase3CFingerprint(),
+
+        imageId:
+          Number(
+            phase3cSliceSelect.value
+          ),
+
+        language:
+          phase3cLanguageSelect.value,
+
+        passedAt:
+          Date.now()
+      };
+
+      await saveSetting(
+        PHASE3C_REVIEW_KEY,
+        phase3cReviewState
+      );
+
+      renderPhase3CReviewStatus();
     }
 
 
