@@ -3671,15 +3671,15 @@
           </h3>
 
           <div class="phase3cc-version">
-            版本：Phase 3-C-C v1｜TEXT-REBUILD-TRADITIONAL-20260828
+            版本：Phase 3-C-C v1.1｜TEXT-REBUILD-NOISE-FIX-20260829
             <br>
-            保留 Raw OCR｜安全接縫去重｜段落整理｜OpenCC 簡轉繁｜可回復
+            保留 Raw OCR｜安全接縫去重｜段落整理｜OpenCC 簡轉繁｜雜訊偵測修正｜可回復
           </div>
 
           <p>
             本階段不會覆蓋 Phase 3-C-B 的原始 OCR。
             系統會另外建立「清理後原文」與「繁體中文版本」兩層文字，
-            並把疑似 OCR 雜訊列出來供後續人工或 AI 校正。
+            並把高風險 OCR 雜訊列出來供後續人工或 AI 校正。v1.1 已收緊雜訊規則，避免正常中文因單一符號或隱藏替代字元被大量誤報。
           </p>
 
           <div
@@ -14980,28 +14980,78 @@
               compact.length
             : 0;
 
-        const hasReplacement =
-          /[ □■◆◇]{1,}/.test(
+        // Phase 3-C-C v1.1：只把「高風險」內容列入疑似雜訊。
+        // 舊版把 □■◆◇ 與單一替代字元都視為無法辨識，容易讓正常中文大量誤報。
+        // 這裡改成：
+        // 1. 只有真正的 Unicode replacement char（U+FFFD）達到一定強度才列出；
+        // 2. 保留對明顯 ASCII 亂碼、圖表碎片、短符號碎片的偵測；
+        // 3. □■◆◇ 視為可能的合法項目符號，不單獨構成錯誤。
+        const replacementCount =
+          (
+            line.match(
+              /\uFFFD/g
+            ) || []
+          ).length;
+
+        const readableCount =
+          cjkCount +
+          latinCount;
+
+        const highReplacementRisk =
+          replacementCount >= 2 ||
+          (
+            replacementCount === 1 &&
+            compact.length <= 16
+          );
+
+        const weirdAsciiPunctuation =
+          /[A-Za-z0-9]{1,}[=@/#\\][A-Za-z0-9=@/#\\-]{2,}/.test(
+            line
+          );
+
+        const repeatedUppercaseBlocks =
+          /[A-Z]{3,}.*[A-Z]{3,}/.test(
             line
           );
 
         const asciiGibberish =
-          cjkCount < 3 &&
+          cjkCount < 4 &&
           latinCount >= 6 &&
           (
             symbolRatio >= 0.12 ||
-            /[A-Z]{3,}.*[A-Z]{3,}/.test(
-              line
-            )
+            weirdAsciiPunctuation ||
+            repeatedUppercaseBlocks
+          );
+
+        const shortSymbolFragment =
+          compact.length <= 18 &&
+          symbolRatio >= 0.45 &&
+          readableCount <= 10;
+
+        const mixedChartFragment =
+          compact.length <= 32 &&
+          cjkCount <= 8 &&
+          symbolRatio >= 0.22 &&
+          /[0-9A-Za-z]/.test(
+            line
+          ) &&
+          /[<>=/%\\|]/.test(
+            line
+          );
+
+        const unmatchedShortQuote =
+          compact.length <= 8 &&
+          cjkCount <= 3 &&
+          /[“”‘’"']/.test(
+            line
           );
 
         if (
-          hasReplacement ||
+          highReplacementRisk ||
           asciiGibberish ||
-          (
-            compact.length <= 14 &&
-            symbolRatio >= 0.5
-          )
+          shortSymbolFragment ||
+          mixedChartFragment ||
+          unmatchedShortQuote
         ) {
           suspicious.push({
             displayNumber:
@@ -15014,11 +15064,15 @@
               line,
 
             reason:
-              hasReplacement
-                ? "含無法辨識字元"
+              highReplacementRisk
+                ? "疑似 OCR 替代字元"
                 : asciiGibberish
-                  ? "疑似圖表文字／OCR 雜訊"
-                  : "符號比例偏高"
+                  ? "疑似亂碼／圖表文字"
+                  : mixedChartFragment
+                    ? "疑似圖表碎片"
+                    : unmatchedShortQuote
+                      ? "短句含異常引號"
+                      : "符號碎片"
           });
         }
 
