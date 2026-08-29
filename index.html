@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Screenshot Report｜Phase 3-C-B Batch OCR</title>
+  <title>Screenshot Report｜Phase 3-C-C Text Rebuild</title>
 
   <style>
     * {
@@ -2098,6 +2098,201 @@
       display: none;
     }
 
+
+    /*
+      =========================
+      Phase 3-C-C
+      全文文字重建與繁體化
+      =========================
+    */
+
+    .phase3cc-panel {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 16px;
+      background: #eef7fb;
+      border: 1px solid #b7d7e8;
+    }
+
+    .phase3cc-panel h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    .phase3cc-panel p {
+      margin: 0 0 12px;
+      color: #5f6368;
+      line-height: 1.65;
+      font-size: 14px;
+    }
+
+    .phase3cc-version {
+      margin: 8px 0 12px;
+      padding: 9px 11px;
+      border-radius: 10px;
+      background: #dff2fb;
+      border: 1px solid #94c9e4;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .phase3cc-card,
+    .phase3cc-status {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid #c4dbe8;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .phase3cc-field {
+      margin-top: 10px;
+    }
+
+    .phase3cc-field label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 800;
+    }
+
+    .phase3cc-field select {
+      width: 100%;
+      min-height: 48px;
+      padding: 8px 10px;
+      border: 1px solid #bfc7ce;
+      border-radius: 10px;
+      background: white;
+      font-size: 16px;
+      color: #222;
+    }
+
+    .phase3cc-check {
+      display: flex !important;
+      align-items: flex-start;
+      gap: 10px;
+      font-weight: 400 !important;
+      line-height: 1.55;
+    }
+
+    .phase3cc-check input {
+      width: 24px;
+      height: 24px;
+      flex: 0 0 auto;
+      margin: 0;
+    }
+
+    .phase3cc-button-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .phase3cc-button-grid button {
+      margin: 0;
+    }
+
+    .phase3cc-build-button {
+      background: #236c8e;
+    }
+
+    .phase3cc-export-button {
+      background: #4b6576;
+    }
+
+    .phase3cc-pass-button {
+      background: #1f7a46;
+    }
+
+    .phase3cc-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .phase3cc-summary-item {
+      padding: 11px;
+      border-radius: 10px;
+      background: white;
+      border: 1px solid #c4dbe8;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .phase3cc-summary-item strong {
+      display: block;
+      margin-top: 3px;
+      font-size: 22px;
+    }
+
+    .phase3cc-preview-title {
+      margin-bottom: 7px;
+      font-weight: 900;
+    }
+
+    .phase3cc-text-preview {
+      width: 100%;
+      min-height: 260px;
+      max-height: 420px;
+      resize: vertical;
+      box-sizing: border-box;
+      padding: 10px;
+      border: 1px solid #bdcbd4;
+      border-radius: 10px;
+      background: #fbfdfe;
+      color: #222;
+      font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", "Heiti TC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    .phase3cc-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .phase3cc-list-item {
+      padding: 9px;
+      border-radius: 9px;
+      background: #f7fafc;
+      border: 1px solid #d7e2e8;
+      font-size: 12px;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+    }
+
+    .phase3cc-good {
+      color: #176137;
+      font-weight: 800;
+    }
+
+    .phase3cc-warn {
+      color: #9a3412;
+      font-weight: 800;
+    }
+
+    .phase3cc-info {
+      color: #155e75;
+      font-weight: 800;
+    }
+
+    .phase3cc-note {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      background: #fff7db;
+      border: 1px solid #e3cc7a;
+      color: #5c4a12;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
 </style>
 </head>
 
@@ -3466,6 +3661,251 @@
           ></canvas>
         </div>
 
+
+        <div
+          id="phase3ccPanel"
+          class="phase3cc-panel"
+        >
+          <h3>
+            Phase 3-C-C｜全文文字重建與繁體化
+          </h3>
+
+          <div class="phase3cc-version">
+            版本：Phase 3-C-C v1｜TEXT-REBUILD-TRADITIONAL-20260828
+            <br>
+            保留 Raw OCR｜安全接縫去重｜段落整理｜OpenCC 簡轉繁｜可回復
+          </div>
+
+          <p>
+            本階段不會覆蓋 Phase 3-C-B 的原始 OCR。
+            系統會另外建立「清理後原文」與「繁體中文版本」兩層文字，
+            並把疑似 OCR 雜訊列出來供後續人工或 AI 校正。
+          </p>
+
+          <div
+            id="phase3ccPrerequisite"
+            class="phase3cc-status"
+          >
+            正在檢查 Phase 3-C-B 驗收狀態。
+          </div>
+
+          <div class="phase3cc-card">
+            <strong>
+              全文文字處理設定
+            </strong>
+
+            <div class="phase3cc-field">
+              <label for="phase3ccTraditionalProfile">
+                繁體中文轉換
+              </label>
+              <select id="phase3ccTraditionalProfile">
+                <option value="tw" selected>
+                  台灣繁體（OpenCC cn → tw，建議）
+                </option>
+                <option value="t">
+                  標準繁體（OpenCC cn → t）
+                </option>
+              </select>
+            </div>
+
+            <div class="phase3cc-field">
+              <label
+                class="phase3cc-check"
+                for="phase3ccStripBrowserNoise"
+              >
+                <input
+                  id="phase3ccStripBrowserNoise"
+                  type="checkbox"
+                  checked
+                >
+                <span>
+                  移除明確的瀏覽器網址／頁面外框字串；不刪除正文與圖表中的一般文字。
+                </span>
+              </label>
+            </div>
+
+            <div class="phase3cc-field">
+              <label
+                class="phase3cc-check"
+                for="phase3ccSafeDedupe"
+              >
+                <input
+                  id="phase3ccSafeDedupe"
+                  type="checkbox"
+                  checked
+                >
+                <span>
+                  安全接縫去重：只有高相似度的前後頁重複內容才自動移除。
+                </span>
+              </label>
+            </div>
+
+            <div class="phase3cc-field">
+              <label
+                class="phase3cc-check"
+                for="phase3ccNormalizeParagraphs"
+              >
+                <input
+                  id="phase3ccNormalizeParagraphs"
+                  type="checkbox"
+                  checked
+                >
+                <span>
+                  整理 OCR 強制換行，盡量恢復為自然段落與編號條目。
+                </span>
+              </label>
+            </div>
+
+            <div class="phase3cc-button-grid">
+              <button
+                id="phase3ccBuildButton"
+                class="phase3cc-build-button"
+                onclick="buildPhase3CCTextRebuild()"
+                disabled
+              >
+                建立／更新全文文字重建
+              </button>
+
+              <button
+                id="phase3ccCleanTxtButton"
+                class="phase3cc-export-button"
+                onclick="downloadPhase3CCCleanTxt()"
+                disabled
+              >
+                下載清理後原文 TXT
+              </button>
+
+              <button
+                id="phase3ccTraditionalTxtButton"
+                class="phase3cc-export-button"
+                onclick="downloadPhase3CCTraditionalTxt()"
+                disabled
+              >
+                下載繁體中文 TXT
+              </button>
+
+              <button
+                id="phase3ccJsonButton"
+                class="phase3cc-export-button"
+                onclick="downloadPhase3CCJson()"
+                disabled
+              >
+                匯出 Phase 3-C-C JSON
+              </button>
+
+              <button
+                id="phase3ccPassButton"
+                class="phase3cc-pass-button"
+                onclick="markPhase3CCPass()"
+                disabled
+              >
+                ✓ 全文結構可用，標記 Phase 3-C-C PASS
+              </button>
+
+              <button
+                id="phase3ccClearButton"
+                class="secondary-button"
+                onclick="clearPhase3CCState()"
+                disabled
+              >
+                清除 Phase 3-C-C 文字重建結果
+              </button>
+            </div>
+          </div>
+
+          <div class="phase3cc-summary-grid">
+            <div class="phase3cc-summary-item">
+              來源切片
+              <strong id="phase3ccSliceCount">0</strong>
+            </div>
+
+            <div class="phase3cc-summary-item">
+              Raw 字元
+              <strong id="phase3ccRawCharCount">0</strong>
+            </div>
+
+            <div class="phase3cc-summary-item">
+              清理後字元
+              <strong id="phase3ccCleanCharCount">0</strong>
+            </div>
+
+            <div class="phase3cc-summary-item">
+              繁體字元
+              <strong id="phase3ccTraditionalCharCount">0</strong>
+            </div>
+
+            <div class="phase3cc-summary-item">
+              接縫去重
+              <strong id="phase3ccDedupeCount">0</strong>
+            </div>
+
+            <div class="phase3cc-summary-item">
+              疑似雜訊
+              <strong id="phase3ccSuspiciousCount">0</strong>
+            </div>
+          </div>
+
+          <div
+            id="phase3ccBuildStatus"
+            class="phase3cc-status"
+          >
+            尚未建立全文文字重建。
+          </div>
+
+          <div class="phase3cc-card">
+            <div class="phase3cc-preview-title">
+              清理後原文預覽
+            </div>
+            <textarea
+              id="phase3ccCleanPreview"
+              class="phase3cc-text-preview"
+              readonly
+              placeholder="建立後會顯示去除明確瀏覽器雜訊、接縫重複與強制換行後的原文。"
+            ></textarea>
+          </div>
+
+          <div class="phase3cc-card">
+            <div class="phase3cc-preview-title">
+              繁體中文預覽
+            </div>
+            <textarea
+              id="phase3ccTraditionalPreview"
+              class="phase3cc-text-preview"
+              readonly
+              placeholder="建立後會顯示獨立的繁體中文版本；Raw OCR 不會被覆蓋。"
+            ></textarea>
+          </div>
+
+          <div class="phase3cc-card">
+            <div class="phase3cc-preview-title">
+              疑似 OCR 雜訊／待後續校正
+            </div>
+            <div
+              id="phase3ccSuspiciousList"
+              class="phase3cc-list"
+            >
+              <div class="phase3cc-list-item">
+                尚未分析。
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="phase3ccReviewStatus"
+            class="phase3cc-status"
+          >
+            尚未完成 Phase 3-C-C 驗收。
+          </div>
+
+          <div class="phase3cc-note">
+            <strong>安全原則：</strong>
+            Phase 3-C-B Raw OCR 永遠保留。
+            Phase 3-C-C 只新增衍生文字，不會改寫原始截圖或原始 OCR。
+            「BAXInterposer…」這類可能是圖表字或 OCR 雜訊的內容，預設只標記、不直接刪除。
+          </div>
+        </div>
+
+
         <div class="order-help">
           ◀ = 往前移一格　
           ▶ = 往後移一格　
@@ -3861,6 +4301,76 @@
     const phase3cbWorkCanvas =
       document.getElementById("phase3cbWorkCanvas");
 
+
+    const phase3ccPanel =
+      document.getElementById("phase3ccPanel");
+
+    const phase3ccPrerequisite =
+      document.getElementById("phase3ccPrerequisite");
+
+    const phase3ccTraditionalProfile =
+      document.getElementById("phase3ccTraditionalProfile");
+
+    const phase3ccStripBrowserNoise =
+      document.getElementById("phase3ccStripBrowserNoise");
+
+    const phase3ccSafeDedupe =
+      document.getElementById("phase3ccSafeDedupe");
+
+    const phase3ccNormalizeParagraphs =
+      document.getElementById("phase3ccNormalizeParagraphs");
+
+    const phase3ccBuildButton =
+      document.getElementById("phase3ccBuildButton");
+
+    const phase3ccCleanTxtButton =
+      document.getElementById("phase3ccCleanTxtButton");
+
+    const phase3ccTraditionalTxtButton =
+      document.getElementById("phase3ccTraditionalTxtButton");
+
+    const phase3ccJsonButton =
+      document.getElementById("phase3ccJsonButton");
+
+    const phase3ccPassButton =
+      document.getElementById("phase3ccPassButton");
+
+    const phase3ccClearButton =
+      document.getElementById("phase3ccClearButton");
+
+    const phase3ccSliceCount =
+      document.getElementById("phase3ccSliceCount");
+
+    const phase3ccRawCharCount =
+      document.getElementById("phase3ccRawCharCount");
+
+    const phase3ccCleanCharCount =
+      document.getElementById("phase3ccCleanCharCount");
+
+    const phase3ccTraditionalCharCount =
+      document.getElementById("phase3ccTraditionalCharCount");
+
+    const phase3ccDedupeCount =
+      document.getElementById("phase3ccDedupeCount");
+
+    const phase3ccSuspiciousCount =
+      document.getElementById("phase3ccSuspiciousCount");
+
+    const phase3ccBuildStatus =
+      document.getElementById("phase3ccBuildStatus");
+
+    const phase3ccCleanPreview =
+      document.getElementById("phase3ccCleanPreview");
+
+    const phase3ccTraditionalPreview =
+      document.getElementById("phase3ccTraditionalPreview");
+
+    const phase3ccSuspiciousList =
+      document.getElementById("phase3ccSuspiciousList");
+
+    const phase3ccReviewStatus =
+      document.getElementById("phase3ccReviewStatus");
+
     const PHASE2C_STATE_KEY =
       "phase2cBatchState:v1";
 
@@ -3920,6 +4430,21 @@
     const PHASE3CB_VERSION =
       1;
 
+
+    const PHASE3CC_STATE_KEY =
+      "phase3cTextRebuild:v1";
+
+    const PHASE3CC_REVIEW_KEY =
+      "phase3cTextRebuildReview:v1";
+
+    const PHASE3CC_VERSION =
+      1;
+
+    const PHASE3CC_OPENCC_CDNS = [
+      "https://cdn.jsdelivr.net/npm/opencc-js@1.4.2/dist/umd/full.js",
+      "https://unpkg.com/opencc-js@1.4.2/dist/umd/full.js"
+    ];
+
     let phase2cState = null;
     let phase2cRunning = false;
     let phase2cStopRequested = false;
@@ -3964,6 +4489,12 @@
     let phase3cbWorker = null;
     let phase3cbRunning = false;
     let phase3cbStopRequested = false;
+
+
+    let phase3ccState = null;
+    let phase3ccReviewState = null;
+    let phase3ccOpenCCPromise = null;
+    let phase3ccBuilding = false;
 
     let lastOverlapCandidate = null;
     let currentSeamOverlapPixels = 0;
@@ -4127,6 +4658,36 @@
     );
 
 
+
+    phase3ccTraditionalProfile.addEventListener(
+      "change",
+      function() {
+        renderPhase3CCAvailability();
+      }
+    );
+
+    phase3ccStripBrowserNoise.addEventListener(
+      "change",
+      function() {
+        renderPhase3CCAvailability();
+      }
+    );
+
+    phase3ccSafeDedupe.addEventListener(
+      "change",
+      function() {
+        renderPhase3CCAvailability();
+      }
+    );
+
+    phase3ccNormalizeParagraphs.addEventListener(
+      "change",
+      function() {
+        renderPhase3CCAvailability();
+      }
+    );
+
+
     async function startApp() {
       try {
         db = await openDatabase();
@@ -4143,6 +4704,7 @@
         await loadPhase3BState();
         await loadPhase3CState();
         await loadPhase3CBState();
+        await loadPhase3CCState();
         await updateStorageInfo();
       }
       catch (error) {
@@ -13406,6 +13968,13 @@
       );
 
       renderPhase3CBReviewStatus();
+
+      if (
+        typeof renderPhase3CCAvailability ===
+        "function"
+      ) {
+        renderPhase3CCAvailability();
+      }
     }
 
 
@@ -13442,7 +14011,2014 @@
         1;
 
       renderPhase3CBAvailability();
+
+      if (
+        typeof renderPhase3CCAvailability ===
+        "function"
+      ) {
+        renderPhase3CCAvailability();
+      }
     }
+
+
+
+    /*
+      =========================
+      Phase 3-C-C
+      全文文字重建與繁體化
+      =========================
+    */
+
+    function phase3CCPrerequisitePassed() {
+      const fingerprint =
+        getPhase3CFingerprint();
+
+      const counts =
+        getPhase3CBCounts();
+
+      return Boolean(
+        fingerprint &&
+        phase3cbState &&
+        phase3cbReviewState &&
+        phase3cbReviewState.status ===
+          "pass" &&
+        phase3cbReviewState.articleFingerprint ===
+          fingerprint &&
+        counts.total > 0 &&
+        counts.completed ===
+          counts.total &&
+        counts.errors === 0
+      );
+    }
+
+
+    function phase3CCSimpleHash(value) {
+      const text =
+        String(value || "");
+
+      let hash =
+        2166136261;
+
+      for (
+        let index = 0;
+        index < text.length;
+        index++
+      ) {
+        hash ^=
+          text.charCodeAt(
+            index
+          );
+
+        hash =
+          Math.imul(
+            hash,
+            16777619
+          );
+      }
+
+      return (
+        hash >>> 0
+      ).toString(16);
+    }
+
+
+    function getPhase3CCSourceFingerprint() {
+      if (
+        !phase3CCPrerequisitePassed()
+      ) {
+        return "";
+      }
+
+      const items =
+        Array.isArray(
+          phase3cbState.items
+        )
+          ? phase3cbState.items
+          : [];
+
+      const compact =
+        items.map(
+          item => [
+            Number(
+              item.imageId
+            ),
+            Number(
+              item.displayNumber
+            ),
+            phase3CCSimpleHash(
+              item.text || ""
+            )
+          ]
+        );
+
+      return [
+        getPhase3CFingerprint(),
+        phase3cbState.language,
+        phase3CCSimpleHash(
+          JSON.stringify(
+            compact
+          )
+        )
+      ].join("|");
+    }
+
+
+    function getPhase3CCOptions() {
+      return {
+        traditionalProfile:
+          phase3ccTraditionalProfile.value,
+
+        stripBrowserNoise:
+          Boolean(
+            phase3ccStripBrowserNoise.checked
+          ),
+
+        safeDedupe:
+          Boolean(
+            phase3ccSafeDedupe.checked
+          ),
+
+        normalizeParagraphs:
+          Boolean(
+            phase3ccNormalizeParagraphs.checked
+          )
+      };
+    }
+
+
+    function phase3CCOptionsMatchState() {
+      if (!phase3ccState) {
+        return false;
+      }
+
+      const current =
+        getPhase3CCOptions();
+
+      const saved =
+        phase3ccState.options ||
+        {};
+
+      return (
+        saved.traditionalProfile ===
+          current.traditionalProfile &&
+        Boolean(
+          saved.stripBrowserNoise
+        ) ===
+          current.stripBrowserNoise &&
+        Boolean(
+          saved.safeDedupe
+        ) ===
+          current.safeDedupe &&
+        Boolean(
+          saved.normalizeParagraphs
+        ) ===
+          current.normalizeParagraphs
+      );
+    }
+
+
+    function phase3CCStateMatchesCurrent() {
+      return Boolean(
+        phase3ccState &&
+        phase3ccState.version ===
+          PHASE3CC_VERSION &&
+        phase3ccState.sourceFingerprint ===
+          getPhase3CCSourceFingerprint() &&
+        getPhase3CCSourceFingerprint() &&
+        phase3CCOptionsMatchState()
+      );
+    }
+
+
+    function getPhase3CCResultFingerprint() {
+      if (!phase3ccState) {
+        return "";
+      }
+
+      return [
+        String(
+          phase3ccState.sourceFingerprint ||
+          ""
+        ),
+        phase3CCSimpleHash(
+          JSON.stringify(
+            phase3ccState.options ||
+            {}
+          )
+        ),
+        phase3CCSimpleHash(
+          phase3ccState.cleanedSourceText ||
+          ""
+        ),
+        phase3CCSimpleHash(
+          phase3ccState.traditionalText ||
+          ""
+        )
+      ].join("|");
+    }
+
+
+    async function loadPhase3CCState() {
+      try {
+        const saved =
+          await getSetting(
+            PHASE3CC_STATE_KEY
+          );
+
+        phase3ccState =
+          saved &&
+          saved.value
+            ? saved.value
+            : null;
+      }
+      catch (error) {
+        console.warn(
+          "讀取 Phase 3-C-C 文字重建狀態失敗：",
+          error
+        );
+
+        phase3ccState =
+          null;
+      }
+
+      try {
+        const savedReview =
+          await getSetting(
+            PHASE3CC_REVIEW_KEY
+          );
+
+        phase3ccReviewState =
+          savedReview &&
+          savedReview.value
+            ? savedReview.value
+            : null;
+      }
+      catch (error) {
+        console.warn(
+          "讀取 Phase 3-C-C 驗收狀態失敗：",
+          error
+        );
+
+        phase3ccReviewState =
+          null;
+      }
+
+      if (
+        phase3ccState &&
+        phase3ccState.options
+      ) {
+        const options =
+          phase3ccState.options;
+
+        if (
+          options.traditionalProfile ===
+            "tw" ||
+          options.traditionalProfile ===
+            "t"
+        ) {
+          phase3ccTraditionalProfile.value =
+            options.traditionalProfile;
+        }
+
+        phase3ccStripBrowserNoise.checked =
+          options.stripBrowserNoise !==
+          false;
+
+        phase3ccSafeDedupe.checked =
+          options.safeDedupe !==
+          false;
+
+        phase3ccNormalizeParagraphs.checked =
+          options.normalizeParagraphs !==
+          false;
+      }
+
+      renderPhase3CCAvailability();
+    }
+
+
+    async function savePhase3CCState() {
+      if (!phase3ccState) {
+        return;
+      }
+
+      phase3ccState.updatedAt =
+        Date.now();
+
+      await saveSetting(
+        PHASE3CC_STATE_KEY,
+        phase3ccState
+      );
+    }
+
+
+    function renderPhase3CCAvailability() {
+      const prerequisite =
+        phase3CCPrerequisitePassed();
+
+      if (!prerequisite) {
+        phase3ccPrerequisite.innerHTML =
+          `<span class="phase3cc-warn">🔒 Phase 3-C-C 尚未解鎖。</span>` +
+          `<br>請先完成 Phase 3-C-B PASS，並保留全部 Raw OCR。`;
+
+        phase3ccBuildButton.disabled =
+          true;
+
+        phase3ccCleanTxtButton.disabled =
+          true;
+
+        phase3ccTraditionalTxtButton.disabled =
+          true;
+
+        phase3ccJsonButton.disabled =
+          !phase3ccState;
+
+        phase3ccPassButton.disabled =
+          true;
+
+        phase3ccClearButton.disabled =
+          !phase3ccState;
+
+        renderPhase3CCState();
+        renderPhase3CCReviewStatus();
+
+        return;
+      }
+
+      const items =
+        Array.isArray(
+          phase3cbState.items
+        )
+          ? phase3cbState.items
+          : [];
+
+      const first =
+        items[0];
+
+      const last =
+        items[
+          items.length - 1
+        ];
+
+      phase3ccPrerequisite.innerHTML =
+        `<span class="phase3cc-good">✅ Phase 3-C-B 已 PASS，全文文字重建已解鎖。</span>` +
+        `<br>來源：第 ${first ? first.displayNumber : "—"}～${last ? last.displayNumber : "—"} 張，` +
+        `${items.length} 個 Raw OCR 切片。`;
+
+      phase3ccBuildButton.disabled =
+        phase3ccBuilding;
+
+      const valid =
+        phase3CCStateMatchesCurrent();
+
+      phase3ccCleanTxtButton.disabled =
+        !valid ||
+        !String(
+          phase3ccState &&
+          phase3ccState.cleanedSourceText ||
+          ""
+        ).trim();
+
+      phase3ccTraditionalTxtButton.disabled =
+        !valid ||
+        !String(
+          phase3ccState &&
+          phase3ccState.traditionalText ||
+          ""
+        ).trim();
+
+      phase3ccJsonButton.disabled =
+        !phase3ccState;
+
+      phase3ccPassButton.disabled =
+        !valid ||
+        !String(
+          phase3ccState.traditionalText ||
+          ""
+        ).trim();
+
+      phase3ccClearButton.disabled =
+        phase3ccBuilding ||
+        !phase3ccState;
+
+      renderPhase3CCState();
+      renderPhase3CCReviewStatus();
+    }
+
+
+    function renderPhase3CCState() {
+      const state =
+        phase3ccState;
+
+      if (!state) {
+        phase3ccSliceCount.textContent =
+          "0";
+
+        phase3ccRawCharCount.textContent =
+          "0";
+
+        phase3ccCleanCharCount.textContent =
+          "0";
+
+        phase3ccTraditionalCharCount.textContent =
+          "0";
+
+        phase3ccDedupeCount.textContent =
+          "0";
+
+        phase3ccSuspiciousCount.textContent =
+          "0";
+
+        phase3ccBuildStatus.textContent =
+          "尚未建立全文文字重建。";
+
+        phase3ccCleanPreview.value =
+          "";
+
+        phase3ccTraditionalPreview.value =
+          "";
+
+        phase3ccSuspiciousList.innerHTML =
+          `<div class="phase3cc-list-item">尚未分析。</div>`;
+
+        return;
+      }
+
+      phase3ccSliceCount.textContent =
+        String(
+          state.sliceCount || 0
+        );
+
+      phase3ccRawCharCount.textContent =
+        String(
+          state.rawCharCount || 0
+        );
+
+      phase3ccCleanCharCount.textContent =
+        String(
+          String(
+            state.cleanedSourceText ||
+            ""
+          ).length
+        );
+
+      phase3ccTraditionalCharCount.textContent =
+        String(
+          String(
+            state.traditionalText ||
+            ""
+          ).length
+        );
+
+      phase3ccDedupeCount.textContent =
+        String(
+          Array.isArray(
+            state.seamDedupe
+          )
+            ? state.seamDedupe.length
+            : 0
+        );
+
+      phase3ccSuspiciousCount.textContent =
+        String(
+          Array.isArray(
+            state.suspiciousLines
+          )
+            ? state.suspiciousLines.length
+            : 0
+        );
+
+      phase3ccCleanPreview.value =
+        String(
+          state.cleanedSourceText ||
+          ""
+        );
+
+      phase3ccTraditionalPreview.value =
+        String(
+          state.traditionalText ||
+          ""
+        );
+
+      if (
+        phase3CCStateMatchesCurrent()
+      ) {
+        const dedupeCount =
+          Array.isArray(
+            state.seamDedupe
+          )
+            ? state.seamDedupe.length
+            : 0;
+
+        const noiseCount =
+          Array.isArray(
+            state.removedNoise
+          )
+            ? state.removedNoise.length
+            : 0;
+
+        phase3ccBuildStatus.innerHTML =
+          `<span class="phase3cc-good">✅ 全文文字重建已建立。</span>` +
+          `<br>Raw OCR 保留不變；移除明確瀏覽器雜訊 ${noiseCount} 項；` +
+          `安全接縫去重 ${dedupeCount} 處。` +
+          `<br>繁體轉換：OpenCC ${state.openccProfile || "—"}。`;
+      }
+      else {
+        phase3ccBuildStatus.innerHTML =
+          `<span class="phase3cc-warn">⚠️ 目前顯示的是舊的 Phase 3-C-C 結果。</span>` +
+          `<br>來源 OCR 或處理設定已改變，請按「建立／更新全文文字重建」。`;
+      }
+
+      renderPhase3CCSuspiciousList();
+    }
+
+
+    function renderPhase3CCSuspiciousList() {
+      const items =
+        phase3ccState &&
+        Array.isArray(
+          phase3ccState.suspiciousLines
+        )
+          ? phase3ccState.suspiciousLines
+          : [];
+
+      phase3ccSuspiciousList.innerHTML =
+        "";
+
+      if (items.length === 0) {
+        phase3ccSuspiciousList.innerHTML =
+          `<div class="phase3cc-list-item"><span class="phase3cc-good">✅ 沒有偵測到高風險 OCR 雜訊行。</span></div>`;
+
+        return;
+      }
+
+      for (
+        const item of
+        items.slice(0, 40)
+      ) {
+        const row =
+          document.createElement(
+            "div"
+          );
+
+        row.className =
+          "phase3cc-list-item";
+
+        const title =
+          document.createElement(
+            "strong"
+          );
+
+        title.textContent =
+          `第 ${item.displayNumber} 張｜${item.reason}`;
+
+        row.appendChild(
+          title
+        );
+
+        row.appendChild(
+          document.createElement(
+            "br"
+          )
+        );
+
+        row.appendChild(
+          document.createTextNode(
+            item.text
+          )
+        );
+
+        phase3ccSuspiciousList.appendChild(
+          row
+        );
+      }
+
+      if (items.length > 40) {
+        const more =
+          document.createElement(
+            "div"
+          );
+
+        more.className =
+          "phase3cc-list-item";
+
+        more.textContent =
+          `另外還有 ${items.length - 40} 項，已保存在 JSON。`;
+
+        phase3ccSuspiciousList.appendChild(
+          more
+        );
+      }
+    }
+
+
+    function renderPhase3CCReviewStatus() {
+      const fingerprint =
+        getPhase3CCSourceFingerprint();
+
+      if (
+        phase3ccReviewState &&
+        phase3ccReviewState.status ===
+          "pass" &&
+        phase3ccReviewState.sourceFingerprint ===
+          fingerprint &&
+        phase3ccReviewState.resultFingerprint ===
+          getPhase3CCResultFingerprint() &&
+        phase3CCStateMatchesCurrent() &&
+        fingerprint
+      ) {
+        const date =
+          new Date(
+            phase3ccReviewState.passedAt
+          );
+
+        phase3ccReviewStatus.innerHTML =
+          `<span class="phase3cc-good">✅ Phase 3-C-C 已 PASS。</span>` +
+          `<br>Raw OCR、清理後原文與繁體中文版本均已保存。` +
+          `<br>驗收時間：${date.toLocaleString()}`;
+
+        return;
+      }
+
+      if (
+        phase3ccReviewState &&
+        phase3ccReviewState.status ===
+          "pass"
+      ) {
+        phase3ccReviewStatus.innerHTML =
+          `<span class="phase3cc-warn">⚠️ 舊的 Phase 3-C-C PASS 已失效。</span>` +
+          `<br>來源 OCR 已變更，請重新建立全文文字重建。`;
+
+        return;
+      }
+
+      phase3ccReviewStatus.textContent =
+        "尚未完成 Phase 3-C-C 驗收。";
+    }
+
+
+    function phase3CCNormalizeLine(
+      value
+    ) {
+      return String(
+        value || ""
+      )
+        .normalize(
+          "NFC"
+        )
+        .replace(
+          /\u00a0/g,
+          " "
+        )
+        .replace(
+          /[ \t]+/g,
+          " "
+        )
+        .replace(
+          /\s+([，。！？；：、])/g,
+          "$1"
+        )
+        .replace(
+          /([（【「『])\s+/g,
+          "$1"
+        )
+        .replace(
+          /\s+([）】」』])/g,
+          "$1"
+        )
+        .trim();
+    }
+
+
+    function phase3CCLooksLikeListStart(
+      line
+    ) {
+      return /^(?:\d{1,3}[.)、．]|[一二三四五六七八九十]{1,3}[、.．]|[①②③④⑤⑥⑦⑧⑨⑩])\s*/.test(
+        line
+      );
+    }
+
+
+    function phase3CCLooksLikeHeading(
+      line
+    ) {
+      const text =
+        String(
+          line || ""
+        ).trim();
+
+      if (
+        !text ||
+        text.length > 34
+      ) {
+        return false;
+      }
+
+      if (
+        /[。！？!?；;]$/.test(
+          text
+        )
+      ) {
+        return false;
+      }
+
+      return (
+        /^(?:第[一二三四五六七八九十0-9]+[章节部分]|阅读说明|30\s*秒|总结|小结|结论|結論|Tutorial|Hot Chips)/i.test(
+          text
+        ) ||
+        (
+          /^[A-Za-z0-9\u4e00-\u9fff：:｜| ·—\-]+$/.test(
+            text
+          ) &&
+          text.length <= 16
+        )
+      );
+    }
+
+
+    function phase3CCShouldJoinLines(
+      previous,
+      current
+    ) {
+      const prev =
+        String(
+          previous || ""
+        ).trim();
+
+      const next =
+        String(
+          current || ""
+        ).trim();
+
+      if (!prev || !next) {
+        return false;
+      }
+
+      if (
+        phase3CCLooksLikeListStart(
+          next
+        ) ||
+        phase3CCLooksLikeHeading(
+          next
+        )
+      ) {
+        return false;
+      }
+
+      if (
+        /[。！？!?；;：:]$/.test(
+          prev
+        )
+      ) {
+        return false;
+      }
+
+      return true;
+    }
+
+
+    function phase3CCNormalizeParagraphs(
+      text
+    ) {
+      const lines =
+        String(
+          text || ""
+        )
+          .replace(
+            /\r\n?/g,
+            "\n"
+          )
+          .split(
+            "\n"
+          )
+          .map(
+            phase3CCNormalizeLine
+          );
+
+      const paragraphs =
+        [];
+
+      let buffer =
+        "";
+
+      function flush() {
+        const value =
+          buffer.trim();
+
+        if (value) {
+          paragraphs.push(
+            value
+          );
+        }
+
+        buffer =
+          "";
+      }
+
+      for (
+        const line of
+        lines
+      ) {
+        if (!line) {
+          flush();
+          continue;
+        }
+
+        if (!buffer) {
+          buffer =
+            line;
+          continue;
+        }
+
+        if (
+          phase3CCShouldJoinLines(
+            buffer,
+            line
+          )
+        ) {
+          const noSpace =
+            /[\u3400-\u9fff]$/.test(
+              buffer
+            ) &&
+            /^[\u3400-\u9fff]/.test(
+              line
+            );
+
+          buffer +=
+            noSpace
+              ? line
+              : ` ${line}`;
+        }
+        else {
+          flush();
+          buffer =
+            line;
+        }
+      }
+
+      flush();
+
+      return paragraphs.join(
+        "\n\n"
+      );
+    }
+
+
+    function phase3CCStripBrowserArtifacts(
+      text,
+      displayNumber
+    ) {
+      const removed =
+        [];
+
+      const suspicious =
+        [];
+
+      const lines =
+        String(
+          text || ""
+        )
+          .replace(
+            /\r\n?/g,
+            "\n"
+          )
+          .split(
+            "\n"
+          );
+
+      const output =
+        [];
+
+      for (
+        let index = 0;
+        index < lines.length;
+        index++
+      ) {
+        let line =
+          phase3CCNormalizeLine(
+            lines[index]
+          );
+
+        if (!line) {
+          output.push(
+            ""
+          );
+          continue;
+        }
+
+        const original =
+          line;
+
+        line =
+          line.replace(
+            /[“”"'‘’]?\s*https?:\/\/[^\s“”"'‘’]+[“”"'‘’]?/gi,
+            ""
+          )
+          .replace(
+            /\b(?:www\.)?mp\.?weixin\.?qq\.?com\b/gi,
+            ""
+          )
+          .replace(
+            /\s{2,}/g,
+            " "
+          )
+          .trim();
+
+        if (
+          line !== original
+        ) {
+          removed.push({
+            displayNumber:
+              displayNumber,
+
+            lineNumber:
+              index + 1,
+
+            text:
+              original,
+
+            reason:
+              "移除網址／瀏覽器字串"
+          });
+        }
+
+        if (!line) {
+          continue;
+        }
+
+        const compact =
+          line.replace(
+            /\s/g,
+            ""
+          );
+
+        const cjkCount =
+          (
+            compact.match(
+              /[\u3400-\u9fff]/g
+            ) || []
+          ).length;
+
+        const latinCount =
+          (
+            compact.match(
+              /[A-Za-z0-9]/g
+            ) || []
+          ).length;
+
+        const symbolCount =
+          Math.max(
+            0,
+            compact.length -
+            cjkCount -
+            latinCount
+          );
+
+        const symbolRatio =
+          compact.length
+            ? symbolCount /
+              compact.length
+            : 0;
+
+        const hasReplacement =
+          /[ □■◆◇]{1,}/.test(
+            line
+          );
+
+        const asciiGibberish =
+          cjkCount < 3 &&
+          latinCount >= 6 &&
+          (
+            symbolRatio >= 0.12 ||
+            /[A-Z]{3,}.*[A-Z]{3,}/.test(
+              line
+            )
+          );
+
+        if (
+          hasReplacement ||
+          asciiGibberish ||
+          (
+            compact.length <= 14 &&
+            symbolRatio >= 0.5
+          )
+        ) {
+          suspicious.push({
+            displayNumber:
+              displayNumber,
+
+            lineNumber:
+              index + 1,
+
+            text:
+              line,
+
+            reason:
+              hasReplacement
+                ? "含無法辨識字元"
+                : asciiGibberish
+                  ? "疑似圖表文字／OCR 雜訊"
+                  : "符號比例偏高"
+          });
+        }
+
+        output.push(
+          line
+        );
+      }
+
+      return {
+        text:
+          output.join(
+            "\n"
+          ),
+
+        removed:
+          removed,
+
+        suspicious:
+          suspicious
+      };
+    }
+
+
+    function phase3CCOverlapNormalized(
+      text
+    ) {
+      const source =
+        String(
+          text || ""
+        );
+
+      let normalized =
+        "";
+
+      const map =
+        [];
+
+      for (
+        let index = 0;
+        index < source.length;
+        index++
+      ) {
+        const char =
+          source[index];
+
+        if (
+          /[\u3400-\u9fffA-Za-z0-9]/.test(
+            char
+          )
+        ) {
+          normalized +=
+            char.toLowerCase();
+
+          map.push(
+            index
+          );
+        }
+      }
+
+      return {
+        normalized:
+          normalized,
+
+        map:
+          map
+      };
+    }
+
+
+    function phase3CCLevenshteinSimilarity(
+      left,
+      right
+    ) {
+      const a =
+        String(
+          left || ""
+        );
+
+      const b =
+        String(
+          right || ""
+        );
+
+      if (a === b) {
+        return 1;
+      }
+
+      if (!a.length || !b.length) {
+        return 0;
+      }
+
+      const previous =
+        new Array(
+          b.length + 1
+        );
+
+      const current =
+        new Array(
+          b.length + 1
+        );
+
+      for (
+        let j = 0;
+        j <= b.length;
+        j++
+      ) {
+        previous[j] =
+          j;
+      }
+
+      for (
+        let i = 1;
+        i <= a.length;
+        i++
+      ) {
+        current[0] =
+          i;
+
+        const aChar =
+          a.charCodeAt(
+            i - 1
+          );
+
+        for (
+          let j = 1;
+          j <= b.length;
+          j++
+        ) {
+          const cost =
+            aChar ===
+            b.charCodeAt(
+              j - 1
+            )
+              ? 0
+              : 1;
+
+          current[j] =
+            Math.min(
+              current[j - 1] + 1,
+              previous[j] + 1,
+              previous[j - 1] +
+                cost
+            );
+        }
+
+        for (
+          let j = 0;
+          j <= b.length;
+          j++
+        ) {
+          previous[j] =
+            current[j];
+        }
+      }
+
+      const distance =
+        previous[
+          b.length
+        ];
+
+      return (
+        1 -
+        distance /
+        Math.max(
+          a.length,
+          b.length
+        )
+      );
+    }
+
+
+    function phase3CCFindSafeOverlap(
+      previousText,
+      nextText
+    ) {
+      const previous =
+        phase3CCOverlapNormalized(
+          previousText
+        );
+
+      const next =
+        phase3CCOverlapNormalized(
+          nextText
+        );
+
+      const maxLength =
+        Math.min(
+          220,
+          previous.normalized.length,
+          next.normalized.length
+        );
+
+      if (maxLength < 24) {
+        return null;
+      }
+
+      for (
+        let length =
+          maxLength;
+        length >= 24;
+        length--
+      ) {
+        const left =
+          previous.normalized.slice(
+            -length
+          );
+
+        const right =
+          next.normalized.slice(
+            0,
+            length
+          );
+
+        if (left === right) {
+          const rawCut =
+            next.map[
+              length - 1
+            ] + 1;
+
+          return {
+            normalizedLength:
+              length,
+
+            similarity:
+              1,
+
+            rawCut:
+              rawCut
+          };
+        }
+      }
+
+      const candidates =
+        [
+          160,
+          140,
+          120,
+          100,
+          84,
+          72,
+          60,
+          48,
+          40,
+          32,
+          28
+        ];
+
+      for (
+        const length of
+        candidates
+      ) {
+        if (
+          length > maxLength
+        ) {
+          continue;
+        }
+
+        const left =
+          previous.normalized.slice(
+            -length
+          );
+
+        const right =
+          next.normalized.slice(
+            0,
+            length
+          );
+
+        const similarity =
+          phase3CCLevenshteinSimilarity(
+            left,
+            right
+          );
+
+        if (
+          similarity >=
+          0.92
+        ) {
+          const rawCut =
+            next.map[
+              length - 1
+            ] + 1;
+
+          return {
+            normalizedLength:
+              length,
+
+            similarity:
+              similarity,
+
+            rawCut:
+              rawCut
+          };
+        }
+      }
+
+      return null;
+    }
+
+
+    async function phase3CCLoadOpenCC() {
+      if (
+        window.OpenCC &&
+        typeof window.OpenCC.Converter ===
+          "function"
+      ) {
+        return window.OpenCC;
+      }
+
+      if (
+        phase3ccOpenCCPromise
+      ) {
+        return phase3ccOpenCCPromise;
+      }
+
+      phase3ccOpenCCPromise =
+        (async function() {
+          let lastError =
+            null;
+
+          for (
+            const src of
+            PHASE3CC_OPENCC_CDNS
+          ) {
+            try {
+              await new Promise(
+                (resolve, reject) => {
+                  const script =
+                    document.createElement(
+                      "script"
+                    );
+
+                  script.src =
+                    src;
+
+                  script.async =
+                    true;
+
+                  script.onload =
+                    resolve;
+
+                  script.onerror =
+                    function() {
+                      reject(
+                        new Error(
+                          `OpenCC 載入失敗：${src}`
+                        )
+                      );
+                    };
+
+                  document.head.appendChild(
+                    script
+                  );
+                }
+              );
+
+              if (
+                window.OpenCC &&
+                typeof window.OpenCC.Converter ===
+                  "function"
+              ) {
+                return window.OpenCC;
+              }
+            }
+            catch (error) {
+              lastError =
+                error;
+            }
+          }
+
+          throw (
+            lastError ||
+            new Error(
+              "無法載入免費 OpenCC 簡繁轉換引擎"
+            )
+          );
+        })();
+
+      try {
+        return await phase3ccOpenCCPromise;
+      }
+      catch (error) {
+        phase3ccOpenCCPromise =
+          null;
+
+        throw error;
+      }
+    }
+
+
+    async function buildPhase3CCTextRebuild() {
+      if (phase3ccBuilding) {
+        return;
+      }
+
+      if (
+        !phase3CCPrerequisitePassed()
+      ) {
+        alert(
+          "請先完成 Phase 3-C-B PASS。"
+        );
+
+        return;
+      }
+
+      phase3ccBuilding =
+        true;
+
+      renderPhase3CCAvailability();
+
+      phase3ccBuildStatus.innerHTML =
+        `<span class="phase3cc-info">正在建立全文文字重建…</span>` +
+        `<br>Raw OCR 不會被修改。`;
+
+      try {
+        const options =
+          getPhase3CCOptions();
+
+        const sourceFingerprint =
+          getPhase3CCSourceFingerprint();
+
+        const rawItems =
+          phase3cbState.items.map(
+            item => ({
+              imageId:
+                item.imageId,
+
+              displayNumber:
+                item.displayNumber,
+
+              text:
+                String(
+                  item.text || ""
+                )
+            })
+          );
+
+        const rawCharCount =
+          rawItems.reduce(
+            (
+              total,
+              item
+            ) =>
+              total +
+              item.text.length,
+            0
+          );
+
+        const removedNoise =
+          [];
+
+        const suspiciousLines =
+          [];
+
+        const pieces =
+          [];
+
+        for (
+          const item of
+          rawItems
+        ) {
+          let currentText =
+            item.text;
+
+          if (
+            options.stripBrowserNoise
+          ) {
+            const cleaned =
+              phase3CCStripBrowserArtifacts(
+                currentText,
+                item.displayNumber
+              );
+
+            currentText =
+              cleaned.text;
+
+            removedNoise.push(
+              ...cleaned.removed
+            );
+
+            suspiciousLines.push(
+              ...cleaned.suspicious
+            );
+          }
+          else {
+            const checked =
+              phase3CCStripBrowserArtifacts(
+                currentText,
+                item.displayNumber
+              );
+
+            suspiciousLines.push(
+              ...checked.suspicious
+            );
+          }
+
+          pieces.push({
+            imageId:
+              item.imageId,
+
+            displayNumber:
+              item.displayNumber,
+
+            text:
+              currentText
+          });
+        }
+
+        const seamDedupe =
+          [];
+
+        const mergedPieces =
+          [];
+
+        for (
+          let index = 0;
+          index < pieces.length;
+          index++
+        ) {
+          const piece =
+            pieces[index];
+
+          let textValue =
+            piece.text;
+
+          if (
+            options.safeDedupe &&
+            mergedPieces.length > 0
+          ) {
+            const previous =
+              mergedPieces[
+                mergedPieces.length - 1
+              ];
+
+            const overlap =
+              phase3CCFindSafeOverlap(
+                previous.text,
+                textValue
+              );
+
+            if (
+              overlap &&
+              overlap.rawCut > 0
+            ) {
+              const removedPrefix =
+                textValue.slice(
+                  0,
+                  overlap.rawCut
+                );
+
+              textValue =
+                textValue.slice(
+                  overlap.rawCut
+                )
+                .replace(
+                  /^\s+/,
+                  ""
+                );
+
+              seamDedupe.push({
+                fromDisplayNumber:
+                  previous.displayNumber,
+
+                toDisplayNumber:
+                  piece.displayNumber,
+
+                normalizedLength:
+                  overlap.normalizedLength,
+
+                similarity:
+                  overlap.similarity,
+
+                removedText:
+                  removedPrefix.slice(
+                    0,
+                    260
+                  )
+              });
+            }
+          }
+
+          mergedPieces.push({
+            ...piece,
+            text:
+              textValue
+          });
+        }
+
+        let cleanedSourceText =
+          mergedPieces
+            .map(
+              item =>
+                String(
+                  item.text || ""
+                ).trim()
+            )
+            .filter(
+              Boolean
+            )
+            .join(
+              "\n"
+            );
+
+        if (
+          options.normalizeParagraphs
+        ) {
+          cleanedSourceText =
+            phase3CCNormalizeParagraphs(
+              cleanedSourceText
+            );
+        }
+
+        phase3ccBuildStatus.innerHTML =
+          `<span class="phase3cc-info">正在載入免費 OpenCC 簡繁轉換引擎…</span>` +
+          `<br>第一次可能需要網路下載程式檔。`;
+
+        const OpenCC =
+          await phase3CCLoadOpenCC();
+
+        const converter =
+          OpenCC.Converter({
+            from:
+              "cn",
+
+            to:
+              options.traditionalProfile
+          });
+
+        const traditionalText =
+          converter(
+            cleanedSourceText
+          );
+
+        phase3ccState = {
+          version:
+            PHASE3CC_VERSION,
+
+          sourceFingerprint:
+            sourceFingerprint,
+
+          articleFingerprint:
+            getPhase3CFingerprint(),
+
+          language:
+            phase3cbState.language,
+
+          status:
+            "ready",
+
+          builtAt:
+            Date.now(),
+
+          updatedAt:
+            Date.now(),
+
+          sliceCount:
+            rawItems.length,
+
+          rawCharCount:
+            rawCharCount,
+
+          options:
+            options,
+
+          openccProfile:
+            `cn→${options.traditionalProfile}`,
+
+          cleanedSourceText:
+            cleanedSourceText,
+
+          traditionalText:
+            traditionalText,
+
+          seamDedupe:
+            seamDedupe,
+
+          removedNoise:
+            removedNoise,
+
+          suspiciousLines:
+            suspiciousLines,
+
+          sourceItems:
+            rawItems.map(
+              item => ({
+                imageId:
+                  item.imageId,
+
+                displayNumber:
+                  item.displayNumber,
+
+                rawTextHash:
+                  phase3CCSimpleHash(
+                    item.text
+                  )
+              })
+            )
+        };
+
+        phase3ccReviewState =
+          null;
+
+        await saveSetting(
+          PHASE3CC_STATE_KEY,
+          phase3ccState
+        );
+
+        await saveSetting(
+          PHASE3CC_REVIEW_KEY,
+          null
+        );
+
+        renderPhase3CCAvailability();
+      }
+      catch (error) {
+        console.error(
+          "Phase 3-C-C 建立失敗：",
+          error
+        );
+
+        phase3ccBuildStatus.innerHTML =
+          `<span class="phase3cc-warn">❌ Phase 3-C-C 建立失敗。</span>` +
+          `<br>${error.message || error}` +
+          `<br>Raw OCR 沒有被修改；請確認網路後再試一次。`;
+      }
+      finally {
+        phase3ccBuilding =
+          false;
+
+        renderPhase3CCAvailability();
+      }
+    }
+
+
+    function phase3CCDownloadText(
+      filename,
+      text
+    ) {
+      const value =
+        String(
+          text || ""
+        );
+
+      if (!value.trim()) {
+        alert(
+          "目前沒有可下載的文字。"
+        );
+
+        return;
+      }
+
+      const blob =
+        new Blob(
+          [
+            "\ufeff",
+            value
+          ],
+          {
+            type:
+              "text/plain;charset=utf-8"
+          }
+        );
+
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+      const link =
+        document.createElement(
+          "a"
+        );
+
+      link.href =
+        url;
+
+      link.download =
+        filename;
+
+      document.body.appendChild(
+        link
+      );
+
+      link.click();
+      link.remove();
+
+      setTimeout(
+        function() {
+          URL.revokeObjectURL(
+            url
+          );
+        },
+        30000
+      );
+    }
+
+
+    function downloadPhase3CCCleanTxt() {
+      if (
+        !phase3CCStateMatchesCurrent()
+      ) {
+        alert(
+          "請先建立與目前 OCR／設定一致的 Phase 3-C-C 結果。"
+        );
+
+        return;
+      }
+
+      phase3CCDownloadText(
+        "phase3cc-clean-source-article.txt",
+        phase3ccState.cleanedSourceText
+      );
+    }
+
+
+    function downloadPhase3CCTraditionalTxt() {
+      if (
+        !phase3CCStateMatchesCurrent()
+      ) {
+        alert(
+          "請先建立與目前 OCR／設定一致的 Phase 3-C-C 結果。"
+        );
+
+        return;
+      }
+
+      phase3CCDownloadText(
+        "phase3cc-traditional-article.txt",
+        phase3ccState.traditionalText
+      );
+    }
+
+
+    function downloadPhase3CCJson() {
+      if (!phase3ccState) {
+        alert(
+          "尚未建立 Phase 3-C-C 結果。"
+        );
+
+        return;
+      }
+
+      const payload = {
+        schema:
+          "screenshot-report.phase3c.text-rebuild.v1",
+
+        exportedAt:
+          new Date().toISOString(),
+
+        rawOcrPreserved:
+          true,
+
+        state:
+          phase3ccState
+      };
+
+      const blob =
+        new Blob(
+          [
+            JSON.stringify(
+              payload,
+              null,
+              2
+            )
+          ],
+          {
+            type:
+              "application/json;charset=utf-8"
+          }
+        );
+
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+      const link =
+        document.createElement(
+          "a"
+        );
+
+      link.href =
+        url;
+
+      link.download =
+        "phase3cc-text-rebuild.json";
+
+      document.body.appendChild(
+        link
+      );
+
+      link.click();
+      link.remove();
+
+      setTimeout(
+        function() {
+          URL.revokeObjectURL(
+            url
+          );
+        },
+        30000
+      );
+    }
+
+
+    async function markPhase3CCPass() {
+      if (
+        !phase3CCStateMatchesCurrent()
+      ) {
+        alert(
+          "請先建立有效的 Phase 3-C-C 全文文字重建。"
+        );
+
+        return;
+      }
+
+      if (
+        !String(
+          phase3ccState.cleanedSourceText ||
+          ""
+        ).trim() ||
+        !String(
+          phase3ccState.traditionalText ||
+          ""
+        ).trim()
+      ) {
+        alert(
+          "清理後原文或繁體中文版本為空，不能標記 PASS。"
+        );
+
+        return;
+      }
+
+      const confirmed =
+        confirm(
+          "請確認：文章順序大致正確、主要段落仍存在、繁體中文可讀；疑似 OCR 雜訊可以留到下一階段校正。Raw OCR 仍會完整保留。要標記 Phase 3-C-C PASS 嗎？"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      phase3ccReviewState = {
+        version:
+          PHASE3CC_VERSION,
+
+        status:
+          "pass",
+
+        sourceFingerprint:
+          getPhase3CCSourceFingerprint(),
+
+        resultFingerprint:
+          getPhase3CCResultFingerprint(),
+
+        articleFingerprint:
+          getPhase3CFingerprint(),
+
+        passedAt:
+          Date.now()
+      };
+
+      await saveSetting(
+        PHASE3CC_REVIEW_KEY,
+        phase3ccReviewState
+      );
+
+      renderPhase3CCReviewStatus();
+    }
+
+
+    async function clearPhase3CCState() {
+      const confirmed =
+        confirm(
+          "確定要清除 Phase 3-C-C 的清理後原文與繁體版本嗎？Phase 3-C-B Raw OCR、原始截圖與前面所有階段資料都不會被刪除。"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      phase3ccState =
+        null;
+
+      phase3ccReviewState =
+        null;
+
+      await saveSetting(
+        PHASE3CC_STATE_KEY,
+        null
+      );
+
+      await saveSetting(
+        PHASE3CC_REVIEW_KEY,
+        null
+      );
+
+      renderPhase3CCAvailability();
+    }
+
 
 
     /*
