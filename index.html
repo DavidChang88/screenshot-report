@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Screenshot Report｜Phase 3-C-C Text Rebuild</title>
+  <title>Screenshot Report｜Phase 3-C-D OCR Correction Triage</title>
 
   <style>
     * {
@@ -2293,6 +2293,260 @@
       line-height: 1.65;
     }
 
+
+
+    /*
+      =========================
+      Phase 3-C-D
+      OCR 校正候選與圖表文字分流
+      =========================
+    */
+
+    .phase3cd-panel {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 18px;
+      background: #fff8ec;
+      border: 1px solid #efcf93;
+    }
+
+    .phase3cd-panel h3 {
+      margin: 0 0 10px;
+      font-size: 22px;
+      line-height: 1.45;
+    }
+
+    .phase3cd-panel p {
+      margin: 0 0 14px;
+      color: #5f6368;
+      line-height: 1.65;
+    }
+
+    .phase3cd-version {
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #fff1cf;
+      border: 1px solid #e7c46f;
+      font-size: 14px;
+      line-height: 1.65;
+      font-weight: 700;
+    }
+
+    .phase3cd-card,
+    .phase3cd-status {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 14px;
+      background: #fff;
+      border: 1px solid #ead8b6;
+      line-height: 1.65;
+    }
+
+    .phase3cd-field {
+      margin-top: 14px;
+    }
+
+    .phase3cd-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .phase3cd-check input {
+      width: 22px;
+      height: 22px;
+      margin: 1px 0 0;
+      flex: 0 0 auto;
+    }
+
+    .phase3cd-button-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .phase3cd-button-grid button {
+      margin-top: 0;
+    }
+
+    .phase3cd-build-button {
+      background: #a05f16;
+    }
+
+    .phase3cd-safe-button {
+      background: #2f7d54;
+    }
+
+    .phase3cd-apply-button {
+      background: #2f6d8f;
+    }
+
+    .phase3cd-export-button {
+      background: #506a7d;
+    }
+
+    .phase3cd-pass-button {
+      background: #3f8a52;
+    }
+
+    .phase3cd-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .phase3cd-summary-item {
+      min-width: 0;
+      padding: 12px;
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid #ead8b6;
+      font-size: 13px;
+      color: #444;
+    }
+
+    .phase3cd-summary-item strong {
+      display: block;
+      margin-top: 4px;
+      color: #1d1d1f;
+      font-size: 24px;
+      line-height: 1.2;
+    }
+
+    .phase3cd-candidate-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .phase3cd-candidate {
+      padding: 13px;
+      border-radius: 13px;
+      background: #fff;
+      border: 1px solid #ead8b6;
+    }
+
+    .phase3cd-candidate-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .phase3cd-badge {
+      flex: 0 0 auto;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #f1f3f4;
+      color: #555;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .phase3cd-badge-high {
+      background: #e4f4e9;
+      color: #2f6f43;
+    }
+
+    .phase3cd-badge-medium {
+      background: #fff1cf;
+      color: #8a5a00;
+    }
+
+    .phase3cd-candidate-text {
+      margin: 8px 0 10px;
+      padding: 10px;
+      border-radius: 10px;
+      background: #f7f7f8;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .phase3cd-candidate-note {
+      color: #666;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .phase3cd-candidate select,
+    .phase3cd-candidate input[type="text"] {
+      width: 100%;
+      min-height: 44px;
+      padding: 9px 10px;
+      border: 1px solid #c8ccd0;
+      border-radius: 10px;
+      background: white;
+      color: #1d1d1f;
+      font: inherit;
+      font-size: 14px;
+    }
+
+    .phase3cd-replacement-wrap {
+      margin-top: 8px;
+    }
+
+    .phase3cd-preview-title {
+      margin-bottom: 8px;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .phase3cd-text-preview {
+      width: 100%;
+      min-height: 300px;
+      resize: vertical;
+      padding: 12px;
+      border: 1px solid #c8ccd0;
+      border-radius: 12px;
+      background: white;
+      color: #1d1d1f;
+      font: inherit;
+      font-size: 14px;
+      line-height: 1.65;
+      white-space: pre-wrap;
+    }
+
+    .phase3cd-chart-preview {
+      min-height: 180px;
+    }
+
+    .phase3cd-good {
+      color: #2f7d54;
+      font-weight: 800;
+    }
+
+    .phase3cd-warn {
+      color: #a05f16;
+      font-weight: 800;
+    }
+
+    .phase3cd-info {
+      color: #2f6d8f;
+      font-weight: 800;
+    }
+
+    .phase3cd-note {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #fff7dd;
+      border: 1px solid #e7c46f;
+      color: #6f5510;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
 </style>
 </head>
 
@@ -3906,6 +4160,260 @@
         </div>
 
 
+        <div
+          id="phase3cdPanel"
+          class="phase3cd-panel"
+        >
+          <h3>
+            Phase 3-C-D｜OCR 校正候選與圖表文字分流
+          </h3>
+
+          <div class="phase3cd-version">
+            版本：Phase 3-C-D v1｜OCR-CORRECTION-TRIAGE-20260829
+            <br>
+            保留 Raw OCR／Phase 3-C-C｜安全斷行修復｜台灣術語正規化｜疑似圖表文字人工分流｜可回復
+          </div>
+
+          <p>
+            本階段以 Phase 3-C-C 已保存的繁體全文為來源，不覆蓋 Raw OCR、清理後原文或繁體版本。
+            系統只自動做高安全性的斷行修復與可選的台灣術語正規化；疑似亂碼、圖表標籤與不確定 OCR 內容一律先列成候選，等你確認後才分流或排除。
+          </p>
+
+          <div
+            id="phase3cdPrerequisite"
+            class="phase3cd-status"
+          >
+            正在檢查 Phase 3-C-C 驗收狀態。
+          </div>
+
+          <div class="phase3cd-card">
+            <strong>
+              校正工作區設定
+            </strong>
+
+            <div class="phase3cd-field">
+              <label
+                class="phase3cd-check"
+                for="phase3cdJoinFragments"
+              >
+                <input
+                  id="phase3cdJoinFragments"
+                  type="checkbox"
+                  checked
+                >
+                <span>
+                  合併明顯被 OCR 強制斷開的極短中文字尾（例如「內」＋「存。」）；只使用保守規則。
+                </span>
+              </label>
+            </div>
+
+            <div class="phase3cd-field">
+              <label
+                class="phase3cd-check"
+                for="phase3cdTaiwanTerms"
+              >
+                <input
+                  id="phase3cdTaiwanTerms"
+                  type="checkbox"
+                  checked
+                >
+                <span>
+                  台灣術語保守正規化（例如：內存→記憶體、帶寬→頻寬、芯片→晶片、數據→資料）。
+                </span>
+              </label>
+            </div>
+
+            <div class="phase3cd-field">
+              <label class="phase3cd-check">
+                <input
+                  type="checkbox"
+                  checked
+                  disabled
+                >
+                <span>
+                  安全模式固定開啟：疑似圖表／亂碼候選預設不刪除，必須人工選擇「圖表／附註」或「排除正文」才會從本階段的衍生正文移除。
+                </span>
+              </label>
+            </div>
+
+            <div class="phase3cd-button-grid">
+              <button
+                id="phase3cdBuildButton"
+                class="phase3cd-build-button"
+                onclick="buildPhase3CDWorkspace()"
+                disabled
+              >
+                建立／更新 Phase 3-C-D 校正工作區
+              </button>
+
+              <button
+                id="phase3cdSafeSuggestButton"
+                class="phase3cd-safe-button"
+                onclick="applyPhase3CDHighConfidenceSuggestions()"
+                disabled
+              >
+                ✓ 採用高信心分類建議
+              </button>
+
+              <button
+                id="phase3cdApplyButton"
+                class="phase3cd-apply-button"
+                onclick="applyPhase3CDCurrentDecisions()"
+                disabled
+              >
+                重新套用目前人工選擇
+              </button>
+
+              <button
+                id="phase3cdCorrectedTxtButton"
+                class="phase3cd-export-button"
+                onclick="downloadPhase3CDCorrectedTxt()"
+                disabled
+              >
+                下載校正後正文 TXT
+              </button>
+
+              <button
+                id="phase3cdChartTxtButton"
+                class="phase3cd-export-button"
+                onclick="downloadPhase3CDChartTxt()"
+                disabled
+              >
+                下載圖表／雜訊候選 TXT
+              </button>
+
+              <button
+                id="phase3cdJsonButton"
+                class="phase3cd-export-button"
+                onclick="downloadPhase3CDJson()"
+                disabled
+              >
+                匯出 Phase 3-C-D JSON
+              </button>
+
+              <button
+                id="phase3cdPassButton"
+                class="phase3cd-pass-button"
+                onclick="markPhase3CDPass()"
+                disabled
+              >
+                ✓ 候選均已檢查，標記 Phase 3-C-D PASS
+              </button>
+
+              <button
+                id="phase3cdClearButton"
+                class="secondary-button"
+                onclick="clearPhase3CDState()"
+                disabled
+              >
+                清除 Phase 3-C-D 校正工作區
+              </button>
+            </div>
+          </div>
+
+          <div class="phase3cd-summary-grid">
+            <div class="phase3cd-summary-item">
+              來源字元
+              <strong id="phase3cdSourceCharCount">0</strong>
+            </div>
+
+            <div class="phase3cd-summary-item">
+              校正後字元
+              <strong id="phase3cdCorrectedCharCount">0</strong>
+            </div>
+
+            <div class="phase3cd-summary-item">
+              安全斷行修復
+              <strong id="phase3cdJoinCount">0</strong>
+            </div>
+
+            <div class="phase3cd-summary-item">
+              台灣術語替換
+              <strong id="phase3cdTermCount">0</strong>
+            </div>
+
+            <div class="phase3cd-summary-item">
+              校正／分流候選
+              <strong id="phase3cdCandidateCount">0</strong>
+            </div>
+
+            <div class="phase3cd-summary-item">
+              待人工確認
+              <strong id="phase3cdPendingCount">0</strong>
+            </div>
+
+            <div class="phase3cd-summary-item">
+              圖表／附註
+              <strong id="phase3cdChartCount">0</strong>
+            </div>
+
+            <div class="phase3cd-summary-item">
+              手動校正失敗
+              <strong id="phase3cdCorrectionFailureCount">0</strong>
+            </div>
+          </div>
+
+          <div
+            id="phase3cdBuildStatus"
+            class="phase3cd-status"
+          >
+            尚未建立 Phase 3-C-D 校正工作區。
+          </div>
+
+          <div class="phase3cd-card">
+            <div class="phase3cd-preview-title">
+              待人工確認候選
+            </div>
+            <div
+              id="phase3cdCandidateList"
+              class="phase3cd-candidate-list"
+            >
+              <div class="phase3cd-candidate">
+                尚未分析。
+              </div>
+            </div>
+          </div>
+
+          <div class="phase3cd-card">
+            <div class="phase3cd-preview-title">
+              校正後正文預覽
+            </div>
+            <textarea
+              id="phase3cdCorrectedPreview"
+              class="phase3cd-text-preview"
+              readonly
+              placeholder="建立工作區後，會顯示安全斷行修復、台灣術語正規化，以及人工分流後的衍生正文。"
+            ></textarea>
+          </div>
+
+          <div class="phase3cd-card">
+            <div class="phase3cd-preview-title">
+              圖表／附註分流預覽
+            </div>
+            <textarea
+              id="phase3cdChartPreview"
+              class="phase3cd-text-preview phase3cd-chart-preview"
+              readonly
+              placeholder="人工選擇「圖表／附註」後，候選會保存在這一層，不會遺失。"
+            ></textarea>
+          </div>
+
+          <div
+            id="phase3cdReviewStatus"
+            class="phase3cd-status"
+          >
+            尚未完成 Phase 3-C-D 驗收。
+          </div>
+
+          <div class="phase3cd-note">
+            <strong>安全原則：</strong>
+            本階段不使用語意 AI 猜測未知字串，也不會改寫 Phase 3-C-B Raw OCR 或 Phase 3-C-C 結果。
+            「BAXInterposer…」「H/=—mx…」這類內容只會被列成候選；除非人工明確選擇，否則保留在正文。
+            所有人工選擇會存入 IndexedDB，重新開啟頁面後仍可繼續。
+          </div>
+        </div>
+
+
         <div class="order-help">
           ◀ = 往前移一格　
           ▶ = 往後移一格　
@@ -4371,6 +4879,83 @@
     const phase3ccReviewStatus =
       document.getElementById("phase3ccReviewStatus");
 
+
+
+    const phase3cdPanel =
+      document.getElementById("phase3cdPanel");
+
+    const phase3cdPrerequisite =
+      document.getElementById("phase3cdPrerequisite");
+
+    const phase3cdJoinFragments =
+      document.getElementById("phase3cdJoinFragments");
+
+    const phase3cdTaiwanTerms =
+      document.getElementById("phase3cdTaiwanTerms");
+
+    const phase3cdBuildButton =
+      document.getElementById("phase3cdBuildButton");
+
+    const phase3cdSafeSuggestButton =
+      document.getElementById("phase3cdSafeSuggestButton");
+
+    const phase3cdApplyButton =
+      document.getElementById("phase3cdApplyButton");
+
+    const phase3cdCorrectedTxtButton =
+      document.getElementById("phase3cdCorrectedTxtButton");
+
+    const phase3cdChartTxtButton =
+      document.getElementById("phase3cdChartTxtButton");
+
+    const phase3cdJsonButton =
+      document.getElementById("phase3cdJsonButton");
+
+    const phase3cdPassButton =
+      document.getElementById("phase3cdPassButton");
+
+    const phase3cdClearButton =
+      document.getElementById("phase3cdClearButton");
+
+    const phase3cdSourceCharCount =
+      document.getElementById("phase3cdSourceCharCount");
+
+    const phase3cdCorrectedCharCount =
+      document.getElementById("phase3cdCorrectedCharCount");
+
+    const phase3cdJoinCount =
+      document.getElementById("phase3cdJoinCount");
+
+    const phase3cdTermCount =
+      document.getElementById("phase3cdTermCount");
+
+    const phase3cdCandidateCount =
+      document.getElementById("phase3cdCandidateCount");
+
+    const phase3cdPendingCount =
+      document.getElementById("phase3cdPendingCount");
+
+    const phase3cdChartCount =
+      document.getElementById("phase3cdChartCount");
+
+    const phase3cdCorrectionFailureCount =
+      document.getElementById("phase3cdCorrectionFailureCount");
+
+    const phase3cdBuildStatus =
+      document.getElementById("phase3cdBuildStatus");
+
+    const phase3cdCandidateList =
+      document.getElementById("phase3cdCandidateList");
+
+    const phase3cdCorrectedPreview =
+      document.getElementById("phase3cdCorrectedPreview");
+
+    const phase3cdChartPreview =
+      document.getElementById("phase3cdChartPreview");
+
+    const phase3cdReviewStatus =
+      document.getElementById("phase3cdReviewStatus");
+
     const PHASE2C_STATE_KEY =
       "phase2cBatchState:v1";
 
@@ -4445,6 +5030,16 @@
       "https://unpkg.com/opencc-js@1.4.2/dist/umd/full.js"
     ];
 
+    const PHASE3CD_STATE_KEY =
+      "phase3cCorrectionTriage:v1";
+
+    const PHASE3CD_REVIEW_KEY =
+      "phase3cCorrectionTriageReview:v1";
+
+    const PHASE3CD_VERSION =
+      1;
+
+
     let phase2cState = null;
     let phase2cRunning = false;
     let phase2cStopRequested = false;
@@ -4495,6 +5090,11 @@
     let phase3ccReviewState = null;
     let phase3ccOpenCCPromise = null;
     let phase3ccBuilding = false;
+
+
+    let phase3cdState = null;
+    let phase3cdReviewState = null;
+    let phase3cdBuilding = false;
 
     let lastOverlapCandidate = null;
     let currentSeamOverlapPixels = 0;
@@ -4688,6 +5288,21 @@
     );
 
 
+    phase3cdJoinFragments.addEventListener(
+      "change",
+      function() {
+        renderPhase3CDAvailability();
+      }
+    );
+
+    phase3cdTaiwanTerms.addEventListener(
+      "change",
+      function() {
+        renderPhase3CDAvailability();
+      }
+    );
+
+
     async function startApp() {
       try {
         db = await openDatabase();
@@ -4705,6 +5320,7 @@
         await loadPhase3CState();
         await loadPhase3CBState();
         await loadPhase3CCState();
+        await loadPhase3CDState();
         await updateStorageInfo();
       }
       catch (error) {
@@ -16071,6 +16687,1924 @@
       );
 
       renderPhase3CCAvailability();
+    }
+
+
+
+    /*
+      =========================
+      Phase 3-C-D
+      OCR 校正候選與圖表文字分流
+      =========================
+    */
+
+    function phase3CDPrerequisitePassed() {
+      const fingerprint =
+        getPhase3CCSourceFingerprint();
+
+      return Boolean(
+        phase3ccState &&
+        phase3ccReviewState &&
+        phase3ccReviewState.status ===
+          "pass" &&
+        phase3CCStateMatchesCurrent() &&
+        fingerprint &&
+        phase3ccReviewState.sourceFingerprint ===
+          fingerprint &&
+        phase3ccReviewState.resultFingerprint ===
+          getPhase3CCResultFingerprint()
+      );
+    }
+
+
+    function getPhase3CDOptions() {
+      return {
+        joinFragments:
+          Boolean(
+            phase3cdJoinFragments.checked
+          ),
+
+        taiwanTerms:
+          Boolean(
+            phase3cdTaiwanTerms.checked
+          )
+      };
+    }
+
+
+    function getPhase3CDSourceFingerprint() {
+      if (!phase3CDPrerequisitePassed()) {
+        return "";
+      }
+
+      return [
+        getPhase3CCResultFingerprint(),
+        String(
+          phase3ccReviewState &&
+          phase3ccReviewState.passedAt ||
+          ""
+        )
+      ].join("|");
+    }
+
+
+    function phase3CDOptionsMatchState() {
+      if (!phase3cdState) {
+        return false;
+      }
+
+      const current =
+        getPhase3CDOptions();
+
+      const saved =
+        phase3cdState.options || {};
+
+      return (
+        Boolean(saved.joinFragments) ===
+          current.joinFragments &&
+        Boolean(saved.taiwanTerms) ===
+          current.taiwanTerms
+      );
+    }
+
+
+    function phase3CDStateMatchesCurrent() {
+      const sourceFingerprint =
+        getPhase3CDSourceFingerprint();
+
+      return Boolean(
+        phase3cdState &&
+        phase3cdState.version ===
+          PHASE3CD_VERSION &&
+        sourceFingerprint &&
+        phase3cdState.sourceFingerprint ===
+          sourceFingerprint &&
+        phase3CDOptionsMatchState()
+      );
+    }
+
+
+    function getPhase3CDResultFingerprint() {
+      if (!phase3cdState) {
+        return "";
+      }
+
+      return [
+        String(
+          phase3cdState.sourceFingerprint ||
+          ""
+        ),
+        phase3CCSimpleHash(
+          JSON.stringify(
+            phase3cdState.options || {}
+          )
+        ),
+        phase3CCSimpleHash(
+          String(
+            phase3cdState.correctedText ||
+            ""
+          )
+        ),
+        phase3CCSimpleHash(
+          JSON.stringify(
+            (phase3cdState.candidates || [])
+              .map(
+                candidate => [
+                  candidate.id,
+                  candidate.action,
+                  candidate.replacement || ""
+                ]
+              )
+          )
+        )
+      ].join("|");
+    }
+
+
+    async function loadPhase3CDState() {
+      try {
+        const saved =
+          await getSetting(
+            PHASE3CD_STATE_KEY
+          );
+
+        phase3cdState =
+          saved && saved.value
+            ? saved.value
+            : null;
+      }
+      catch (error) {
+        console.warn(
+          "讀取 Phase 3-C-D 狀態失敗：",
+          error
+        );
+
+        phase3cdState = null;
+      }
+
+      try {
+        const savedReview =
+          await getSetting(
+            PHASE3CD_REVIEW_KEY
+          );
+
+        phase3cdReviewState =
+          savedReview &&
+          savedReview.value
+            ? savedReview.value
+            : null;
+      }
+      catch (error) {
+        console.warn(
+          "讀取 Phase 3-C-D 驗收狀態失敗：",
+          error
+        );
+
+        phase3cdReviewState = null;
+      }
+
+      if (
+        phase3cdState &&
+        phase3cdState.options
+      ) {
+        phase3cdJoinFragments.checked =
+          phase3cdState.options.joinFragments !==
+          false;
+
+        phase3cdTaiwanTerms.checked =
+          phase3cdState.options.taiwanTerms !==
+          false;
+      }
+
+      renderPhase3CDAvailability();
+    }
+
+
+    async function savePhase3CDState() {
+      if (!phase3cdState) {
+        return;
+      }
+
+      phase3cdState.updatedAt =
+        Date.now();
+
+      await saveSetting(
+        PHASE3CD_STATE_KEY,
+        phase3cdState
+      );
+    }
+
+
+    function phase3CDEscapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+
+    function phase3CDNormalizeSpaces(value) {
+      return String(value || "")
+        .replace(/\r\n?/g, "\n")
+        .replace(/[ \t]+/g, " ")
+        .replace(/\s+([，。！？；：、])/g, "$1")
+        .replace(/([（【「『])\s+/g, "$1")
+        .replace(/\s+([）】」』])/g, "$1")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+    }
+
+
+    function phase3CDJoinObviousFragments(text) {
+      const blocks =
+        String(text || "")
+          .replace(/\r\n?/g, "\n")
+          .split(/\n{2,}/)
+          .map(
+            block => block.trim()
+          )
+          .filter(Boolean);
+
+      const output = [];
+      const joins = [];
+
+      for (const block of blocks) {
+        if (!output.length) {
+          output.push(block);
+          continue;
+        }
+
+        const previous =
+          output[output.length - 1];
+
+        const compact =
+          block.replace(/\s/g, "");
+
+        const tinyChineseTail =
+          /^[\u3400-\u9fff]{1,2}[。！？；：]?$/.test(
+            compact
+          );
+
+        const previousOpen =
+          !/[。！？!?；;：:]$/.test(
+            previous
+          );
+
+        const previousCompact =
+          previous.replace(/\s/g, "");
+
+        const previousCjkCount =
+          (previousCompact.match(/[\u3400-\u9fff]/g) || []).length;
+
+        const previousLatinCount =
+          (previousCompact.match(/[A-Za-z0-9]/g) || []).length;
+
+        const previousLooksLikeProse =
+          previousCjkCount >= 4 &&
+          previousCjkCount >= previousLatinCount &&
+          !/[<>=/%\\|]/.test(previous);
+
+        if (
+          tinyChineseTail &&
+          previousOpen &&
+          previousLooksLikeProse
+        ) {
+          output[output.length - 1] =
+            previous + compact;
+
+          joins.push({
+            before:
+              previous.slice(-60),
+            fragment:
+              block,
+            after:
+              (previous + compact).slice(-80)
+          });
+
+          continue;
+        }
+
+        output.push(block);
+      }
+
+      return {
+        text:
+          phase3CDNormalizeSpaces(
+            output.join("\n\n")
+          ),
+        joins:
+          joins
+      };
+    }
+
+
+    function phase3CDApplyTaiwanTerms(text) {
+      const rules = [
+        ["內存", "記憶體"],
+        ["帶寬", "頻寬"],
+        ["芯片", "晶片"],
+        ["數據", "資料"],
+        ["網絡", "網路"],
+        ["軟件", "軟體"],
+        ["硬盤", "硬碟"],
+        ["視頻", "影片"],
+        ["信息", "資訊"],
+        ["打印", "列印"],
+        ["服務器", "伺服器"],
+        ["鼠標", "滑鼠"]
+      ];
+
+      let output =
+        String(text || "");
+
+      const changes = [];
+
+      for (const rule of rules) {
+        const from = rule[0];
+        const to = rule[1];
+
+        let count = 0;
+        let index = 0;
+
+        while (
+          (index = output.indexOf(
+            from,
+            index
+          )) !== -1
+        ) {
+          count++;
+          index += from.length;
+        }
+
+        if (!count) {
+          continue;
+        }
+
+        output =
+          output.split(from).join(to);
+
+        changes.push({
+          from:
+            from,
+          to:
+            to,
+          count:
+            count
+        });
+      }
+
+      return {
+        text:
+          output,
+        changes:
+          changes,
+        count:
+          changes.reduce(
+            (total, item) =>
+              total + item.count,
+            0
+          )
+      };
+    }
+
+
+    function phase3CDCandidateRecommendation(
+      text,
+      reason
+    ) {
+      const value =
+        String(text || "").trim();
+
+      const compact =
+        value.replace(/\s/g, "");
+
+      const cjkCount =
+        (compact.match(/[\u3400-\u9fff]/g) || []).length;
+
+      const latinCount =
+        (compact.match(/[A-Za-z0-9]/g) || []).length;
+
+      const shortChineseTail =
+        /^[\u3400-\u9fff]{1,2}[。！？；：]?$/.test(
+          compact
+        );
+
+      const hardAsciiGibberish =
+        cjkCount <= 2 &&
+        latinCount >= 5 &&
+        (
+          /[=@/#\\]/.test(value) ||
+          /[A-Z]{3,}.*[A-Z]{3,}/.test(value)
+        );
+
+      if (shortChineseTail) {
+        return {
+          recommendedAction:
+            "keep",
+          confidence:
+            "high",
+          note:
+            "極短中文字尾較像 OCR 換行碎片；建議保留正文。"
+        };
+      }
+
+      if (hardAsciiGibberish) {
+        return {
+          recommendedAction:
+            "chart",
+          confidence:
+            "high",
+          note:
+            "ASCII／符號結構高度像圖表標籤或 OCR 亂碼；建議分流到圖表／附註。"
+        };
+      }
+
+      if (
+        /圖表|亂碼|符號碎片/.test(
+          String(reason || "")
+        )
+      ) {
+        return {
+          recommendedAction:
+            "chart",
+          confidence:
+            "medium",
+          note:
+            "Phase 3-C-C 已標記為疑似圖表／符號內容；建議人工查看後再分流。"
+        };
+      }
+
+      return {
+        recommendedAction:
+          "keep",
+        confidence:
+          "medium",
+        note:
+          "目前沒有足夠證據自動刪除；建議人工確認。"
+      };
+    }
+
+
+    function phase3CDCandidateId(parts) {
+      return "c" +
+        phase3CCSimpleHash(
+          parts.join("|")
+        );
+    }
+
+
+    function phase3CDCreateSpecialTypoCandidates(text) {
+      const candidates = [];
+      const value =
+        String(text || "");
+
+      const rules = [
+        {
+          pattern:
+            /\bzZHBM\b/g,
+          replacement:
+            "zHBM",
+          label:
+            "zZHBM"
+        }
+      ];
+
+      for (const rule of rules) {
+        let match;
+
+        while (
+          (match = rule.pattern.exec(value))
+        ) {
+          candidates.push({
+            id:
+              phase3CDCandidateId([
+                "typo",
+                rule.label,
+                String(match.index)
+              ]),
+            type:
+              "typo",
+            displayNumber:
+              null,
+            lineNumber:
+              null,
+            rawText:
+              match[0],
+            articleText:
+              match[0],
+            reason:
+              "常見 OCR 重複字元候選",
+            recommendedAction:
+              "correct",
+            confidence:
+              "high",
+            note:
+              "可安全縮減明顯重複字元；仍保留人工覆核。",
+            suggestion:
+              rule.replacement,
+            action:
+              "pending",
+            replacement:
+              rule.replacement
+          });
+        }
+      }
+
+      return candidates;
+    }
+
+
+    function phase3CDMergeCandidateDecisions(
+      candidates,
+      previousCandidates
+    ) {
+      const previousMap =
+        new Map(
+          (previousCandidates || [])
+            .map(
+              candidate => [
+                candidate.id,
+                candidate
+              ]
+            )
+        );
+
+      return candidates.map(
+        candidate => {
+          const previous =
+            previousMap.get(
+              candidate.id
+            );
+
+          if (!previous) {
+            return candidate;
+          }
+
+          return {
+            ...candidate,
+            action:
+              previous.action ||
+              candidate.action,
+            replacement:
+              previous.replacement ||
+              candidate.replacement ||
+              ""
+          };
+        }
+      );
+    }
+
+
+    function phase3CDReplaceFirst(
+      text,
+      target,
+      replacement
+    ) {
+      const source =
+        String(text || "");
+      const needle =
+        String(target || "");
+
+      if (!needle) {
+        return {
+          text:
+            source,
+          applied:
+            false
+        };
+      }
+
+      const index =
+        source.indexOf(
+          needle
+        );
+
+      if (index < 0) {
+        return {
+          text:
+            source,
+          applied:
+            false
+        };
+      }
+
+      return {
+        text:
+          source.slice(0, index) +
+          String(replacement || "") +
+          source.slice(
+            index + needle.length
+          ),
+        applied:
+          true
+      };
+    }
+
+
+    function phase3CDRebuildDerivedOutputs() {
+      if (!phase3cdState) {
+        return;
+      }
+
+      let text =
+        String(
+          phase3cdState.baseText ||
+          ""
+        );
+
+      const chartItems = [];
+      const excludedItems = [];
+      const appliedCorrections = [];
+      const correctionFailures = [];
+
+      const candidates =
+        Array.isArray(
+          phase3cdState.candidates
+        )
+          ? phase3cdState.candidates
+          : [];
+
+      for (const candidate of candidates) {
+        const action =
+          candidate.action ||
+          "pending";
+
+        if (
+          action === "pending" ||
+          action === "keep"
+        ) {
+          continue;
+        }
+
+        const target =
+          String(
+            candidate.articleText ||
+            candidate.rawText ||
+            ""
+          ).trim();
+
+        if (action === "chart") {
+          chartItems.push({
+            id:
+              candidate.id,
+            displayNumber:
+              candidate.displayNumber,
+            text:
+              target,
+            reason:
+              candidate.reason
+          });
+
+          const result =
+            phase3CDReplaceFirst(
+              text,
+              target,
+              ""
+            );
+
+          text = result.text;
+          continue;
+        }
+
+        if (action === "exclude") {
+          excludedItems.push({
+            id:
+              candidate.id,
+            displayNumber:
+              candidate.displayNumber,
+            text:
+              target,
+            reason:
+              candidate.reason
+          });
+
+          const result =
+            phase3CDReplaceFirst(
+              text,
+              target,
+              ""
+            );
+
+          text = result.text;
+          continue;
+        }
+
+        if (action === "correct") {
+          const replacement =
+            String(
+              candidate.replacement ||
+              candidate.suggestion ||
+              ""
+            );
+
+          if (!replacement.trim()) {
+            correctionFailures.push({
+              id:
+                candidate.id,
+              reason:
+                "校正文字為空"
+            });
+            continue;
+          }
+
+          const result =
+            phase3CDReplaceFirst(
+              text,
+              target,
+              replacement
+            );
+
+          text = result.text;
+
+          if (result.applied) {
+            appliedCorrections.push({
+              id:
+                candidate.id,
+              from:
+                target,
+              to:
+                replacement
+            });
+          }
+          else {
+            correctionFailures.push({
+              id:
+                candidate.id,
+              reason:
+                "在目前正文找不到完全相同的 OCR 片段"
+            });
+          }
+        }
+      }
+
+      text =
+        phase3CDNormalizeSpaces(
+          text
+        );
+
+      phase3cdState.correctedText =
+        text;
+
+      phase3cdState.chartItems =
+        chartItems;
+
+      phase3cdState.excludedItems =
+        excludedItems;
+
+      phase3cdState.appliedCorrections =
+        appliedCorrections;
+
+      phase3cdState.correctionFailures =
+        correctionFailures;
+
+      phase3cdState.pendingCount =
+        candidates.filter(
+          candidate =>
+            !candidate.action ||
+            candidate.action ===
+              "pending"
+        ).length;
+    }
+
+
+    function phase3CDChartText() {
+      if (!phase3cdState) {
+        return "";
+      }
+
+      const items =
+        Array.isArray(
+          phase3cdState.chartItems
+        )
+          ? phase3cdState.chartItems
+          : [];
+
+      return items.map(
+        item => {
+          const page =
+            item.displayNumber
+              ? `第 ${item.displayNumber} 張`
+              : "頁面未定位";
+
+          return [
+            `【${page}】`,
+            item.text,
+            item.reason
+              ? `原因：${item.reason}`
+              : ""
+          ]
+            .filter(Boolean)
+            .join("\n");
+        }
+      ).join("\n\n");
+    }
+
+
+    function renderPhase3CDCandidates() {
+      phase3cdCandidateList.innerHTML =
+        "";
+
+      if (
+        !phase3cdState ||
+        !Array.isArray(
+          phase3cdState.candidates
+        ) ||
+        !phase3cdState.candidates.length
+      ) {
+        const empty =
+          document.createElement(
+            "div"
+          );
+
+        empty.className =
+          "phase3cd-candidate";
+
+        empty.textContent =
+          phase3cdState
+            ? "目前沒有需要人工確認的候選。"
+            : "尚未分析。";
+
+        phase3cdCandidateList.appendChild(
+          empty
+        );
+
+        return;
+      }
+
+      for (
+        const candidate of
+        phase3cdState.candidates
+      ) {
+        const card =
+          document.createElement(
+            "div"
+          );
+
+        card.className =
+          "phase3cd-candidate";
+
+        const head =
+          document.createElement(
+            "div"
+          );
+
+        head.className =
+          "phase3cd-candidate-head";
+
+        const title =
+          document.createElement(
+            "div"
+          );
+
+        title.textContent =
+          candidate.displayNumber
+            ? `第 ${candidate.displayNumber} 張｜${candidate.reason || "待確認"}`
+            : `${candidate.reason || "待確認"}`;
+
+        const badge =
+          document.createElement(
+            "span"
+          );
+
+        badge.className =
+          "phase3cd-badge " +
+          (
+            candidate.confidence ===
+              "high"
+              ? "phase3cd-badge-high"
+              : "phase3cd-badge-medium"
+          );
+
+        badge.textContent =
+          candidate.confidence ===
+            "high"
+            ? "高信心建議"
+            : "需人工判斷";
+
+        head.appendChild(title);
+        head.appendChild(badge);
+        card.appendChild(head);
+
+        const original =
+          document.createElement(
+            "div"
+          );
+
+        original.className =
+          "phase3cd-candidate-text";
+
+        original.textContent =
+          candidate.articleText ||
+          candidate.rawText ||
+          "";
+
+        card.appendChild(original);
+
+        const note =
+          document.createElement(
+            "div"
+          );
+
+        note.className =
+          "phase3cd-candidate-note";
+
+        const recommendedLabel =
+          candidate.recommendedAction ===
+            "chart"
+            ? "圖表／附註"
+            : candidate.recommendedAction ===
+              "correct"
+              ? "套用校正"
+              : "保留正文";
+
+        note.textContent =
+          `建議：${recommendedLabel}。${candidate.note || ""}`;
+
+        card.appendChild(note);
+
+        const select =
+          document.createElement(
+            "select"
+          );
+
+        const options = [
+          ["pending", "尚未確認"],
+          ["keep", "保留正文（已確認）"],
+          ["chart", "分流到圖表／附註"],
+          ["exclude", "排除本階段衍生正文"],
+          ["correct", "套用人工校正文字"]
+        ];
+
+        for (const option of options) {
+          const element =
+            document.createElement(
+              "option"
+            );
+
+          element.value =
+            option[0];
+
+          element.textContent =
+            option[1];
+
+          if (
+            option[0] ===
+            (candidate.action || "pending")
+          ) {
+            element.selected =
+              true;
+          }
+
+          select.appendChild(
+            element
+          );
+        }
+
+        select.addEventListener(
+          "change",
+          async function() {
+            candidate.action =
+              select.value;
+
+            phase3CDRebuildDerivedOutputs();
+            await savePhase3CDState();
+            renderPhase3CDAvailability();
+          }
+        );
+
+        card.appendChild(select);
+
+        const replacementWrap =
+          document.createElement(
+            "div"
+          );
+
+        replacementWrap.className =
+          "phase3cd-replacement-wrap";
+
+        const replacementInput =
+          document.createElement(
+            "input"
+          );
+
+        replacementInput.type =
+          "text";
+
+        replacementInput.placeholder =
+          "若選擇人工校正，請輸入替換後文字";
+
+        replacementInput.value =
+          candidate.replacement ||
+          candidate.suggestion ||
+          "";
+
+        replacementInput.disabled =
+          (candidate.action || "pending") !==
+          "correct";
+
+        select.addEventListener(
+          "change",
+          function() {
+            replacementInput.disabled =
+              select.value !==
+              "correct";
+          }
+        );
+
+        replacementInput.addEventListener(
+          "change",
+          async function() {
+            candidate.replacement =
+              replacementInput.value;
+
+            phase3CDRebuildDerivedOutputs();
+            await savePhase3CDState();
+            renderPhase3CDAvailability();
+          }
+        );
+
+        replacementWrap.appendChild(
+          replacementInput
+        );
+
+        card.appendChild(
+          replacementWrap
+        );
+
+        phase3cdCandidateList.appendChild(
+          card
+        );
+      }
+    }
+
+
+    function renderPhase3CDState() {
+      const state =
+        phase3cdState;
+
+      if (!state) {
+        phase3cdSourceCharCount.textContent =
+          "0";
+        phase3cdCorrectedCharCount.textContent =
+          "0";
+        phase3cdJoinCount.textContent =
+          "0";
+        phase3cdTermCount.textContent =
+          "0";
+        phase3cdCandidateCount.textContent =
+          "0";
+        phase3cdPendingCount.textContent =
+          "0";
+        phase3cdChartCount.textContent =
+          "0";
+        phase3cdCorrectionFailureCount.textContent =
+          "0";
+        phase3cdCorrectedPreview.value =
+          "";
+        phase3cdChartPreview.value =
+          "";
+        phase3cdBuildStatus.textContent =
+          "尚未建立 Phase 3-C-D 校正工作區。";
+        renderPhase3CDCandidates();
+        return;
+      }
+
+      phase3cdSourceCharCount.textContent =
+        String(
+          state.sourceCharCount || 0
+        );
+
+      phase3cdCorrectedCharCount.textContent =
+        String(
+          String(
+            state.correctedText || ""
+          ).length
+        );
+
+      phase3cdJoinCount.textContent =
+        String(
+          Array.isArray(state.joins)
+            ? state.joins.length
+            : 0
+        );
+
+      phase3cdTermCount.textContent =
+        String(
+          Number(
+            state.termReplacementCount ||
+            0
+          )
+        );
+
+      phase3cdCandidateCount.textContent =
+        String(
+          Array.isArray(state.candidates)
+            ? state.candidates.length
+            : 0
+        );
+
+      phase3cdPendingCount.textContent =
+        String(
+          Number(
+            state.pendingCount || 0
+          )
+        );
+
+      phase3cdChartCount.textContent =
+        String(
+          Array.isArray(state.chartItems)
+            ? state.chartItems.length
+            : 0
+        );
+
+      phase3cdCorrectionFailureCount.textContent =
+        String(
+          Array.isArray(
+            state.correctionFailures
+          )
+            ? state.correctionFailures.length
+            : 0
+        );
+
+      phase3cdCorrectedPreview.value =
+        String(
+          state.correctedText ||
+          ""
+        );
+
+      phase3cdChartPreview.value =
+        phase3CDChartText();
+
+      if (phase3CDStateMatchesCurrent()) {
+        const pending =
+          Number(state.pendingCount || 0);
+
+        const chartCount =
+          Array.isArray(state.chartItems)
+            ? state.chartItems.length
+            : 0;
+
+        phase3cdBuildStatus.innerHTML =
+          `<span class="phase3cd-good">✅ Phase 3-C-D 校正工作區已建立。</span>` +
+          `<br>待確認 ${pending} 項｜已分流圖表／附註 ${chartCount} 項。` +
+          `<br>安全斷行與術語替換只存在本階段衍生文字，前一階段資料未被改寫。`;
+      }
+      else {
+        phase3cdBuildStatus.innerHTML =
+          `<span class="phase3cd-warn">⚠️ 目前 Phase 3-C-D 結果與來源或設定不一致。</span>` +
+          `<br>請按「建立／更新 Phase 3-C-D 校正工作區」。`;
+      }
+
+      renderPhase3CDCandidates();
+    }
+
+
+    function renderPhase3CDReviewStatus() {
+      const sourceFingerprint =
+        getPhase3CDSourceFingerprint();
+
+      if (
+        phase3cdReviewState &&
+        phase3cdReviewState.status ===
+          "pass" &&
+        sourceFingerprint &&
+        phase3cdReviewState.sourceFingerprint ===
+          sourceFingerprint &&
+        phase3cdReviewState.resultFingerprint ===
+          getPhase3CDResultFingerprint() &&
+        phase3CDStateMatchesCurrent()
+      ) {
+        const date =
+          new Date(
+            phase3cdReviewState.passedAt
+          );
+
+        phase3cdReviewStatus.innerHTML =
+          `<span class="phase3cd-good">✅ Phase 3-C-D 已 PASS。</span>` +
+          `<br>校正後正文、圖表／附註分流與人工決策均已保存。` +
+          `<br>驗收時間：${date.toLocaleString()}`;
+        return;
+      }
+
+      if (
+        phase3cdReviewState &&
+        phase3cdReviewState.status ===
+          "pass"
+      ) {
+        phase3cdReviewStatus.innerHTML =
+          `<span class="phase3cd-warn">⚠️ 舊的 Phase 3-C-D PASS 已失效。</span>` +
+          `<br>來源或人工選擇已改變，請重新驗收。`;
+        return;
+      }
+
+      phase3cdReviewStatus.textContent =
+        "尚未完成 Phase 3-C-D 驗收。";
+    }
+
+
+    function renderPhase3CDAvailability() {
+      const prerequisite =
+        phase3CDPrerequisitePassed();
+
+      if (!prerequisite) {
+        phase3cdPrerequisite.innerHTML =
+          `<span class="phase3cd-warn">🔒 Phase 3-C-D 尚未解鎖。</span>` +
+          `<br>請先完成 Phase 3-C-C PASS，並保留 Phase 3-C-C 文字重建結果。`;
+
+        phase3cdBuildButton.disabled =
+          true;
+        phase3cdSafeSuggestButton.disabled =
+          true;
+        phase3cdApplyButton.disabled =
+          true;
+        phase3cdCorrectedTxtButton.disabled =
+          true;
+        phase3cdChartTxtButton.disabled =
+          true;
+        phase3cdJsonButton.disabled =
+          !phase3cdState;
+        phase3cdPassButton.disabled =
+          true;
+        phase3cdClearButton.disabled =
+          !phase3cdState;
+
+        renderPhase3CDState();
+        renderPhase3CDReviewStatus();
+        return;
+      }
+
+      phase3cdPrerequisite.innerHTML =
+        `<span class="phase3cd-good">✅ Phase 3-C-C 已 PASS，OCR 校正與分流已解鎖。</span>` +
+        `<br>來源為 Phase 3-C-C 繁體全文；Raw OCR 與前一階段結果保持唯讀。`;
+
+      const valid =
+        phase3CDStateMatchesCurrent();
+
+      const pending =
+        valid && phase3cdState
+          ? Number(
+              phase3cdState.pendingCount ||
+              0
+            )
+          : 0;
+
+      const correctionFailures =
+        valid && phase3cdState &&
+        Array.isArray(
+          phase3cdState.correctionFailures
+        )
+          ? phase3cdState.correctionFailures.length
+          : 0;
+
+      phase3cdBuildButton.disabled =
+        phase3cdBuilding;
+
+      phase3cdSafeSuggestButton.disabled =
+        !valid ||
+        !phase3cdState ||
+        !Array.isArray(
+          phase3cdState.candidates
+        ) ||
+        !phase3cdState.candidates.some(
+          candidate =>
+            candidate.confidence ===
+              "high" &&
+            (
+              !candidate.action ||
+              candidate.action ===
+                "pending"
+            )
+        );
+
+      phase3cdApplyButton.disabled =
+        !valid ||
+        phase3cdBuilding;
+
+      phase3cdCorrectedTxtButton.disabled =
+        !valid ||
+        !String(
+          phase3cdState &&
+          phase3cdState.correctedText ||
+          ""
+        ).trim();
+
+      phase3cdChartTxtButton.disabled =
+        !valid;
+
+      phase3cdJsonButton.disabled =
+        !phase3cdState;
+
+      phase3cdPassButton.disabled =
+        !valid ||
+        pending > 0 ||
+        correctionFailures > 0 ||
+        !String(
+          phase3cdState &&
+          phase3cdState.correctedText ||
+          ""
+        ).trim();
+
+      phase3cdClearButton.disabled =
+        phase3cdBuilding ||
+        !phase3cdState;
+
+      renderPhase3CDState();
+      renderPhase3CDReviewStatus();
+    }
+
+
+    async function buildPhase3CDWorkspace() {
+      if (phase3cdBuilding) {
+        return;
+      }
+
+      if (!phase3CDPrerequisitePassed()) {
+        alert(
+          "請先完成 Phase 3-C-C PASS。"
+        );
+        return;
+      }
+
+      phase3cdBuilding = true;
+      renderPhase3CDAvailability();
+
+      phase3cdBuildStatus.innerHTML =
+        `<span class="phase3cd-info">正在建立 OCR 校正候選與圖表分流工作區…</span>` +
+        `<br>前一階段資料不會被改寫。`;
+
+      try {
+        const sourceText =
+          String(
+            phase3ccState.traditionalText ||
+            ""
+          );
+
+        if (!sourceText.trim()) {
+          throw new Error(
+            "Phase 3-C-C 繁體全文為空"
+          );
+        }
+
+        const options =
+          getPhase3CDOptions();
+
+        let baseText =
+          sourceText;
+
+        let joins = [];
+
+        if (options.joinFragments) {
+          const joined =
+            phase3CDJoinObviousFragments(
+              baseText
+            );
+          baseText =
+            joined.text;
+          joins =
+            joined.joins;
+        }
+        else {
+          baseText =
+            phase3CDNormalizeSpaces(
+              baseText
+            );
+        }
+
+        let termChanges = [];
+        let termReplacementCount = 0;
+
+        if (options.taiwanTerms) {
+          const normalized =
+            phase3CDApplyTaiwanTerms(
+              baseText
+            );
+
+          baseText =
+            normalized.text;
+          termChanges =
+            normalized.changes;
+          termReplacementCount =
+            normalized.count;
+        }
+
+        let converter = null;
+
+        try {
+          const OpenCC =
+            await phase3CCLoadOpenCC();
+
+          converter =
+            OpenCC.Converter({
+              from:
+                "cn",
+              to:
+                phase3ccState.options &&
+                phase3ccState.options.traditionalProfile ||
+                "tw"
+            });
+        }
+        catch (error) {
+          console.warn(
+            "Phase 3-C-D 候選文字 OpenCC 轉換略過：",
+            error
+          );
+        }
+
+        const candidates = [];
+        const seenIds = new Set();
+
+        const suspicious =
+          Array.isArray(
+            phase3ccState.suspiciousLines
+          )
+            ? phase3ccState.suspiciousLines
+            : [];
+
+        for (const item of suspicious) {
+          const rawText =
+            String(
+              item.text || ""
+            ).trim();
+
+          if (!rawText) {
+            continue;
+          }
+
+          let articleText =
+            rawText;
+
+          if (converter) {
+            try {
+              articleText =
+                converter(articleText);
+            }
+            catch (error) {
+              // 保留原字串即可。
+            }
+          }
+
+          if (options.taiwanTerms) {
+            articleText =
+              phase3CDApplyTaiwanTerms(
+                articleText
+              ).text;
+          }
+
+          articleText =
+            phase3CDNormalizeSpaces(
+              articleText
+            );
+
+          const recommendation =
+            phase3CDCandidateRecommendation(
+              articleText,
+              item.reason
+            );
+
+          const id =
+            phase3CDCandidateId([
+              "suspicious",
+              String(
+                item.displayNumber || ""
+              ),
+              String(
+                item.lineNumber || ""
+              ),
+              rawText
+            ]);
+
+          if (seenIds.has(id)) {
+            continue;
+          }
+
+          seenIds.add(id);
+
+          candidates.push({
+            id:
+              id,
+            type:
+              "suspicious",
+            displayNumber:
+              item.displayNumber || null,
+            lineNumber:
+              item.lineNumber || null,
+            rawText:
+              rawText,
+            articleText:
+              articleText,
+            reason:
+              item.reason ||
+              "Phase 3-C-C 疑似雜訊",
+            recommendedAction:
+              recommendation.recommendedAction,
+            confidence:
+              recommendation.confidence,
+            note:
+              recommendation.note,
+            suggestion:
+              "",
+            action:
+              "pending",
+            replacement:
+              ""
+          });
+        }
+
+        for (
+          const candidate of
+          phase3CDCreateSpecialTypoCandidates(
+            baseText
+          )
+        ) {
+          if (seenIds.has(candidate.id)) {
+            continue;
+          }
+
+          seenIds.add(candidate.id);
+          candidates.push(candidate);
+        }
+
+        const previousCandidates =
+          phase3cdState &&
+          phase3cdState.sourceFingerprint ===
+            getPhase3CDSourceFingerprint()
+            ? phase3cdState.candidates
+            : [];
+
+        const mergedCandidates =
+          phase3CDMergeCandidateDecisions(
+            candidates,
+            previousCandidates
+          );
+
+        phase3cdState = {
+          version:
+            PHASE3CD_VERSION,
+          sourceFingerprint:
+            getPhase3CDSourceFingerprint(),
+          sourcePhase3CCFingerprint:
+            getPhase3CCResultFingerprint(),
+          status:
+            "ready",
+          builtAt:
+            Date.now(),
+          updatedAt:
+            Date.now(),
+          options:
+            options,
+          sourceCharCount:
+            sourceText.length,
+          sourceTextHash:
+            phase3CCSimpleHash(
+              sourceText
+            ),
+          baseText:
+            baseText,
+          joins:
+            joins,
+          termChanges:
+            termChanges,
+          termReplacementCount:
+            termReplacementCount,
+          candidates:
+            mergedCandidates,
+          correctedText:
+            baseText,
+          chartItems:
+            [],
+          excludedItems:
+            [],
+          appliedCorrections:
+            [],
+          correctionFailures:
+            [],
+          pendingCount:
+            mergedCandidates.length
+        };
+
+        phase3CDRebuildDerivedOutputs();
+
+        phase3cdReviewState =
+          null;
+
+        await saveSetting(
+          PHASE3CD_STATE_KEY,
+          phase3cdState
+        );
+
+        await saveSetting(
+          PHASE3CD_REVIEW_KEY,
+          null
+        );
+      }
+      catch (error) {
+        console.error(
+          "Phase 3-C-D 建立失敗：",
+          error
+        );
+
+        phase3cdBuildStatus.innerHTML =
+          `<span class="phase3cd-warn">❌ Phase 3-C-D 建立失敗。</span>` +
+          `<br>${phase3CDEscapeHtml(error.message || error)}` +
+          `<br>Phase 3-C-B／3-C-C 資料沒有被修改。`;
+      }
+      finally {
+        phase3cdBuilding = false;
+        renderPhase3CDAvailability();
+      }
+    }
+
+
+    async function applyPhase3CDHighConfidenceSuggestions() {
+      if (!phase3CDStateMatchesCurrent()) {
+        alert(
+          "請先建立有效的 Phase 3-C-D 校正工作區。"
+        );
+        return;
+      }
+
+      let changed = 0;
+
+      for (
+        const candidate of
+        phase3cdState.candidates
+      ) {
+        if (
+          candidate.confidence !==
+            "high" ||
+          (
+            candidate.action &&
+            candidate.action !==
+              "pending"
+          )
+        ) {
+          continue;
+        }
+
+        candidate.action =
+          candidate.recommendedAction ||
+          "keep";
+
+        if (
+          candidate.action ===
+            "correct" &&
+          !candidate.replacement
+        ) {
+          candidate.replacement =
+            candidate.suggestion || "";
+        }
+
+        changed++;
+      }
+
+      phase3CDRebuildDerivedOutputs();
+      await savePhase3CDState();
+      phase3cdReviewState = null;
+      await saveSetting(
+        PHASE3CD_REVIEW_KEY,
+        null
+      );
+
+      renderPhase3CDAvailability();
+
+      if (!changed) {
+        alert(
+          "目前沒有尚未處理的高信心建議。"
+        );
+      }
+    }
+
+
+    async function applyPhase3CDCurrentDecisions() {
+      if (!phase3CDStateMatchesCurrent()) {
+        alert(
+          "請先建立與目前設定一致的 Phase 3-C-D 工作區。"
+        );
+        return;
+      }
+
+      phase3CDRebuildDerivedOutputs();
+      await savePhase3CDState();
+
+      phase3cdReviewState = null;
+      await saveSetting(
+        PHASE3CD_REVIEW_KEY,
+        null
+      );
+
+      renderPhase3CDAvailability();
+    }
+
+
+    function downloadPhase3CDCorrectedTxt() {
+      if (!phase3CDStateMatchesCurrent()) {
+        alert(
+          "請先建立有效的 Phase 3-C-D 工作區。"
+        );
+        return;
+      }
+
+      phase3CCDownloadText(
+        "phase3cd-reviewed-article.txt",
+        phase3cdState.correctedText
+      );
+    }
+
+
+    function downloadPhase3CDChartTxt() {
+      if (!phase3CDStateMatchesCurrent()) {
+        alert(
+          "請先建立有效的 Phase 3-C-D 工作區。"
+        );
+        return;
+      }
+
+      const value =
+        phase3CDChartText() ||
+        "目前沒有人工分流到圖表／附註的候選。";
+
+      phase3CCDownloadText(
+        "phase3cd-chart-notes.txt",
+        value
+      );
+    }
+
+
+    function downloadPhase3CDJson() {
+      if (!phase3cdState) {
+        alert(
+          "尚未建立 Phase 3-C-D 工作區。"
+        );
+        return;
+      }
+
+      const payload = {
+        schema:
+          "screenshot-report.phase3c.ocr-correction-triage.v1",
+        exportedAt:
+          new Date().toISOString(),
+        rawOcrPreserved:
+          true,
+        phase3ccPreserved:
+          true,
+        state:
+          phase3cdState,
+        review:
+          phase3cdReviewState
+      };
+
+      const blob =
+        new Blob(
+          [
+            JSON.stringify(
+              payload,
+              null,
+              2
+            )
+          ],
+          {
+            type:
+              "application/json;charset=utf-8"
+          }
+        );
+
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+      const link =
+        document.createElement(
+          "a"
+        );
+
+      link.href =
+        url;
+      link.download =
+        "phase3cd-ocr-correction-triage.json";
+
+      document.body.appendChild(
+        link
+      );
+      link.click();
+      link.remove();
+
+      setTimeout(
+        function() {
+          URL.revokeObjectURL(url);
+        },
+        30000
+      );
+    }
+
+
+    async function markPhase3CDPass() {
+      if (!phase3CDStateMatchesCurrent()) {
+        alert(
+          "請先建立有效的 Phase 3-C-D 工作區。"
+        );
+        return;
+      }
+
+      phase3CDRebuildDerivedOutputs();
+      await savePhase3CDState();
+
+      const pending =
+        Number(
+          phase3cdState.pendingCount ||
+          0
+        );
+
+      const failures =
+        Array.isArray(
+          phase3cdState.correctionFailures
+        )
+          ? phase3cdState.correctionFailures.length
+          : 0;
+
+      if (pending > 0) {
+        alert(
+          `還有 ${pending} 項候選尚未人工確認。請逐項選擇保留、圖表／附註、排除或校正。`
+        );
+        return;
+      }
+
+      if (failures > 0) {
+        alert(
+          `有 ${failures} 項人工校正沒有成功套用。請改成「保留正文」或重新輸入校正文字。`
+        );
+        return;
+      }
+
+      if (
+        !String(
+          phase3cdState.correctedText ||
+          ""
+        ).trim()
+      ) {
+        alert(
+          "校正後正文為空，不能標記 PASS。"
+        );
+        return;
+      }
+
+      const confirmed =
+        confirm(
+          "請確認：所有候選都已人工檢查；圖表／附註分流合理；校正後正文仍保留主要內容。Raw OCR 與 Phase 3-C-C 都會保留。要標記 Phase 3-C-D PASS 嗎？"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      phase3cdReviewState = {
+        version:
+          PHASE3CD_VERSION,
+        status:
+          "pass",
+        sourceFingerprint:
+          getPhase3CDSourceFingerprint(),
+        resultFingerprint:
+          getPhase3CDResultFingerprint(),
+        passedAt:
+          Date.now()
+      };
+
+      await saveSetting(
+        PHASE3CD_REVIEW_KEY,
+        phase3cdReviewState
+      );
+
+      renderPhase3CDAvailability();
+    }
+
+
+    async function clearPhase3CDState() {
+      const confirmed =
+        confirm(
+          "確定要清除 Phase 3-C-D 校正工作區嗎？Phase 3-C-B Raw OCR、Phase 3-C-C 清理後原文與繁體全文都不會被刪除。"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      phase3cdState = null;
+      phase3cdReviewState = null;
+
+      await saveSetting(
+        PHASE3CD_STATE_KEY,
+        null
+      );
+
+      await saveSetting(
+        PHASE3CD_REVIEW_KEY,
+        null
+      );
+
+      renderPhase3CDAvailability();
     }
 
 
