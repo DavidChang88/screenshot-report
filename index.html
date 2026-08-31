@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Screenshot Report｜Phase 3-C-D OCR Correction Triage</title>
+  <title>Screenshot Report｜Phase 3-C-D v2 Full-text OCR Audit</title>
 
   <style>
     * {
@@ -4165,18 +4165,18 @@
           class="phase3cd-panel"
         >
           <h3>
-            Phase 3-C-D｜OCR 校正候選與圖表文字分流
+            Phase 3-C-D｜全文 OCR 校正與漏網異常補抓
           </h3>
 
           <div class="phase3cd-version">
-            版本：Phase 3-C-D v1｜OCR-CORRECTION-TRIAGE-20260829
+            版本：Phase 3-C-D v2｜FULLTEXT-OCR-AUDIT-20260829
             <br>
-            保留 Raw OCR／Phase 3-C-C｜安全斷行修復｜台灣術語正規化｜疑似圖表文字人工分流｜可回復
+            延續 v1 人工決策｜全文漏網 OCR 補抓｜安全斷行修復｜台灣術語正規化｜疑似圖表文字人工分流｜可回復
           </div>
 
           <p>
             本階段以 Phase 3-C-C 已保存的繁體全文為來源，不覆蓋 Raw OCR、清理後原文或繁體版本。
-            系統只自動做高安全性的斷行修復與可選的台灣術語正規化；疑似亂碼、圖表標籤與不確定 OCR 內容一律先列成候選，等你確認後才分流或排除。
+            v2 除了延續 v1 的候選與人工決策，還會掃描整篇正文，補抓 Phase 3-C-C 沒有列出的疑似 OCR 異常。全文掃描只會新增候選，不會自動刪除或語意猜字；待人工確認項目尚未處理完以前，不能標記 PASS。
           </p>
 
           <div
@@ -4224,6 +4224,22 @@
             </div>
 
             <div class="phase3cd-field">
+              <label
+                class="phase3cd-check"
+                for="phase3cdFullTextAudit"
+              >
+                <input
+                  id="phase3cdFullTextAudit"
+                  type="checkbox"
+                  checked
+                >
+                <span>
+                  全文漏網 OCR 補抓（建議開啟）：掃描整篇衍生正文，將疑似亂碼、異常標點、可疑詞形與段尾殘片新增為人工候選；不會自動刪除正文。
+                </span>
+              </label>
+            </div>
+
+            <div class="phase3cd-field">
               <label class="phase3cd-check">
                 <input
                   type="checkbox"
@@ -4243,7 +4259,7 @@
                 onclick="buildPhase3CDWorkspace()"
                 disabled
               >
-                建立／更新 Phase 3-C-D 校正工作區
+                建立／更新 Phase 3-C-D v2 全文校正工作區
               </button>
 
               <button
@@ -4338,6 +4354,11 @@
             </div>
 
             <div class="phase3cd-summary-item">
+              全文補抓候選
+              <strong id="phase3cdFullScanCount">0</strong>
+            </div>
+
+            <div class="phase3cd-summary-item">
               待人工確認
               <strong id="phase3cdPendingCount">0</strong>
             </div>
@@ -4382,7 +4403,7 @@
               id="phase3cdCorrectedPreview"
               class="phase3cd-text-preview"
               readonly
-              placeholder="建立工作區後，會顯示安全斷行修復、台灣術語正規化，以及人工分流後的衍生正文。"
+              placeholder="建立 v2 工作區後，會顯示安全斷行修復、台灣術語正規化、全文漏網 OCR 補抓候選，以及人工分流後的衍生正文。"
             ></textarea>
           </div>
 
@@ -4408,8 +4429,8 @@
           <div class="phase3cd-note">
             <strong>安全原則：</strong>
             本階段不使用語意 AI 猜測未知字串，也不會改寫 Phase 3-C-B Raw OCR 或 Phase 3-C-C 結果。
-            「BAXInterposer…」「H/=—mx…」這類內容只會被列成候選；除非人工明確選擇，否則保留在正文。
-            所有人工選擇會存入 IndexedDB，重新開啟頁面後仍可繼續。
+            v2 會把全文結構異常與本篇已觀察到的漏網 OCR 型態補列為候選；「BAXInterposer…」「H/=—mx…」等疑似圖表內容仍不會自動刪除。
+            舊版 v1 的人工選擇會在來源相同時沿用；新增候選必須重新人工確認。所有選擇會存入 IndexedDB，重新開啟頁面後仍可繼續。
           </div>
         </div>
 
@@ -5037,7 +5058,7 @@
       "phase3cCorrectionTriageReview:v1";
 
     const PHASE3CD_VERSION =
-      1;
+      2;
 
 
     let phase2cState = null;
@@ -5296,6 +5317,13 @@
     );
 
     phase3cdTaiwanTerms.addEventListener(
+      "change",
+      function() {
+        renderPhase3CDAvailability();
+      }
+    );
+
+    phase3cdFullTextAudit.addEventListener(
       "change",
       function() {
         renderPhase3CDAvailability();
@@ -16727,6 +16755,11 @@
         taiwanTerms:
           Boolean(
             phase3cdTaiwanTerms.checked
+          ),
+
+        fullTextAudit:
+          Boolean(
+            phase3cdFullTextAudit.checked
           )
       };
     }
@@ -16763,7 +16796,9 @@
         Boolean(saved.joinFragments) ===
           current.joinFragments &&
         Boolean(saved.taiwanTerms) ===
-          current.taiwanTerms
+          current.taiwanTerms &&
+        Boolean(saved.fullTextAudit) ===
+          current.fullTextAudit
       );
     }
 
@@ -16873,6 +16908,10 @@
 
         phase3cdTaiwanTerms.checked =
           phase3cdState.options.taiwanTerms !==
+          false;
+
+        phase3cdFullTextAudit.checked =
+          phase3cdState.options.fullTextAudit !==
           false;
       }
 
@@ -17005,6 +17044,7 @@
         ["內存", "記憶體"],
         ["帶寬", "頻寬"],
         ["芯片", "晶片"],
+        ["硅", "矽"],
         ["數據", "資料"],
         ["網絡", "網路"],
         ["軟件", "軟體"],
@@ -17144,6 +17184,188 @@
         note:
           "目前沒有足夠證據自動刪除；建議人工確認。"
       };
+    }
+
+
+    function phase3CDFullTextCandidate(
+      target,
+      reason,
+      confidence,
+      note,
+      suggestion
+    ) {
+      const value =
+        phase3CDNormalizeSpaces(
+          target
+        );
+
+      if (!value) {
+        return null;
+      }
+
+      return {
+        id:
+          phase3CDCandidateId([
+            "fulltext-v2",
+            reason,
+            value
+          ]),
+        type:
+          "fulltext",
+        displayNumber:
+          null,
+        lineNumber:
+          null,
+        rawText:
+          value,
+        articleText:
+          value,
+        reason:
+          reason,
+        recommendedAction:
+          "correct",
+        confidence:
+          confidence || "medium",
+        note:
+          note ||
+          "全文掃描補抓到疑似 OCR 異常；不會自動刪除，請對照原圖後決定保留、校正、分流或排除。",
+        suggestion:
+          suggestion || "",
+        action:
+          "pending",
+        replacement:
+          suggestion || ""
+      };
+    }
+
+
+    function phase3CDCreateFullTextAuditCandidates(text) {
+      const value =
+        String(text || "")
+          .replace(/\r\n?/g, "\n");
+
+      const candidates = [];
+      const seen = new Set();
+
+      function addCandidate(
+        target,
+        reason,
+        confidence,
+        note,
+        suggestion
+      ) {
+        const candidate =
+          phase3CDFullTextCandidate(
+            target,
+            reason,
+            confidence,
+            note,
+            suggestion
+          );
+
+        if (!candidate || seen.has(candidate.id)) {
+          return;
+        }
+
+        seen.add(candidate.id);
+        candidates.push(candidate);
+      }
+
+      const blocks =
+        value
+          .split(/\n{2,}/)
+          .map(block => block.trim())
+          .filter(Boolean);
+
+      /*
+        這些詞形來自本篇實測時已出現的 OCR 漏網型態。
+        只當作警報，不做語意猜字、不自動刪除。
+      */
+      const observedRiskTokens = [
+        "國生",
+        "莫力斤",
+        "可九",
+        "化轟",
+        "音爭",
+        "顆粒快"
+      ];
+
+      for (const block of blocks) {
+        const hits =
+          observedRiskTokens.filter(
+            token => block.includes(token)
+          );
+
+        if (hits.length >= 2) {
+          addCandidate(
+            block,
+            `全文補抓：同段含多個高風險 OCR 詞形（${hits.join("、")}）`,
+            "medium",
+            "此段同時出現多個已觀察到的 OCR 失真詞形，建議對照原圖後整段人工校正；不要直接猜字。"
+          );
+          continue;
+        }
+
+        if (hits.length === 1) {
+          const token = hits[0];
+
+          addCandidate(
+            token,
+            `全文補抓：高風險 OCR 詞形「${token}」`,
+            "medium",
+            "這個詞形曾在本篇漏過前一階段檢查。若確認為多餘字可排除；若為誤字請人工輸入正確文字。"
+          );
+        }
+
+        if (
+          /(?:[，。、；：！？!?]\s*){3,}/.test(
+            block
+          )
+        ) {
+          addCandidate(
+            block,
+            "全文補抓：異常連續標點",
+            "medium",
+            "同一段出現三個以上連續標點，常見於 OCR 斷裂或漏字；建議人工對照原圖。"
+          );
+        }
+
+        const cjkCount =
+          (block.match(/[\u3400-\u9fff]/g) || []).length;
+
+        const latinCount =
+          (block.match(/[A-Za-z]/g) || []).length;
+
+        if (
+          cjkCount >= 8 &&
+          /[\u3400-\u9fff][，。、；：\s]*[A-Z]\s*$/.test(
+            block
+          )
+        ) {
+          addCandidate(
+            block,
+            "全文補抓：中文段落尾端殘留單一拉丁字母",
+            "medium",
+            "中文正文段尾孤立拉丁字母可能是下一行被截斷或 OCR 殘片；請對照原圖。"
+          );
+        }
+
+        if (
+          cjkCount >= 6 &&
+          latinCount >= 6 &&
+          /[=@#\\/]/.test(block) &&
+          /[A-Z]{2,}/.test(block)
+        ) {
+          addCandidate(
+            block,
+            "全文補抓：高符號密度混合字串",
+            "medium",
+            "中文段落混入大量 ASCII 符號與大寫字母，可能是圖表標籤或 OCR 亂碼；建議人工分流。"
+          );
+        }
+      }
+
+      return candidates;
     }
 
 
@@ -17615,9 +17837,12 @@
             "chart"
             ? "圖表／附註"
             : candidate.recommendedAction ===
-              "correct"
-              ? "套用校正"
-              : "保留正文";
+              "exclude"
+              ? "排除衍生正文"
+              : candidate.recommendedAction ===
+                "correct"
+                ? "人工校正"
+                : "保留正文";
 
         note.textContent =
           `建議：${recommendedLabel}。${candidate.note || ""}`;
@@ -17755,6 +17980,8 @@
           "0";
         phase3cdCandidateCount.textContent =
           "0";
+        phase3cdFullScanCount.textContent =
+          "0";
         phase3cdPendingCount.textContent =
           "0";
         phase3cdChartCount.textContent =
@@ -17805,6 +18032,16 @@
             : 0
         );
 
+      phase3cdFullScanCount.textContent =
+        String(
+          Array.isArray(state.candidates)
+            ? state.candidates.filter(
+                candidate =>
+                  candidate.type === "fulltext"
+              ).length
+            : 0
+        );
+
       phase3cdPendingCount.textContent =
         String(
           Number(
@@ -17847,9 +18084,9 @@
             : 0;
 
         phase3cdBuildStatus.innerHTML =
-          `<span class="phase3cd-good">✅ Phase 3-C-D 校正工作區已建立。</span>` +
-          `<br>待確認 ${pending} 項｜已分流圖表／附註 ${chartCount} 項。` +
-          `<br>安全斷行與術語替換只存在本階段衍生文字，前一階段資料未被改寫。`;
+          `<span class="phase3cd-good">✅ Phase 3-C-D v2 全文校正工作區已建立。</span>` +
+          `<br>待確認 ${pending} 項｜全文補抓 ${Array.isArray(state.candidates) ? state.candidates.filter(candidate => candidate.type === "fulltext").length : 0} 項｜已分流圖表／附註 ${chartCount} 項。` +
+          `<br>安全斷行、術語替換與全文異常補抓只存在本階段衍生文字；前一階段資料與 v1 人工決策不會被改寫。`;
       }
       else {
         phase3cdBuildStatus.innerHTML =
@@ -18031,7 +18268,7 @@
       renderPhase3CDAvailability();
 
       phase3cdBuildStatus.innerHTML =
-        `<span class="phase3cd-info">正在建立 OCR 校正候選與圖表分流工作區…</span>` +
+        `<span class="phase3cd-info">正在建立 Phase 3-C-D v2 全文 OCR 校正與漏網異常工作區…</span>` +
         `<br>前一階段資料不會被改寫。`;
 
       try {
@@ -18226,6 +18463,22 @@
           candidates.push(candidate);
         }
 
+        if (options.fullTextAudit) {
+          for (
+            const candidate of
+            phase3CDCreateFullTextAuditCandidates(
+              baseText
+            )
+          ) {
+            if (seenIds.has(candidate.id)) {
+              continue;
+            }
+
+            seenIds.add(candidate.id);
+            candidates.push(candidate);
+          }
+        }
+
         const previousCandidates =
           phase3cdState &&
           phase3cdState.sourceFingerprint ===
@@ -18270,6 +18523,11 @@
             termReplacementCount,
           candidates:
             mergedCandidates,
+          fullScanCandidateCount:
+            mergedCandidates.filter(
+              candidate =>
+                candidate.type === "fulltext"
+            ).length,
           correctedText:
             baseText,
           chartItems:
@@ -18442,7 +18700,7 @@
 
       const payload = {
         schema:
-          "screenshot-report.phase3c.ocr-correction-triage.v1",
+          "screenshot-report.phase3c.ocr-correction-triage.v2",
         exportedAt:
           new Date().toISOString(),
         rawOcrPreserved:
@@ -18483,7 +18741,7 @@
       link.href =
         url;
       link.download =
-        "phase3cd-ocr-correction-triage.json";
+        "phase3cd-v2-fulltext-ocr-audit.json";
 
       document.body.appendChild(
         link
@@ -18526,7 +18784,7 @@
 
       if (pending > 0) {
         alert(
-          `還有 ${pending} 項候選尚未人工確認。請逐項選擇保留、圖表／附註、排除或校正。`
+          `還有 ${pending} 項候選尚未人工確認，其中可能包含 v2 全文漏網 OCR 補抓。請逐項選擇保留、圖表／附註、排除或校正。`
         );
         return;
       }
@@ -18552,7 +18810,7 @@
 
       const confirmed =
         confirm(
-          "請確認：所有候選都已人工檢查；圖表／附註分流合理；校正後正文仍保留主要內容。Raw OCR 與 Phase 3-C-C 都會保留。要標記 Phase 3-C-D PASS 嗎？"
+          "請確認：v2 全文漏網 OCR 候選與原有候選都已人工檢查；圖表／附註分流合理；校正後正文仍保留主要內容。Raw OCR、Phase 3-C-C 與舊版人工決策都會保留。要標記 Phase 3-C-D PASS 嗎？"
         );
 
       if (!confirmed) {
@@ -18584,7 +18842,7 @@
     async function clearPhase3CDState() {
       const confirmed =
         confirm(
-          "確定要清除 Phase 3-C-D 校正工作區嗎？Phase 3-C-B Raw OCR、Phase 3-C-C 清理後原文與繁體全文都不會被刪除。"
+          "確定要清除 Phase 3-C-D v2 校正工作區嗎？Phase 3-C-B Raw OCR、Phase 3-C-C 清理後原文與繁體全文都不會被刪除。"
         );
 
       if (!confirmed) {
