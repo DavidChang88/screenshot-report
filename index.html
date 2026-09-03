@@ -17290,11 +17290,22 @@
         "顆粒快",
         "100W,",
         "換人了",
-        "內豐牆",
-        "丨—— 全"
+        "內豐牆"
       ];
 
       for (const block of blocks) {
+        const residualChartFragmentMatch =
+          block.match(/[丨｜|]\s*(?:(?:—|─|-)\s*){2,}全/);
+
+        if (residualChartFragmentMatch) {
+          addCandidate(
+            residualChartFragmentMatch[0],
+            "全文補抓：疑似圖表／符號碎片",
+            "medium",
+            "直線＋破折號＋「全」的結構高度疑似 OCR 圖表碎片；建議人工確認後分流到圖表／附註。"
+          );
+        }
+
         const hits =
           observedRiskTokens.filter(
             token => block.includes(token)
