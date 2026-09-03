@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Screenshot Report｜Phase 3-D 正式輸出與報告封裝</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei",
+        -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 720px; margin: 0 auto; padding: 20px 14px 48px; }
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 14px;
+      box-shadow: 0 3px 16px rgba(0,0,0,.06);
+    }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    h2 { margin: 0 0 12px; font-size: 21px; }
+    p { margin: 8px 0; line-height: 1.65; color: #5f6368; }
+    .status { padding: 14px; border-radius: 13px; line-height: 1.65; background: #f2f2f7; }
+    .good { background: #e8f5ec; color: #17663b; }
+    .warn { background: #fff3d6; color: #7a4b00; }
+    .bad { background: #ffe7e3; color: #9f241b; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .metric { background: #f7f7f9; border-radius: 13px; padding: 13px; }
+    .metric span { display:block; color:#666; font-size:13px; }
+    .metric strong { display:block; margin-top:4px; font-size:24px; }
+    label { display:block; margin-top: 12px; font-size: 14px; font-weight: 700; }
+    input[type="text"], textarea {
+      width:100%;
+      margin-top:7px;
+      border:1px solid #c9ccd2;
+      border-radius:12px;
+      padding:12px 13px;
+      font:inherit;
+      font-size:16px;
+      background:#fff;
+      color:#1d1d1f;
+    }
+    textarea { min-height: 220px; resize: vertical; line-height: 1.6; }
+    button, .file-label {
+      display:block;
+      width:100%;
+      border:0;
+      border-radius:13px;
+      padding:15px 14px;
+      margin-top:10px;
+      font:inherit;
+      font-size:16px;
+      font-weight:800;
+      text-align:center;
+      cursor:pointer;
+      text-decoration:none;
+      background:#3478f6;
+      color:white;
+    }
+    button.secondary, .file-label.secondary { background:#e9e9ee; color:#1d1d1f; }
+    button.success { background:#4f9155; }
+    button.dark { background:#536b7c; }
+    button:disabled { opacity:.38; cursor:default; }
+    .button-grid { display:grid; grid-template-columns:1fr; gap:0; }
+    .small { font-size:13px; color:#6f7277; line-height:1.55; }
+    .preview {
+      white-space: pre-wrap;
+      overflow-wrap:anywhere;
+      max-height:420px;
+      overflow:auto;
+      padding:14px;
+      background:#f7f7f9;
+      border-radius:12px;
+      border:1px solid #e1e2e5;
+      line-height:1.65;
+    }
+    .pill {
+      display:inline-block;
+      padding:5px 9px;
+      border-radius:999px;
+      background:#eef2ff;
+      color:#4752a3;
+      font-size:12px;
+      font-weight:800;
+    }
+    .hidden { display:none !important; }
+    .divider { height:1px; background:#e5e5e8; margin:16px 0; }
+    a.back { color:#3478f6; text-decoration:none; font-weight:700; }
+    @media (min-width: 640px) {
+      .button-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+      .button-grid button, .button-grid .file-label { margin-top:10px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="card">
+      <div class="small"><a class="back" href="./index.html">← 回到 Screenshot Report</a></div>
+      <h1>Phase 3-D</h1>
+      <p>
+        正式輸出與報告封裝。只讀取已驗收的 Phase 3-C-D 衍生結果，
+        不改寫 Raw OCR、Phase 3-C-C 或 Phase 3-C-D 人工決策。
+      </p>
+
+      <div id="sourceStatus" class="status">正在讀取 Phase 3-C-D…</div>
+
+      <div class="grid">
+        <div class="metric"><span>校正後字元</span><strong id="charCount">0</strong></div>
+        <div class="metric"><span>圖表／附註</span><strong id="chartCount">0</strong></div>
+        <div class="metric"><span>人工校正</span><strong id="correctionCount">0</strong></div>
+        <div class="metric"><span>排除衍生正文</span><strong id="excludedCount">0</strong></div>
+      </div>
+
+      <label class="file-label secondary" for="jsonImport">
+        若換裝置：匯入 Phase 3-C-D JSON
+      </label>
+      <input id="jsonImport" class="hidden" type="file" accept="application/json,.json">
+
+      <div class="small">
+        同一台 iPhone Safari 通常不需要匯入；不同裝置的 IndexedDB 不會自動同步。
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>1. 建立正式報告</h2>
+
+      <label>
+        報告標題
+        <input
+          id="reportTitle"
+          type="text"
+          placeholder="例如：Hot Chips 2026 Day 1 記憶體專場深度解讀"
+        >
+      </label>
+
+      <label>
+        副標題／來源註記（可留空）
+        <input
+          id="reportSubtitle"
+          type="text"
+          placeholder="例如：由 24 張手機截圖重建；Phase 3-C-D 人工驗收完成"
+        >
+      </label>
+
+      <button id="buildButton" onclick="buildReport()" disabled>
+        建立／更新 Phase 3-D 正式報告
+      </button>
+
+      <div id="buildStatus" class="status" style="margin-top:12px;">
+        尚未建立 Phase 3-D 報告。
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2. 正式內容預覽</h2>
+
+      <div class="pill">MAIN ARTICLE</div>
+      <div id="articlePreview" class="preview" style="margin-top:10px;">
+        尚無內容。
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="pill">CHART / NOTES APPENDIX</div>
+      <div id="chartPreview" class="preview" style="margin-top:10px; max-height:280px;">
+        尚無內容。
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3. 下載輸出</h2>
+
+      <div class="button-grid">
+        <button id="markdownButton" class="dark" onclick="downloadMarkdown()" disabled>
+          下載 Markdown
+        </button>
+        <button id="txtButton" class="dark" onclick="downloadTxt()" disabled>
+          下載正文 TXT
+        </button>
+        <button id="excelButton" class="dark" onclick="downloadExcel()" disabled>
+          下載 Excel
+        </button>
+        <button id="jsonButton" class="dark" onclick="downloadManifest()" disabled>
+          下載報告 JSON
+        </button>
+        <button id="htmlButton" class="dark" onclick="downloadHtml()" disabled>
+          下載可列印 HTML
+        </button>
+        <button id="pdfButton" class="dark" onclick="printReport()" disabled>
+          列印／儲存 PDF
+        </button>
+        <button id="aiButton" class="dark" onclick="downloadAiPackage()" disabled>
+          下載 AI 分析輸入包
+        </button>
+      </div>
+
+      <p class="small">
+        Excel 優先使用 SheetJS 產生 .xlsx；若 CDN 暫時無法載入，
+        會自動下載 Excel 可開啟的 UTF-8 CSV。PDF 使用瀏覽器列印／分享流程，不重新 OCR。
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>4. Phase 3-D 驗收</h2>
+
+      <div id="reviewStatus" class="status">
+        尚未驗收。
+      </div>
+
+      <button id="passButton" class="success" onclick="markPass()" disabled>
+        ✓ 輸出檢查完成，標記 Phase 3-D PASS
+      </button>
+
+      <p class="small">
+        PASS 代表：正文來源是已 PASS 的 Phase 3-C-D、報告封裝已建立、
+        輸出預覽可讀，且本階段未回寫前一階段資料。
+      </p>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <script>
+    const DB_NAME = "ScreenshotReportDB";
+    const DB_VERSION = 2;
+    const SETTINGS_STORE = "settings";
+
+    const PHASE3CD_STATE_KEY =
+      "phase3cCorrectionTriage:v1";
+
+    const PHASE3CD_REVIEW_KEY =
+      "phase3cCorrectionTriageReview:v1";
+
+    const PHASE3D_STATE_KEY =
+      "phase3dReport:v1";
+
+    const PHASE3D_REVIEW_KEY =
+      "phase3dReportReview:v1";
+
+    const PHASE3D_VERSION =
+      "phase3d-output-report-v1";
+
+    let db = null;
+    let sourceState = null;
+    let sourceReview = null;
+    let reportState = null;
+    let reportReview = null;
+    let importedSource = false;
+
+    const el =
+      id => document.getElementById(id);
+
+    function openDatabase() {
+      return new Promise(
+        (resolve, reject) => {
+          const request =
+            indexedDB.open(
+              DB_NAME,
+              DB_VERSION
+            );
+
+          request.onupgradeneeded =
+            event => {
+              const database =
+                event.target.result;
+
+              if (
+                !database.objectStoreNames.contains(
+                  SETTINGS_STORE
+                )
+              ) {
+                database.createObjectStore(
+                  SETTINGS_STORE,
+                  { keyPath: "key" }
+                );
+              }
+            };
+
+          request.onsuccess =
+            () => resolve(
+              request.result
+            );
+
+          request.onerror =
+            () => reject(
+              request.error
+            );
+        }
+      );
+    }
+
+    function getSetting(key) {
+      return new Promise(
+        (resolve, reject) => {
+          const tx =
+            db.transaction(
+              SETTINGS_STORE,
+              "readonly"
+            );
+
+          const req =
+            tx.objectStore(
+              SETTINGS_STORE
+            ).get(key);
+
+          req.onsuccess =
+            () => resolve(
+              req.result || null
+            );
+
+          req.onerror =
+            () => reject(
+              req.error
+            );
+        }
+      );
+    }
+
+    function saveSetting(
+      key,
+      value
+    ) {
+      return new Promise(
+        (resolve, reject) => {
+          const tx =
+            db.transaction(
+              SETTINGS_STORE,
+              "readwrite"
+            );
+
+          tx.objectStore(
+            SETTINGS_STORE
+          ).put({
+            key,
+            value,
+            updatedAt: Date.now()
+          });
+
+          tx.oncomplete =
+            () => resolve();
+
+          tx.onerror =
+            () => reject(
+              tx.error
+            );
+        }
+      );
+    }
+
+    function simpleHash(value) {
+      const s =
+        String(value || "");
+
+      let h =
+        2166136261;
+
+      for (
+        let i = 0;
+        i < s.length;
+        i++
+      ) {
+        h ^=
+          s.charCodeAt(i);
+
+        h =
+          Math.imul(
+            h,
+            16777619
+          );
+      }
+
+      return (
+        h >>> 0
+      )
+        .toString(16)
+        .padStart(8, "0");
+    }
+
+    function chartText() {
+      const items =
+        Array.isArray(
+          sourceState &&
+          sourceState.chartItems
+        )
+          ? sourceState.chartItems
+          : [];
+
+      if (!items.length) {
+        return "目前沒有人工分流到圖表／附註的項目。";
+      }
+
+      return items
+        .map(
+          item => {
+            const page =
+              item.displayNumber
+                ? `第 ${item.displayNumber} 張`
+                : "頁面未定位";
+
+            return [
+              `【${page}】`,
+              item.text || "",
+              item.reason
+                ? `原因：${item.reason}`
+                : ""
+            ]
+              .filter(Boolean)
+              .join("\n");
+          }
+        )
+        .join("\n\n");
+    }
+
+    function deriveTitle(text) {
+      const first =
+        String(text || "")
+          .split(/\n+/)
+          .map(x => x.trim())
+          .find(Boolean) ||
+        "Screenshot Report";
+
+      return first.length > 70
+        ? first.slice(0, 70) + "…"
+        : first;
+    }
+
+    function sourceFingerprint() {
+      if (!sourceState) {
+        return "";
+      }
+
+      return simpleHash(
+        JSON.stringify({
+          correctedText:
+            sourceState.correctedText || "",
+          chartItems:
+            sourceState.chartItems || [],
+          excludedItems:
+            sourceState.excludedItems || [],
+          appliedCorrections:
+            sourceState.appliedCorrections || [],
+          passedAt:
+            sourceReview &&
+            sourceReview.passedAt ||
+            0
+        })
+      );
+    }
+
+    function reportFingerprint(
+      state = reportState
+    ) {
+      if (!state) {
+        return "";
+      }
+
+      return simpleHash(
+        JSON.stringify({
+          version:
+            state.version,
+          sourceFingerprint:
+            state.sourceFingerprint,
+          title:
+            state.title,
+          subtitle:
+            state.subtitle,
+          article:
+            state.article,
+          chartNotes:
+            state.chartNotes
+        })
+      );
+    }
+
+    function validSource() {
+      return !!(
+        sourceState &&
+        sourceReview &&
+        sourceReview.status === "pass" &&
+        String(
+          sourceState.correctedText ||
+          ""
+        ).trim()
+      );
+    }
+
+    function currentReportValid() {
+      return !!(
+        reportState &&
+        validSource() &&
+        reportState.sourceFingerprint ===
+          sourceFingerprint() &&
+        String(
+          reportState.article ||
+          ""
+        ).trim()
+      );
+    }
+
+    function setDownloadEnabled(
+      enabled
+    ) {
+      [
+        "markdownButton",
+        "txtButton",
+        "excelButton",
+        "jsonButton",
+        "htmlButton",
+        "pdfButton",
+        "aiButton"
+      ].forEach(
+        id => {
+          el(id).disabled =
+            !enabled;
+        }
+      );
+
+      el("passButton").disabled =
+        !enabled;
+    }
+
+    function render() {
+      const valid =
+        validSource();
+
+      el("buildButton").disabled =
+        !valid;
+
+      if (!valid) {
+        el("sourceStatus").className =
+          "status warn";
+
+        el("sourceStatus").innerHTML =
+          "⚠️ 尚未取得有效的 Phase 3-C-D PASS。<br>" +
+          "請在同一台裝置完成 3-C-D，或匯入剛才下載的 Phase 3-C-D JSON。";
+
+        el("charCount").textContent =
+          "0";
+
+        el("chartCount").textContent =
+          "0";
+
+        el("correctionCount").textContent =
+          "0";
+
+        el("excludedCount").textContent =
+          "0";
+
+        setDownloadEnabled(false);
+        return;
+      }
+
+      const passedAt =
+        sourceReview.passedAt
+          ? new Date(
+              sourceReview.passedAt
+            ).toLocaleString()
+          : "已 PASS";
+
+      el("sourceStatus").className =
+        "status good";
+
+      el("sourceStatus").innerHTML =
+        `✅ Phase 3-C-D PASS 已讀取。` +
+        (
+          importedSource
+            ? "（來源：匯入 JSON）"
+            : "（來源：本機 IndexedDB）"
+        ) +
+        `<br>驗收時間：${passedAt}`;
+
+      el("charCount").textContent =
+        String(
+          String(
+            sourceState.correctedText ||
+            ""
+          ).length
+        );
+
+      el("chartCount").textContent =
+        String(
+          Array.isArray(
+            sourceState.chartItems
+          )
+            ? sourceState.chartItems.length
+            : 0
+        );
+
+      el("correctionCount").textContent =
+        String(
+          Array.isArray(
+            sourceState.appliedCorrections
+          )
+            ? sourceState.appliedCorrections.length
+            : 0
+        );
+
+      el("excludedCount").textContent =
+        String(
+          Array.isArray(
+            sourceState.excludedItems
+          )
+            ? sourceState.excludedItems.length
+            : 0
+        );
+
+      if (
+        !el("reportTitle").value.trim()
+      ) {
+        el("reportTitle").value =
+          deriveTitle(
+            sourceState.correctedText
+          );
+      }
+
+      if (
+        !el("reportSubtitle").value.trim()
+      ) {
+        el("reportSubtitle").value =
+          "Phase 3-C-D 人工驗收完成之正式輸出";
+      }
+
+      const ready =
+        currentReportValid();
+
+      if (ready) {
+        el("articlePreview").textContent =
+          reportState.article;
+
+        el("chartPreview").textContent =
+          reportState.chartNotes;
+
+        el("buildStatus").className =
+          "status good";
+
+        el("buildStatus").innerHTML =
+          `✅ Phase 3-D 正式報告已建立。` +
+          `<br>建立時間：${new Date(
+            reportState.builtAt
+          ).toLocaleString()}` +
+          `<br>來源指紋：${reportState.sourceFingerprint}`;
+
+        setDownloadEnabled(true);
+      }
+      else {
+        el("articlePreview").textContent =
+          sourceState.correctedText || "";
+
+        el("chartPreview").textContent =
+          chartText();
+
+        el("buildStatus").className =
+          "status";
+
+        el("buildStatus").textContent =
+          "尚未建立與目前 Phase 3-C-D PASS 一致的 Phase 3-D 報告。";
+
+        setDownloadEnabled(false);
+      }
+
+      if (
+        reportReview &&
+        reportReview.status === "pass" &&
+        ready &&
+        reportReview.reportFingerprint ===
+          reportFingerprint()
+      ) {
+        el("reviewStatus").className =
+          "status good";
+
+        el("reviewStatus").innerHTML =
+          `✅ Phase 3-D 已 PASS。` +
+          `<br>驗收時間：${new Date(
+            reportReview.passedAt
+          ).toLocaleString()}`;
+      }
+      else if (
+        reportReview &&
+        reportReview.status === "pass"
+      ) {
+        el("reviewStatus").className =
+          "status warn";
+
+        el("reviewStatus").textContent =
+          "⚠️ 舊的 Phase 3-D PASS 已失效；來源或報告內容已變更，請重新建立並驗收。";
+      }
+      else {
+        el("reviewStatus").className =
+          "status";
+
+        el("reviewStatus").textContent =
+          "尚未驗收。";
+      }
+    }
+
+    async function loadAll() {
+      db =
+        await openDatabase();
+
+      const s =
+        await getSetting(
+          PHASE3CD_STATE_KEY
+        );
+
+      const r =
+        await getSetting(
+          PHASE3CD_REVIEW_KEY
+        );
+
+      sourceState =
+        s && s.value
+          ? s.value
+          : null;
+
+      sourceReview =
+        r && r.value
+          ? r.value
+          : null;
+
+      const rs =
+        await getSetting(
+          PHASE3D_STATE_KEY
+        );
+
+      const rr =
+        await getSetting(
+          PHASE3D_REVIEW_KEY
+        );
+
+      reportState =
+        rs && rs.value
+          ? rs.value
+          : null;
+
+      reportReview =
+        rr && rr.value
+          ? rr.value
+          : null;
+
+      render();
+    }
+
+    async function buildReport() {
+      if (!validSource()) {
+        alert(
+          "請先取得有效的 Phase 3-C-D PASS。"
+        );
+        return;
+      }
+
+      const title =
+        el("reportTitle").value.trim() ||
+        deriveTitle(
+          sourceState.correctedText
+        );
+
+      const subtitle =
+        el("reportSubtitle").value.trim();
+
+      reportState = {
+        version:
+          PHASE3D_VERSION,
+
+        sourceFingerprint:
+          sourceFingerprint(),
+
+        sourcePassedAt:
+          sourceReview.passedAt ||
+          null,
+
+        builtAt:
+          Date.now(),
+
+        title:
+          title,
+
+        subtitle:
+          subtitle,
+
+        article:
+          String(
+            sourceState.correctedText ||
+            ""
+          ).trim(),
+
+        chartNotes:
+          chartText(),
+
+        chartItems:
+          Array.isArray(
+            sourceState.chartItems
+          )
+            ? sourceState.chartItems
+            : [],
+
+        excludedItems:
+          Array.isArray(
+            sourceState.excludedItems
+          )
+            ? sourceState.excludedItems
+            : [],
+
+        appliedCorrections:
+          Array.isArray(
+            sourceState.appliedCorrections
+          )
+            ? sourceState.appliedCorrections
+            : [],
+
+        termChanges:
+          Array.isArray(
+            sourceState.termChanges
+          )
+            ? sourceState.termChanges
+            : [],
+
+        counts: {
+          sourceChars:
+            Number(
+              sourceState.sourceCharCount ||
+              0
+            ),
+
+          finalChars:
+            String(
+              sourceState.correctedText ||
+              ""
+            ).length,
+
+          chartItems:
+            Array.isArray(
+              sourceState.chartItems
+            )
+              ? sourceState.chartItems.length
+              : 0,
+
+          excludedItems:
+            Array.isArray(
+              sourceState.excludedItems
+            )
+              ? sourceState.excludedItems.length
+              : 0,
+
+          appliedCorrections:
+            Array.isArray(
+              sourceState.appliedCorrections
+            )
+              ? sourceState.appliedCorrections.length
+              : 0
+        }
+      };
+
+      reportReview =
+        null;
+
+      await saveSetting(
+        PHASE3D_STATE_KEY,
+        reportState
+      );
+
+      await saveSetting(
+        PHASE3D_REVIEW_KEY,
+        null
+      );
+
+      render();
+    }
+
+    function markdownText() {
+      const r =
+        reportState;
+
+      return [
+        `# ${r.title}`,
+        r.subtitle
+          ? `> ${r.subtitle}`
+          : "",
+        `> Phase 3-C-D 驗收：${
+          r.sourcePassedAt
+            ? new Date(
+                r.sourcePassedAt
+              ).toLocaleString()
+            : "PASS"
+        }`,
+        "",
+        "## 正文",
+        "",
+        r.article,
+        "",
+        "## 圖表／附註",
+        "",
+        r.chartNotes,
+        "",
+        "## 輸出稽核摘要",
+        "",
+        `- 最終正文字元：${r.counts.finalChars}`,
+        `- 圖表／附註：${r.counts.chartItems}`,
+        `- 人工校正：${r.counts.appliedCorrections}`,
+        `- 排除本階段衍生正文：${r.counts.excludedItems}`,
+        `- Phase 3-D 來源指紋：${r.sourceFingerprint}`
+      ]
+        .filter(
+          (v, i, a) =>
+            !(
+              v === "" &&
+              a[i - 1] === ""
+            )
+        )
+        .join("\n");
+    }
+
+    function safeName(name) {
+      return String(
+        name || "report"
+      )
+        .replace(
+          /[\\/:*?"<>|]+/g,
+          "-"
+        )
+        .replace(
+          /\s+/g,
+          " "
+        )
+        .trim()
+        .slice(0, 80) ||
+        "report";
+    }
+
+    function downloadBlob(
+      filename,
+      content,
+      type
+    ) {
+      const blob =
+        content instanceof Blob
+          ? content
+          : new Blob(
+              [content],
+              {
+                type:
+                  type ||
+                  "text/plain;charset=utf-8"
+              }
+            );
+
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+      const a =
+        document.createElement(
+          "a"
+        );
+
+      a.href =
+        url;
+
+      a.download =
+        filename;
+
+      document.body.appendChild(
+        a
+      );
+
+      a.click();
+      a.remove();
+
+      setTimeout(
+        () =>
+          URL.revokeObjectURL(
+            url
+          ),
+        30000
+      );
+    }
+
+    function requireReport() {
+      if (
+        !currentReportValid()
+      ) {
+        alert(
+          "請先建立與目前 Phase 3-C-D PASS 一致的 Phase 3-D 正式報告。"
+        );
+        return false;
+      }
+
+      return true;
+    }
+
+    function downloadMarkdown() {
+      if (!requireReport()) {
+        return;
+      }
+
+      downloadBlob(
+        `${safeName(
+          reportState.title
+        )}.md`,
+        markdownText(),
+        "text/markdown;charset=utf-8"
+      );
+    }
+
+    function downloadTxt() {
+      if (!requireReport()) {
+        return;
+      }
+
+      downloadBlob(
+        `${safeName(
+          reportState.title
+        )}-正文.txt`,
+        reportState.article,
+        "text/plain;charset=utf-8"
+      );
+    }
+
+    function csvEscape(value) {
+      const s =
+        String(
+          value == null
+            ? ""
+            : value
+        );
+
+      return `"${s.replace(
+        /"/g,
+        '""'
+      )}"`;
+    }
+
+    function downloadExcelFallback() {
+      const rows = [
+        [
+          "序號",
+          "類型",
+          "頁面",
+          "內容",
+          "原因"
+        ]
+      ];
+
+      String(
+        reportState.article ||
+        ""
+      )
+        .split(/\n{2,}/)
+        .filter(Boolean)
+        .forEach(
+          (p, i) => {
+            rows.push([
+              i + 1,
+              "正文",
+              "",
+              p,
+              ""
+            ]);
+          }
+        );
+
+      (
+        reportState.chartItems ||
+        []
+      ).forEach(
+        (item, i) => {
+          rows.push([
+            i + 1,
+            "圖表／附註",
+            item.displayNumber || "",
+            item.text || "",
+            item.reason || ""
+          ]);
+        }
+      );
+
+      const csv =
+        "\ufeff" +
+        rows
+          .map(
+            row =>
+              row
+                .map(
+                  csvEscape
+                )
+                .join(",")
+          )
+          .join("\r\n");
+
+      downloadBlob(
+        `${safeName(
+          reportState.title
+        )}.csv`,
+        csv,
+        "text/csv;charset=utf-8"
+      );
+    }
+
+    function downloadExcel() {
+      if (!requireReport()) {
+        return;
+      }
+
+      if (!window.XLSX) {
+        downloadExcelFallback();
+        return;
+      }
+
+      const wb =
+        XLSX.utils.book_new();
+
+      const summary = [
+        ["欄位", "值"],
+        [
+          "報告標題",
+          reportState.title
+        ],
+        [
+          "副標題",
+          reportState.subtitle
+        ],
+        [
+          "Phase 3-C-D PASS",
+          reportState.sourcePassedAt
+            ? new Date(
+                reportState.sourcePassedAt
+              ).toLocaleString()
+            : "PASS"
+        ],
+        [
+          "最終正文字元",
+          reportState.counts.finalChars
+        ],
+        [
+          "圖表／附註",
+          reportState.counts.chartItems
+        ],
+        [
+          "人工校正",
+          reportState.counts.appliedCorrections
+        ],
+        [
+          "排除衍生正文",
+          reportState.counts.excludedItems
+        ],
+        [
+          "來源指紋",
+          reportState.sourceFingerprint
+        ]
+      ];
+
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.aoa_to_sheet(
+          summary
+        ),
+        "Summary"
+      );
+
+      const articleRows = [
+        ["序號", "段落"]
+      ];
+
+      String(
+        reportState.article ||
+        ""
+      )
+        .split(/\n{2,}/)
+        .filter(Boolean)
+        .forEach(
+          (p, i) => {
+            articleRows.push([
+              i + 1,
+              p
+            ]);
+          }
+        );
+
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.aoa_to_sheet(
+          articleRows
+        ),
+        "Article"
+      );
+
+      const chartRows = [
+        [
+          "序號",
+          "頁面",
+          "內容",
+          "原因"
+        ]
+      ];
+
+      (
+        reportState.chartItems ||
+        []
+      ).forEach(
+        (item, i) => {
+          chartRows.push([
+            i + 1,
+            item.displayNumber || "",
+            item.text || "",
+            item.reason || ""
+          ]);
+        }
+      );
+
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.aoa_to_sheet(
+          chartRows
+        ),
+        "ChartNotes"
+      );
+
+      const correctionRows = [
+        [
+          "序號",
+          "原文字",
+          "校正後"
+        ]
+      ];
+
+      (
+        reportState.appliedCorrections ||
+        []
+      ).forEach(
+        (item, i) => {
+          correctionRows.push([
+            i + 1,
+            item.from || "",
+            item.to || ""
+          ]);
+        }
+      );
+
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.aoa_to_sheet(
+          correctionRows
+        ),
+        "Corrections"
+      );
+
+      const excludedRows = [
+        [
+          "序號",
+          "頁面",
+          "內容",
+          "原因"
+        ]
+      ];
+
+      (
+        reportState.excludedItems ||
+        []
+      ).forEach(
+        (item, i) => {
+          excludedRows.push([
+            i + 1,
+            item.displayNumber || "",
+            item.text || "",
+            item.reason || ""
+          ]);
+        }
+      );
+
+      XLSX.utils.book_append_sheet(
+        wb,
+        XLSX.utils.aoa_to_sheet(
+          excludedRows
+        ),
+        "Excluded"
+      );
+
+      XLSX.writeFile(
+        wb,
+        `${safeName(
+          reportState.title
+        )}.xlsx`
+      );
+    }
+
+    function downloadManifest() {
+      if (!requireReport()) {
+        return;
+      }
+
+      const payload = {
+        schema:
+          "screenshot-report.phase3d.output-report.v1",
+
+        exportedAt:
+          new Date().toISOString(),
+
+        rawOcrPreserved:
+          true,
+
+        phase3ccPreserved:
+          true,
+
+        phase3cdPreserved:
+          true,
+
+        report:
+          reportState,
+
+        review:
+          reportReview
+      };
+
+      downloadBlob(
+        `${safeName(
+          reportState.title
+        )}-manifest.json`,
+        JSON.stringify(
+          payload,
+          null,
+          2
+        ),
+        "application/json;charset=utf-8"
+      );
+    }
+
+    function escHtml(value) {
+      return String(
+        value || ""
+      )
+        .replace(
+          /&/g,
+          "&amp;"
+        )
+        .replace(
+          /</g,
+          "&lt;"
+        )
+        .replace(
+          />/g,
+          "&gt;"
+        )
+        .replace(
+          /"/g,
+          "&quot;"
+        );
+    }
+
+    function printableHtml() {
+      const r =
+        reportState;
+
+      const paras =
+        String(
+          r.article ||
+          ""
+        )
+          .split(/\n{2,}/)
+          .filter(Boolean)
+          .map(
+            p =>
+              `<p>${
+                escHtml(p)
+                  .replace(
+                    /\n/g,
+                    "<br>"
+                  )
+              }</p>`
+          )
+          .join("\n");
+
+      const charts =
+        escHtml(
+          r.chartNotes
+        )
+          .replace(
+            /\n/g,
+            "<br>"
+          );
+
+      return `<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escHtml(r.title)}</title>
+<style>
+@page{size:A4;margin:18mm}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;
+  color:#111;
+  line-height:1.75;
+  max-width:180mm;
+  margin:auto
+}
+h1{line-height:1.3}
+h2{
+  margin-top:2em;
+  border-bottom:1px solid #ccc;
+  padding-bottom:.35em
+}
+.meta{
+  color:#666;
+  font-size:12px
+}
+.chart{
+  white-space:normal;
+  background:#f7f7f7;
+  padding:14px;
+  border-radius:8px
+}
+p{
+  orphans:3;
+  widows:3
+}
+</style>
+</head>
+<body>
+<h1>${escHtml(r.title)}</h1>
+${r.subtitle ? `<div>${escHtml(r.subtitle)}</div>` : ""}
+<div class="meta">
+Phase 3-C-D PASS：
+${
+  r.sourcePassedAt
+    ? new Date(
+        r.sourcePassedAt
+      ).toLocaleString()
+    : "PASS"
+}
+</div>
+
+<h2>正文</h2>
+${paras}
+
+<h2>圖表／附註</h2>
+<div class="chart">
+${charts}
+</div>
+</body>
+</html>`;
+    }
+
+    function downloadHtml() {
+      if (!requireReport()) {
+        return;
+      }
+
+      downloadBlob(
+        `${safeName(
+          reportState.title
+        )}.html`,
+        printableHtml(),
+        "text/html;charset=utf-8"
+      );
+    }
+
+    function printReport() {
+      if (!requireReport()) {
+        return;
+      }
+
+      const w =
+        window.open(
+          "",
+          "_blank"
+        );
+
+      if (!w) {
+        alert(
+          "Safari 阻擋了新視窗。請允許彈出式視窗後再試一次。"
+        );
+        return;
+      }
+
+      w.document.open();
+      w.document.write(
+        printableHtml()
+      );
+      w.document.close();
+
+      setTimeout(
+        () => {
+          try {
+            w.focus();
+            w.print();
+          }
+          catch (error) {
+            // 使用者仍可從分享選單儲存。
+          }
+        },
+        450
+      );
+    }
+
+    function aiPackageText() {
+      const r =
+        reportState;
+
+      return [
+        `# AI 分析輸入包：${r.title}`,
+        "",
+        "## 使用規則",
+        "- 以下正文已完成人工 OCR 校正與 Phase 3-C-D 驗收。",
+        "- 不要重新猜測 OCR、不要把已分流的圖表碎片硬塞回正文。",
+        "- 若內容本身有事實主張，可標示「需外部查證」，但不要因不確定而改寫來源文字。",
+        "",
+        "## 建議分析任務",
+        "1. 先做 8–12 點重點摘要。",
+        "2. 整理所有可量化數字、公司、產品、技術名詞與因果主張。",
+        "3. 分成「核心論點」「產業含義」「可驗證事實」「作者推論／觀點」四類。",
+        "4. 列出可能需要查證或引用來源的句子。",
+        "5. 若圖表／附註與正文有關，指出可對應的位置，但不要自行還原看不到的圖。",
+        "",
+        "## 已驗收正文",
+        r.article,
+        "",
+        "## 圖表／附註分流",
+        r.chartNotes,
+        "",
+        "## 稽核資訊",
+        `Phase 3-C-D PASS：${
+          r.sourcePassedAt
+            ? new Date(
+                r.sourcePassedAt
+              ).toLocaleString()
+            : "PASS"
+        }`,
+        `Phase 3-D 來源指紋：${r.sourceFingerprint}`
+      ]
+        .join("\n");
+    }
+
+    function downloadAiPackage() {
+      if (!requireReport()) {
+        return;
+      }
+
+      downloadBlob(
+        `${safeName(
+          reportState.title
+        )}-AI分析輸入包.md`,
+        aiPackageText(),
+        "text/markdown;charset=utf-8"
+      );
+    }
+
+    async function markPass() {
+      if (!requireReport()) {
+        return;
+      }
+
+      const confirmed =
+        confirm(
+          "請確認：Phase 3-D 正式正文與圖表／附註預覽可讀，下載輸出已檢查，且本階段沒有回寫 Phase 3-C-D。要標記 Phase 3-D PASS 嗎？"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      reportReview = {
+        version:
+          PHASE3D_VERSION,
+
+        status:
+          "pass",
+
+        sourceFingerprint:
+          sourceFingerprint(),
+
+        reportFingerprint:
+          reportFingerprint(),
+
+        passedAt:
+          Date.now()
+      };
+
+      await saveSetting(
+        PHASE3D_REVIEW_KEY,
+        reportReview
+      );
+
+      render();
+    }
+
+    el("jsonImport")
+      .addEventListener(
+        "change",
+        async event => {
+          const file =
+            event.target.files &&
+            event.target.files[0];
+
+          if (!file) {
+            return;
+          }
+
+          try {
+            const payload =
+              JSON.parse(
+                await file.text()
+              );
+
+            const state =
+              payload &&
+              payload.state;
+
+            const review =
+              payload &&
+              payload.review;
+
+            if (
+              !state ||
+              !review ||
+              review.status !== "pass" ||
+              !String(
+                state.correctedText ||
+                ""
+              ).trim()
+            ) {
+              throw new Error(
+                "JSON 不是已 PASS 的 Phase 3-C-D 匯出檔"
+              );
+            }
+
+            sourceState =
+              state;
+
+            sourceReview =
+              review;
+
+            importedSource =
+              true;
+
+            reportState =
+              null;
+
+            reportReview =
+              null;
+
+            render();
+          }
+          catch (error) {
+            alert(
+              `匯入失敗：${
+                error.message ||
+                error
+              }`
+            );
+          }
+          finally {
+            event.target.value =
+              "";
+          }
+        }
+      );
+
+    loadAll()
+      .catch(
+        error => {
+          console.error(
+            error
+          );
+
+          el("sourceStatus").className =
+            "status bad";
+
+          el("sourceStatus").textContent =
+            `❌ Phase 3-D 初始化失敗：${
+              error.message ||
+              error
+            }`;
+        }
+      );
+  </script>
+</body>
+</html>
