@@ -17296,6 +17296,18 @@
       ];
 
       for (const block of blocks) {
+        const residualMrCdMatch =
+          block.match(/2\s*mr\s*人人\s*CD\s*M/i);
+
+        if (residualMrCdMatch) {
+          addCandidate(
+            residualMrCdMatch[0],
+            "全文補抓：高風險 OCR 詞形「2 mr 人人 CD M」",
+            "medium",
+            "疑似 OCR 殘留文字；空白或換行可能不固定。建議人工對照原圖後決定排除或校正。"
+          );
+        }
+
         const residualChartFragmentMatch =
           block.match(/[丨｜|│┃￨∣︱︳Iil1]\s*(?:[—─━―–－﹘﹣ー一−‒_＿-]\s*){2,}全/);
 
