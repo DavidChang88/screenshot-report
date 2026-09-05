@@ -54,7 +54,7 @@ select{width:100%;margin-top:7px;border:1px solid #c9ccd2;border-radius:12px;pad
 <main class="wrap">
 
 <section class="card hero">
-  <div class="eyebrow">SCREENSHOT REPORT · PRODUCT MODE v2.2</div>
+  <div class="eyebrow">SCREENSHOT REPORT · PRODUCT MODE v2.3</div>
   <h1>手機截圖 → 完整報告</h1>
   <p>適合繁體／簡體中文手機截圖。保留原圖與 Raw OCR，只在高風險內容要求人工確認，再輸出可讀、可查核、可保存的正式報告。</p>
 
@@ -141,27 +141,27 @@ select{width:100%;margin-top:7px;border:1px solid #c9ccd2;border-radius:12px;pad
   <p>Product Mode v2.2 會先保護上一案，再建立乾淨工作區。你可以使用下載備份，也可以先建立本機完整快照。為避免 iPhone 記憶體壓力，狀態備份不內嵌原始截圖；原圖仍保留在你的照片 App／原始來源。</p>
 
   <div id="newProjectStatus" class="status">
-    先下載目前專案狀態備份，之後才會開放清空舊工作區。
+    請先完成至少一種保護：下載專案狀態 JSON，或建立完整本機快照。完成任一種後即可開始新報告。
   </div>
 
   <button id="backupProjectBtn" class="dark" onclick="downloadProjectStateBackup()">
-    1. 下載目前專案狀態備份 JSON
+    保護方式 A：下載專案狀態備份 JSON
   </button>
 
   <button id="startNewProjectBtn" onclick="startFreshProject()" disabled>
-    2. 清空舊工作區並開始新報告
+    開始新報告：清空舊工作區
   </button>
 
   <div id="directImportArea" class="hidden">
     <input id="newImageInput" class="hidden" type="file" accept="image/*" multiple>
     <button id="pickImagesBtn" onclick="pickNewImages()">
-      3. 選取新手機截圖
+      選取新手機截圖
     </button>
     <div id="importProgressBox" class="result-box small">
       新工作區已準備好。建議一次選取同一篇文章的全部連續截圖。
     </div>
     <a id="continueStitchBtn" class="btn hidden" href="./index.html#batchOverlapPanel">
-      4. 開始排序與拼接
+      開始排序與拼接
     </a>
   </div>
 
@@ -187,6 +187,7 @@ const ARCHIVE_DB_VERSION=1;
 const ARCHIVE_PROJECT_STORE="projects";
 const ARCHIVE_IMAGE_STORE="images";
 let archiveDb=null;
+let localSnapshotReady=false;
 
 const KEYS={
   articlePlan:"phase2eArticlePlan:v1",
@@ -455,21 +456,36 @@ function formatBytes(n){
 async function refreshArchiveStatus(){
   if(!archiveDb) archiveDb=await openArchiveDb();
   const snap=await archiveGetLatestProject();
-  if(!snap){
+
+  if(!snap || !snap.complete){
+    localSnapshotReady=false;
     el("archiveStatus").className="status";
     el("archiveStatus").textContent="目前沒有本機完整快照。";
     el("restoreSnapshotBtn").disabled=true;
     el("deleteSnapshotBtn").disabled=true;
+    if(sessionStorage.getItem("productModeBackupDone")!=="1"){
+      el("startNewProjectBtn").disabled=true;
+    }
     return;
   }
+
+  localSnapshotReady=true;
   el("archiveStatus").className="status good";
   el("archiveStatus").innerHTML=
     `✅ 已有本機快照。<br>`+
     `建立時間：${fmtDate(snap.createdAt)}<br>`+
     `圖片：${snap.imageCount||0} 張；約 ${formatBytes(snap.imageBytes||0)}<br>`+
     `來源狀態：${snap.label||"未命名專案"}`;
+
   el("restoreSnapshotBtn").disabled=false;
   el("deleteSnapshotBtn").disabled=false;
+  el("startNewProjectBtn").disabled=false;
+
+  if(sessionStorage.getItem("productModeBackupDone")!=="1"){
+    el("newProjectStatus").className="status good";
+    el("newProjectStatus").innerHTML=
+      "✅ 已有完整本機快照，可直接開始新報告；若要額外保存可攜式狀態，再下載 JSON 即可。";
+  }
 }
 
 async function createLocalSnapshot(){
@@ -630,10 +646,20 @@ async function deleteLocalSnapshot(){
   if(!archiveDb) archiveDb=await openArchiveDb();
   const snap=await archiveGetLatestProject();
   if(!snap) return;
+
   const ok=confirm("確定要刪除本機完整快照嗎？已下載的 JSON 與手機照片不受影響。");
   if(!ok) return;
+
   await clearArchiveAll();
+  localSnapshotReady=false;
   await refreshArchiveStatus();
+
+  if(sessionStorage.getItem("productModeBackupDone")!=="1"){
+    el("startNewProjectBtn").disabled=true;
+    el("newProjectStatus").className="status";
+    el("newProjectStatus").textContent=
+      "請先完成至少一種保護：下載專案狀態 JSON，或建立完整本機快照。";
+  }
 }
 
 function getAllSettingsRecords(){
@@ -703,7 +729,7 @@ async function downloadProjectStateBackup(){
     sessionStorage.setItem("productModeBackupDone","1");
     el("startNewProjectBtn").disabled=false;
     el("newProjectStatus").className="status good";
-    el("newProjectStatus").innerHTML="✅ 已產生專案狀態備份。請確認 Safari 下載項目中已看到 JSON，再進行第 2 步。";
+    el("newProjectStatus").innerHTML="✅ 已產生專案狀態備份 JSON。現在已符合開始新報告的保護條件。";
   }catch(err){
     el("newProjectStatus").className="status warn";
     el("newProjectStatus").textContent="⚠️ 備份失敗："+(err&&err.message?err.message:err);
@@ -729,14 +755,32 @@ function clearWorkflowStoresPreservingPreferences(){
 }
 
 async function startFreshProject(){
-  if(sessionStorage.getItem("productModeBackupDone")!=="1"){
-    alert("請先下載目前專案狀態備份。");
+  let protectedBySnapshot=localSnapshotReady;
+
+  if(!protectedBySnapshot){
+    try{
+      if(!archiveDb) archiveDb=await openArchiveDb();
+      const snap=await archiveGetLatestProject();
+      protectedBySnapshot=!!(snap && snap.complete);
+      localSnapshotReady=protectedBySnapshot;
+    }catch(_){}
+  }
+
+  const protectedByJson=sessionStorage.getItem("productModeBackupDone")==="1";
+
+  if(!protectedByJson && !protectedBySnapshot){
+    alert("請先完成至少一種保護：下載專案狀態備份 JSON，或建立完整本機快照。");
     return;
   }
 
+  const protectionText=protectedBySnapshot
+    ? "已確認有完整本機快照，可之後一鍵還原目前專案。"
+    : "已確認本次 Safari 工作階段已下載專案狀態 JSON。";
+
   const ok=confirm(
-    "將清除這個瀏覽器中的目前截圖與各 Phase 工作狀態，建立乾淨的新報告。\\n\\n"+
-    "已下載的備份檔與手機照片不會被刪除；中文偏好會保留。\\n\\n"+
+    "將清除主工作區中的目前截圖與各 Phase 工作狀態，建立乾淨的新報告。\n\n"+
+    protectionText+"\n"+
+    "手機照片與本機快照不會被刪除；中文偏好會保留。\n\n"+
     "確定要開始新報告嗎？"
   );
   if(!ok) return;
@@ -749,17 +793,24 @@ async function startFreshProject(){
   try{
     await clearWorkflowStoresPreservingPreferences();
     sessionStorage.removeItem("productModeBackupDone");
+
     el("newProjectStatus").className="status good";
-    el("newProjectStatus").textContent="✅ 新工作區已建立。現在直接在這一頁選取新手機截圖。";
+    el("newProjectStatus").textContent=
+      "✅ 新工作區已建立。現在直接在這一頁選取新手機截圖。";
+
     el("directImportArea").classList.remove("hidden");
     el("continueStitchBtn").classList.add("hidden");
-    el("importProgressBox").textContent="新工作區已準備好。建議一次選取同一篇文章的全部連續截圖。";
+    el("importProgressBox").textContent=
+      "新工作區已準備好。建議一次選取同一篇文章的全部連續截圖。";
+
     await loadState();
+    await refreshArchiveStatus();
   }catch(err){
     el("backupProjectBtn").disabled=false;
     el("startNewProjectBtn").disabled=false;
     el("newProjectStatus").className="status warn";
-    el("newProjectStatus").textContent="⚠️ 建立新工作區失敗："+(err&&err.message?err.message:err);
+    el("newProjectStatus").textContent=
+      "⚠️ 建立新工作區失敗："+(err&&err.message?err.message:err);
   }
 }
 
@@ -946,7 +997,9 @@ async function savePreferences(){
     if(sessionStorage.getItem("productModeBackupDone")==="1"){
       el("startNewProjectBtn").disabled=false;
       el("newProjectStatus").className="status good";
-      el("newProjectStatus").textContent="✅ 這個 Safari 分頁工作階段已完成狀態備份，可建立新報告。";
+      el("newProjectStatus").textContent=localSnapshotReady
+        ? "✅ 已有完整本機快照，且本次工作階段也已下載狀態 JSON；可安全開始新報告。"
+        : "✅ 這個 Safari 工作階段已下載狀態 JSON，可開始新報告。";
     }
   }catch(err){
     el("headlineStatus").className="status warn";
