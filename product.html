@@ -54,7 +54,7 @@ select{width:100%;margin-top:7px;border:1px solid #c9ccd2;border-radius:12px;pad
 <main class="wrap">
 
 <section class="card hero">
-  <div class="eyebrow">SCREENSHOT REPORT · PRODUCT MODE v2</div>
+  <div class="eyebrow">SCREENSHOT REPORT · PRODUCT MODE v2.1</div>
   <h1>手機截圖 → 完整報告</h1>
   <p>適合繁體／簡體中文手機截圖。保留原圖與 Raw OCR，只在高風險內容要求人工確認，再輸出可讀、可查核、可保存的正式報告。</p>
 
@@ -128,6 +128,12 @@ select{width:100%;margin-top:7px;border:1px solid #c9ccd2;border-radius:12px;pad
   <button id="startNewProjectBtn" onclick="startFreshProject()" disabled>
     2. 清空舊工作區並開始新報告
   </button>
+
+  <button id="selectNewImagesBtn" class="secondary" onclick="selectNewImages()" disabled>
+    3. 選取新手機截圖
+  </button>
+  <input id="productFileInput" class="hidden" type="file" accept="image/*" multiple>
+  <div id="importProgress" class="small"></div>
 
   <a class="btn secondary" href="./index.html">只管理目前截圖，不清空</a>
 
@@ -417,14 +423,142 @@ async function startFreshProject(){
     await clearWorkflowStoresPreservingPreferences();
     sessionStorage.removeItem("productModeBackupDone");
     el("newProjectStatus").className="status good";
-    el("newProjectStatus").textContent="✅ 新工作區已建立，現在帶你去加入手機截圖。";
-    setTimeout(()=>{ location.href="./index.html"; },450);
+    el("newProjectStatus").textContent="✅ 新工作區已建立。現在可以直接在 Product Mode 選取手機截圖。";
+    el("selectNewImagesBtn").disabled=false;
+    await loadState();
+    setTimeout(()=>{ selectNewImages(); },300);
   }catch(err){
     el("backupProjectBtn").disabled=false;
     el("startNewProjectBtn").disabled=false;
     el("newProjectStatus").className="status warn";
     el("newProjectStatus").textContent="⚠️ 建立新工作區失敗："+(err&&err.message?err.message:err);
   }
+}
+
+
+function getImageDimensionsFromFile(file){
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file);
+    const img=new Image();
+    img.onload=()=>{
+      const out={width:img.naturalWidth||img.width,height:img.naturalHeight||img.height};
+      URL.revokeObjectURL(url);
+      resolve(out);
+    };
+    img.onerror=()=>{
+      URL.revokeObjectURL(url);
+      reject(new Error("無法讀取圖片尺寸："+file.name));
+    };
+    img.src=url;
+  });
+}
+
+async function createLightFingerprint(file){
+  const head=await file.slice(0,Math.min(file.size,131072)).arrayBuffer();
+  if(window.crypto&&crypto.subtle){
+    const digest=await crypto.subtle.digest("SHA-256",head);
+    return Array.from(new Uint8Array(digest)).slice(0,12).map(x=>x.toString(16).padStart(2,"0")).join("");
+  }
+  const bytes=new Uint8Array(head);
+  let h=2166136261;
+  for(let i=0;i<bytes.length;i++){h^=bytes[i];h=Math.imul(h,16777619);}
+  return (h>>>0).toString(16).padStart(8,"0");
+}
+
+async function createThumbnailFromFile(file,maxWidth=360,quality=0.78){
+  const url=URL.createObjectURL(file);
+  try{
+    const img=await new Promise((resolve,reject)=>{
+      const x=new Image();
+      x.onload=()=>resolve(x);
+      x.onerror=()=>reject(new Error("縮圖解碼失敗"));
+      x.src=url;
+    });
+    const scale=Math.min(1,maxWidth/img.naturalWidth);
+    const width=Math.max(1,Math.round(img.naturalWidth*scale));
+    const height=Math.max(1,Math.round(img.naturalHeight*scale));
+    const canvas=document.createElement("canvas");
+    canvas.width=width;canvas.height=height;
+    const ctx=canvas.getContext("2d");
+    ctx.drawImage(img,0,0,width,height);
+    const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",quality));
+    canvas.width=1;canvas.height=1;
+    return blob?{blob,width,height}:null;
+  }finally{
+    URL.revokeObjectURL(url);
+  }
+}
+
+function getAllImages(){
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(IMAGE_STORE,"readonly");
+    const r=tx.objectStore(IMAGE_STORE).getAll();
+    r.onsuccess=()=>resolve(Array.isArray(r.result)?r.result:[]);
+    r.onerror=()=>reject(r.error);
+  });
+}
+
+function addImageRecord(record){
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(IMAGE_STORE,"readwrite");
+    const r=tx.objectStore(IMAGE_STORE).add(record);
+    r.onsuccess=()=>resolve(r.result);
+    r.onerror=()=>reject(r.error);
+  });
+}
+
+async function importNewImages(files){
+  files=Array.from(files||[]).filter(f=>f&&String(f.type||"").startsWith("image/"));
+  if(!files.length)return;
+
+  const existing=await getAllImages();
+  const highestSequence=existing.reduce((m,x)=>Math.max(m,Number(x.sequence)||0),0);
+  const highestBatch=existing.reduce((m,x)=>Math.max(m,Number(x.batchNumber)||0),0);
+  const batchNumber=highestBatch+1;
+
+  el("importProgress").textContent=`正在保存 ${files.length} 張截圖…請勿關閉頁面。`;
+
+  for(let i=0;i<files.length;i++){
+    const file=files[i];
+    el("importProgress").textContent=`正在處理第 ${i+1}/${files.length} 張：${file.name}`;
+    const dimensions=await getImageDimensionsFromFile(file);
+    const fingerprint=await createLightFingerprint(file);
+    let thumb=null;
+    try{thumb=await createThumbnailFromFile(file);}catch(e){thumb=null;}
+
+    const issues=[];
+    if(dimensions.width<500)issues.push("圖片寬度偏小");
+    if(dimensions.height<700)issues.push("圖片高度偏小");
+
+    const record={
+      sequence:highestSequence+i+1,
+      batchNumber,
+      name:file.name,
+      type:file.type||"image/jpeg",
+      size:file.size,
+      lastModified:file.lastModified||Date.now(),
+      width:dimensions.width,
+      height:dimensions.height,
+      fingerprint,
+      qualityIssues:issues,
+      thumbnailBlob:thumb?thumb.blob:null,
+      thumbnailWidth:thumb?thumb.width:null,
+      thumbnailHeight:thumb?thumb.height:null,
+      thumbnailVersion:thumb?1:0,
+      thumbnailError:thumb?"":"縮圖建立失敗",
+      createdAt:Date.now(),
+      blob:file
+    };
+    await addImageRecord(record);
+  }
+
+  el("importProgress").textContent=`✅ 已保存 ${files.length} 張新截圖。下一步：排序與拼接。`;
+  await loadState();
+}
+
+function selectNewImages(){
+  el("productFileInput").value="";
+  el("productFileInput").click();
 }
 
 async function loadPreferences(){
@@ -441,6 +575,23 @@ async function savePreferences(){
   el("prefStatus").textContent="✅ 已保存到本機。Product Mode v1 會用它作為後續工作流提示；Raw OCR 不會因此被覆蓋。";
 }
 
+
+el("productFileInput").addEventListener("change",async e=>{
+  const files=e.target.files;
+  if(!files||!files.length)return;
+  try{
+    await importNewImages(files);
+    el("newProjectStatus").className="status good";
+    el("newProjectStatus").innerHTML=`✅ 新報告已加入 <b>${files.length}</b> 張手機截圖。下一步：排序與拼接。`;
+    el("nextBtn").textContent="繼續：排序與拼接";
+    el("nextBtn").href="./index.html#batchOverlapPanel";
+  }catch(err){
+    el("importProgress").textContent="⚠️ 匯入失敗："+(err&&err.message?err.message:err);
+  }finally{
+    e.target.value="";
+  }
+});
+
 (async()=>{
   try{
     db=await openDb();
@@ -450,6 +601,14 @@ async function savePreferences(){
       el("startNewProjectBtn").disabled=false;
       el("newProjectStatus").className="status good";
       el("newProjectStatus").textContent="✅ 這個 Safari 分頁工作階段已完成狀態備份，可建立新報告。";
+    }
+    const currentImageCount=await countImages();
+    if(currentImageCount===0){
+      el("selectNewImagesBtn").disabled=false;
+      if(sessionStorage.getItem("productModeBackupDone")!=="1"){
+        el("newProjectStatus").className="status good";
+        el("newProjectStatus").textContent="✅ 目前是乾淨工作區，可以直接選取新手機截圖。";
+      }
     }
   }catch(err){
     el("headlineStatus").className="status warn";
