@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Screenshot Report｜Phase 6 正式出版封裝</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f5f7;color:#1d1d1f;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:auto;padding:20px 14px 52px}
+.card{background:#fff;border-radius:18px;padding:20px;margin-bottom:14px;box-shadow:0 3px 16px rgba(0,0,0,.06)}
+h1{margin:0 0 8px;font-size:28px}h2{margin:0 0 12px;font-size:21px}h3{margin:18px 0 8px;font-size:17px}
+p{line-height:1.65;color:#5f6368}
+.status{padding:14px;border-radius:13px;background:#f2f2f7;line-height:1.65}
+.good{background:#e8f5ec;color:#17663b}.warn{background:#fff3d6;color:#7a4b00}.bad{background:#ffe7e3;color:#9f241b}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.metric{background:#f7f7f9;border-radius:13px;padding:13px}.metric span{display:block;color:#666;font-size:13px}.metric strong{display:block;margin-top:4px;font-size:24px}
+label{display:block;margin-top:12px;font-size:14px;font-weight:800}
+input[type=text],textarea{width:100%;margin-top:7px;border:1px solid #c9ccd2;border-radius:12px;padding:12px 13px;font:inherit;font-size:16px;background:#fff;color:#1d1d1f}
+textarea{min-height:170px;resize:vertical;line-height:1.65}
+#article{min-height:480px}
+button,.file-label,a.button{display:block;width:100%;border:0;border-radius:13px;padding:15px 14px;margin-top:10px;font:inherit;font-size:16px;font-weight:800;text-align:center;cursor:pointer;text-decoration:none;background:#3478f6;color:#fff}
+button.secondary,.file-label.secondary,a.button.secondary{background:#e9e9ee;color:#1d1d1f}
+button.dark{background:#536b7c}.success{background:#4f9155!important}button:disabled{opacity:.38;cursor:default}
+.small{font-size:13px;color:#6f7277;line-height:1.55}.hidden{display:none!important}.divider{height:1px;background:#e5e5e8;margin:16px 0}
+.button-grid{display:grid;grid-template-columns:1fr;gap:0}
+.fact{border:1px solid #e2e3e6;border-radius:13px;padding:13px;margin:10px 0}.fact b{display:block;margin-bottom:6px}.tag{display:inline-block;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:800;background:#eef2ff;color:#4752a3;margin:0 5px 5px 0}
+.source{border-top:1px solid #ececf0;padding:12px 0}.source:first-child{border-top:0}.source a{color:#3478f6;overflow-wrap:anywhere}
+.preview{white-space:pre-wrap;overflow-wrap:anywhere;background:#f7f7f9;border:1px solid #e1e2e5;border-radius:12px;padding:14px;line-height:1.7;max-height:440px;overflow:auto}
+@media(min-width:640px){.button-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
+@media print{body{background:#fff}.no-print{display:none!important}.wrap{max-width:none;padding:0}.card{box-shadow:none;border-radius:0;padding:0;margin:0 0 22px}.preview{max-height:none;overflow:visible;border:0;padding:0;background:#fff}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<section class="card">
+  <div class="small"><a href="./phase3d.html">← 回 Phase 3-D</a></div>
+  <h1>Phase 6｜正式出版封裝</h1>
+  <p>讀取已 PASS 的 Phase 3-D，建立 Executive Summary、Key Findings、完整研究報告、事實查核與來源清單。Phase 6 不回寫 OCR、Phase 3-C-D 或 Phase 3-D。</p>
+  <div id="chain" class="status">正在驗證來源鏈…</div>
+  <div class="grid">
+    <div class="metric"><span>Phase 3-D</span><strong id="p3d">—</strong></div>
+    <div class="metric"><span>來源正文字元</span><strong id="chars">0</strong></div>
+    <div class="metric"><span>圖表／附註</span><strong id="charts">0</strong></div>
+    <div class="metric"><span>Fact Checks</span><strong id="facts">0</strong></div>
+  </div>
+  <label class="file-label secondary no-print" for="importFile">匯入 Phase 6 Publication JSON</label>
+  <input id="importFile" class="hidden" type="file" accept="application/json,.json">
+</section>
+
+<section class="card">
+  <h2>1. 出版內容</h2>
+  <label>主標題<input id="title" type="text"></label>
+  <label>副標題<input id="subtitle" type="text"></label>
+  <label>Executive Summary<textarea id="summary"></textarea></label>
+  <label>Key Findings（每行一點）<textarea id="findings" style="min-height:210px"></textarea></label>
+  <label>完整研究報告<textarea id="article"></textarea></label>
+  <button id="saveBtn" onclick="savePublication()" disabled>建立／更新 Phase 6 Publication</button>
+  <div id="saveStatus" class="status" style="margin-top:12px">尚未建立 Phase 6 Publication。</div>
+</section>
+
+<section class="card">
+  <h2>2. Fact Check Appendix</h2>
+  <div id="factList"></div>
+</section>
+
+<section class="card">
+  <h2>3. Source Manifest</h2>
+  <div id="sourceList"></div>
+</section>
+
+<section class="card">
+  <h2>4. 出版預覽</h2>
+  <div id="preview" class="preview">尚無出版預覽。</div>
+</section>
+
+<section class="card no-print">
+  <h2>5. 下載輸出</h2>
+  <div class="button-grid">
+    <button id="summaryMdBtn" class="dark" onclick="downloadSummaryMd()" disabled>Executive Summary Markdown</button>
+    <button id="fullMdBtn" class="dark" onclick="downloadFullMd()" disabled>完整研究報告 Markdown</button>
+    <button id="htmlBtn" class="dark" onclick="downloadHtml()" disabled>出版版 HTML</button>
+    <button id="pdfBtn" class="dark" onclick="printPublication()" disabled>列印／儲存 PDF</button>
+    <button id="factCsvBtn" class="dark" onclick="downloadFactCsv()" disabled>Fact Check CSV</button>
+    <button id="sourceJsonBtn" class="dark" onclick="downloadSourceJson()" disabled>Source Manifest JSON</button>
+    <button id="pubJsonBtn" class="dark" onclick="downloadPublicationJson()" disabled>完整 Publication JSON</button>
+    <button id="aiBtn" class="dark" onclick="downloadAiPackage()" disabled>AI Research Package</button>
+  </div>
+</section>
+
+<section class="card no-print">
+  <h2>6. Phase 6 驗收</h2>
+  <div id="review" class="status">尚未驗收。</div>
+  <button id="passBtn" class="success" onclick="markPass()" disabled>✓ 出版檢查完成，標記 Phase 6 PASS</button>
+  <p class="small">PASS 條件：Phase 3-D 為 PASS、摘要與正文非空、至少 3 個 Key Findings、Fact Check 與 Source Manifest 已建立，且出版層未回寫前階段。</p>
+</section>
+</main>
+
+<script>
+const DB_NAME="ScreenshotReportDB";
+const DB_VERSION=2;
+const STORE="settings";
+const P3D_STATE_KEY="phase3dReport:v1";
+const P3D_REVIEW_KEY="phase3dReportReview:v1";
+const P6_STATE_KEY="phase6Publication:v1";
+const P6_REVIEW_KEY="phase6PublicationReview:v1";
+const P6_VERSION="phase6-publication-v1";
+
+let db=null,p3d=null,p3dReview=null,pub=null,pubReview=null;
+const el=id=>document.getElementById(id);
+
+const DEFAULT_FACTS=[
+ {claim:"Hot Chips 2026 的 Memory Technology Tutorial 包含 Micron、Samsung、SK hynix、3D DRAM 與 HBF 主題。",status:"confirmed",note:"Hot Chips 2026 官方議程直接列出相關 Tutorial 與講者。",sources:["hotchips"]},
+ {claim:"Samsung HBM4 使用 1c DRAM 與 4nm logic base die。",status:"confirmed",note:"Samsung 2026 年 2 月官方量產公告確認。",sources:["samsung-hbm4"]},
+ {claim:"Samsung zHBM 將 HBM 垂直堆疊於 AI accelerator 上。",status:"roadmap",note:"Samsung FMS 2026 公布的是 concept model／未來架構，不能視為已量產產品。",sources:["samsung-zhbm"]},
+ {claim:"SK hynix 12-high HBM4 為 36GB，16-high HBM4 為 48GB。",status:"confirmed",note:"用來修正原來源中「12 層 48GB HBM4」的規格混寫；12-high 48GB 對應 HBM4E。",sources:["skhynix-hbm4","skhynix-hbm4e"]},
+ {claim:"Micron 指出 HBM 對 DDR5 約有 3:1 的 wafer／silicon trade ratio，未來世代更高。",status:"confirmed",note:"Micron FY2026 prepared remarks 明確說明 HBM demand 因 3-to-1 trade ratio 進一步加劇供應壓力。",sources:["micron-trade"]},
+ {claim:"HBF 第一版開放標準最高 512GB、約 0.4–3.0 TB/s，並採 UCIe。",status:"confirmed",note:"SK hynix 與 Sandisk 透過 OCP 公布第一版 HBF 規格。",sources:["hbf"]},
+ {claim:"d-Matrix Raptor 以 3D DRAM＋4nm compute die 主張 100 TB/s 級頻寬。",status:"vendor-claim",note:"早期 silicon 與廠商 projection；適合作為技術方向，不應寫成獨立第三方 benchmark。",sources:["dmatrix"]},
+ {claim:"HBM 高 silicon intensity 會必然導致所有 DRAM 價格上漲。",status:"inference",note:"供給壓力有產業邏輯與 Micron 佐證，但價格仍受需求、庫存、CAPEX、節點轉換等因素影響。",sources:["micron-trade"]}
+];
+
+const DEFAULT_SOURCES=[
+ {id:"hotchips",title:"Hot Chips 2026 Program — Memory Technology Tutorial",publisher:"Hot Chips",type:"conference",url:"https://hotchips.org/",supports:["Memory Technology Tutorial 陣容與主題"]},
+ {id:"samsung-hbm4",title:"Samsung Ships Industry-First Commercial HBM4 With Ultimate Performance for AI Computing",publisher:"Samsung Global Newsroom",type:"official",url:"https://news.samsung.com/global/samsung-ships-industry-first-commercial-hbm4-with-ultimate-performance-for-ai-computing",supports:["HBM4 量產","1c DRAM","4nm logic base die"]},
+ {id:"samsung-zhbm",title:"Samsung Unveils Next-Gen 3D-Memory Vision at FMS 2026",publisher:"Samsung Global Newsroom",type:"official",url:"https://news.samsung.com/global/samsung-unveils-next-gen-3d-memory-vision-at-fms-2026-charting-the-future-of-ai-infrastructure",supports:["zHBM concept model","HBM 垂直堆疊於 AI accelerator","3D memory roadmap"]},
+ {id:"skhynix-hbm4",title:"SK hynix Showcases Next-Generation AI Memory Innovations at CES 2026",publisher:"SK hynix Newsroom",type:"official",url:"https://news.skhynix.com/en/sk-hynix-showcases-next-generation-ai-memory-innovations-at-ces-2026/",supports:["12-high 36GB HBM4","16-high 48GB HBM4"]},
+ {id:"skhynix-hbm4e",title:"SK hynix Begins Supplying Samples of 12-Layer HBM4E",publisher:"SK hynix Newsroom",type:"official",url:"https://news.skhynix.com/cn/12-layer-hbm4e-sample/",supports:["12-high 48GB HBM4E","MR-MUF"]},
+ {id:"micron-trade",title:"Micron Fiscal Q1 2026 Earnings Call Prepared Remarks",publisher:"Micron Investor Relations",type:"financial-filing",url:"https://investors.micron.com/static-files/088991c5-a249-4f66-a0a6-258d9b66f3f9",supports:["HBM 約 3:1 DDR5 trade ratio","未來 HBM 世代 trade ratio 增加","供應緊張"]},
+ {id:"hbf",title:"SK hynix Unveils First HBF Standard Specifications with Sandisk",publisher:"SK hynix Newsroom",type:"official",url:"https://news.skhynix.com/en/hbf-at-fms-2026/",supports:["HBF 最高 512GB","0.4–3.0 TB/s","UCIe","HBM 與 SSD 之間的新 memory tier"]},
+ {id:"dmatrix",title:"Hot Chips 2026: d-Matrix stacks AI accelerator directly on custom DRAM for 100 TB/s per card",publisher:"Tom's Hardware",type:"technical-media",url:"https://www.tomshardware.com/tech-industry/semiconductors/d-matrix-stacks-its-ai-accelerator-directly-on-custom-dram-for-100-tbs-per-card",supports:["Raptor 3D DRAM 架構","TSMC 4nm compute die","100 TB/s 廠商主張","early-silicon projection 限制"]}
+];
+
+const HOTCHIPS_SUMMARY=`Hot Chips 2026 的記憶體專場顯示，AI 記憶體競爭正在從 DRAM 顆粒規格，轉向完整的記憶體系統架構。
+
+算力成長速度持續高於記憶體頻寬，使 Memory Wall 成為 AI 系統的重要限制；HBM 因此不再只是 accelerator 周邊元件，而逐步整合先進 logic base die、封裝、散熱、互連與客製化功能。
+
+Samsung 將競爭往 logic integration 推進；SK hynix 的優勢集中在高層數 HBM 堆疊、封裝與熱管理；Micron 則凸顯 HBM 對 DRAM wafer capacity 的高度消耗。另一方面，HBF 與 3D DRAM 顯示未來 AI 系統可能形成更加複雜的 heterogeneous memory hierarchy。
+
+核心判斷是：下一階段的記憶體競爭，真正要優化的不只是頻寬，而是把更多有效資料，以更低能耗、更短距離搬到 AI 運算單元附近。`;
+
+const HOTCHIPS_FINDINGS=[
+"Memory Wall 已經從工程問題變成產業問題。",
+"HBM 的產品邊界正由 DRAM stack 擴張為 memory subsystem。",
+"Logic base die 將提高 foundry、先進封裝與 HBM 的耦合程度。",
+"高層數 HBM 的瓶頸會越來越集中在 bonding、thermal、warpage 與 yield。",
+"HBM 的高 silicon trade ratio 會降低 non-HBM DRAM 的供應彈性。",
+"HBF、3D DRAM 與 HBM 更可能形成分層架構，而不是單純互相取代。"
+];
+
+const HOTCHIPS_ARTICLE=`# Hot Chips 2026 記憶體戰場
+
+## 1｜Memory Wall：第一約束正在從算力變成記憶體
+
+Hot Chips 2026 的 Memory Technology Tutorial 把 Micron、Samsung、SK hynix、3D DRAM 與 HBF 放在同一個上午，背後其實是在回答同一個問題：AI 運算能力成長太快，傳統「把 DRAM 做得更快」的路線已經不足以獨自解決系統瓶頸。
+
+當 accelerator 的算力提升速度長期高於外部記憶體頻寬，系統面臨的不只是容量不足，而是 bandwidth、latency、power 與 data movement 同時成為限制。HBM 因此開始從 accelerator 周邊元件，變成決定 accelerator 架構的核心資源。
+
+## 2｜Samsung：HBM 不再只是 DRAM，logic base die 走到舞台中央
+
+Samsung 已在商用 HBM4 中使用 1c DRAM core die 與 4nm logic base die。這不只是製程節點升級，而是讓 HBM base die 從介面電路進一步成為可承載 controller、PHY、客製化 IP 與其他邏輯功能的平台。
+
+Samsung 在 FMS 2026 公開的 zHBM concept 更進一步：把 HBM 垂直堆疊在 AI accelerator 上方，縮短 processor 與 memory 的資料路徑。這些 zHBM 數據目前屬於 roadmap／concept model，不應與已量產 HBM4 混為一談，但它清楚揭示一個方向：HBM 的終局可能是與 accelerator 共同封裝甚至共同堆疊的 memory subsystem。
+
+## 3｜SK hynix：層數增加後，封裝與熱才是真正難題
+
+HBM 容量與層數增加，不只是 DRAM density 問題。die thickness、TSV、bonding、underfill、warpage、thermal resistance 與 yield 會一起進入設計空間。
+
+正式查核需要修正原來源中的一個規格混寫：SK hynix 官方資料顯示 12-high HBM4 為 36GB，16-high HBM4 為 48GB；12-high 48GB 對應的是 HBM4E。這個例子說明來源層與研究層必須分開：OCR 要忠實保存來源，正式報告則要避免把來源中的混寫變成新的事實。
+
+## 4｜Micron：HBM 為什麼特別「吃矽」
+
+Micron 公開資料把 HBM 問題從產品規格直接連到晶圓產能。公司指出，HBM 相對 DDR5 約存在 3:1 的 trade ratio，而且未來世代還會增加。
+
+因此，在先進 DRAM cleanroom 與製程產能有限時，HBM 成長會降低 non-HBM DRAM 的供應彈性。這能支持「AI 記憶體需求會增加整體 DRAM 供應壓力」的判斷，但不能直接推論所有 DRAM 價格必然上漲；價格仍受需求、庫存、CAPEX、節點轉換與採購週期影響。
+
+## 5｜HBF：AI Memory Hierarchy 的新樓層
+
+HBF 第一版開放規格最高 512GB，頻寬約 0.4–3.0 TB/s，並採 UCIe。它的關鍵意義不是成為 HBM Killer，而是在 HBM 與 SSD 之間增加一個新的 memory tier。
+
+未來 AI inference 系統更可能同時使用多種不同 latency、capacity、bandwidth 與 cost point 的記憶體，而不是讓單一技術統治全部工作負載。
+
+## 6｜3D DRAM：終極目的不是提高 pin speed，而是縮短資料移動
+
+d-Matrix 在 Hot Chips 2026 展示 Raptor 3D DRAM accelerator，把 4nm compute die 與客製 DRAM 直接 face-to-face bonding，並提出 100 TB/s 級頻寬。相關性能仍包含廠商基於 early silicon 的 projection，因此應視為技術方向，而不是成熟量產 benchmark。
+
+它與 Samsung zHBM 雖然實作不同，底層思想卻一致：不要只問 memory 能跑多快，而要問資料到底需要移動多遠、每個 bit 要付出多少 energy。
+
+## 7｜三大記憶體廠的差異化護城河
+
+Samsung 的突出方向是 logic integration，利用 Memory＋Foundry＋Packaging 的垂直能力把功能往 base die 與 3D integration 推進。
+
+SK hynix 的核心戰場更集中在高層數 HBM stack、封裝、熱管理與未來 bonding 技術。
+
+Micron 的訊息則凸顯製造經濟學：HBM 的 silicon intensity、良率、先進節點產能與供應配置本身就是競爭力。
+
+三家公司並非只做單一技術，但差異化焦點已經逐漸超出傳統 DRAM cell。
+
+## 8｜對半導體供應鏈的含義
+
+HBM 越系統化，價值鏈就越往 advanced logic base die、TSV、wafer bonding、hybrid bonding、advanced packaging、interposer、substrate、thermal solution、test 與 die-to-die interconnect 擴張。
+
+因此 HBM 市場不應只用 DRAM bit demand 來觀察。它正在成為一個記憶體、邏輯與先進封裝共同形成的複合型半導體市場。
+
+## 9｜投資與產業判讀最容易犯的三個錯
+
+第一，把 roadmap 當成量產。zHBM、20-high 以上 bonding 與 3D DRAM 高頻寬都具有重要戰略意義，但必須區分 concept、roadmap、early silicon 與 volume production。
+
+第二，只看 HBM 出貨量、不看 silicon trade ratio。相同 bit growth 對 wafer capacity 的壓力並不對稱。
+
+第三，把 HBF、3D DRAM、zHBM 理解成互相取代。更可能發生的是 heterogeneous memory hierarchy 持續分層，不同架構分別服務不同 latency、capacity、bandwidth、power 與 cost point。
+
+## 結論｜記憶體正在變成 AI 晶片本身的一部分
+
+Hot Chips 2026 最值得留下的，不是哪一顆 HBM4 多快，也不是某一家公司能疊幾層，而是一條越來越清楚的產業方向：AI accelerator 與 memory 的界線正在消失。
+
+下一場競賽真正要回答的，不再只是「誰的 DRAM 顆粒最快」，而是「誰能用最低的資料搬移成本，把最多有效記憶體帶到 AI 運算附近」。`;
+
+function openDb(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB_NAME,DB_VERSION);r.onupgradeneeded=e=>{const d=e.target.result;if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:"key"});};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+function getSetting(key){return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,"readonly");const r=tx.objectStore(STORE).get(key);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>reject(r.error);});}
+function saveSetting(key,value){return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,"readwrite");tx.objectStore(STORE).put({key,value,updatedAt:Date.now()});tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
+function hash(s){s=String(s||"");let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0).toString(16).padStart(8,"0");}
+function p3dFingerprint(){return p3d?hash(JSON.stringify({sourceFingerprint:p3d.sourceFingerprint,title:p3d.title,article:p3d.article,chartItems:p3d.chartItems||[],builtAt:p3d.builtAt})): "";}
+function validP3D(){return !!(p3d&&p3dReview&&p3dReview.status==="pass"&&String(p3d.article||"").trim());}
+function pubFingerprint(){return pub?hash(JSON.stringify({version:pub.version,source:p3dFingerprint(),title:pub.metadata.title,summary:pub.executiveSummary,findings:pub.keyFindings,article:pub.mainArticle,facts:pub.factChecks,sources:pub.sources})): "";}
+function escapeHtml(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function safeName(s){return String(s||"publication").replace(/[\\/:*?"<>|]+/g,"-").replace(/\s+/g," ").trim().slice(0,90)||"publication";}
+function sourceById(id){return (pub?pub.sources:DEFAULT_SOURCES).find(s=>s.id===id);}
+function sourceLabels(ids){return (ids||[]).map(id=>{const s=sourceById(id);return s?s.publisher:id;}).join("；");}
+function statusLabel(v){return ({confirmed:"確認",roadmap:"Roadmap / Concept","vendor-claim":"廠商主張",inference:"分析推論"})[v]||v;}
+
+function renderFacts(){
+  const list=el("factList"); list.innerHTML="";
+  const facts=(pub&&pub.factChecks)||DEFAULT_FACTS;
+  el("facts").textContent=facts.length;
+  facts.forEach(f=>{
+    const d=document.createElement("div"); d.className="fact";
+    d.innerHTML=`<span class="tag">${escapeHtml(statusLabel(f.status))}</span><b>${escapeHtml(f.claim)}</b><div>${escapeHtml(f.note)}</div><div class="small" style="margin-top:7px">來源：${escapeHtml(sourceLabels(f.sources))}</div>`;
+    list.appendChild(d);
+  });
+}
+function renderSources(){
+  const list=el("sourceList"); list.innerHTML="";
+  const sources=(pub&&pub.sources)||DEFAULT_SOURCES;
+  sources.forEach(s=>{
+    const d=document.createElement("div"); d.className="source";
+    d.innerHTML=`<span class="tag">${escapeHtml(s.type)}</span><b>${escapeHtml(s.publisher)}</b><div>${escapeHtml(s.title)}</div><div class="small">支持：${escapeHtml((s.supports||[]).join("；"))}</div><div><a href="${escapeHtml(s.url)}" target="_blank" rel="noopener">${escapeHtml(s.url)}</a></div>`;
+    list.appendChild(d);
+  });
+}
+
+function readyForPass(){
+  if(!validP3D()||!pub)return false;
+  if(!String(pub.executiveSummary||"").trim()||!String(pub.mainArticle||"").trim())return false;
+  if(!Array.isArray(pub.keyFindings)||pub.keyFindings.length<3)return false;
+  if(!Array.isArray(pub.factChecks)||!pub.factChecks.length)return false;
+  if(!Array.isArray(pub.sources)||!pub.sources.length)return false;
+  return true;
+}
+
+function renderPreview(){
+  if(!pub){el("preview").textContent="尚無出版預覽。";return;}
+  el("preview").textContent=[
+    pub.metadata.title,
+    pub.metadata.subtitle,
+    "",
+    "EXECUTIVE SUMMARY",
+    pub.executiveSummary,
+    "",
+    "KEY FINDINGS",
+    ...pub.keyFindings.map((x,i)=>`${i+1}. ${x}`),
+    "",
+    "MAIN ARTICLE",
+    pub.mainArticle
+  ].join("\n");
+}
+
+function render(){
+  const valid=validP3D();
+  el("p3d").textContent=valid?"PASS":"—";
+  el("chars").textContent=p3d?String(String(p3d.article||"").length):"0";
+  el("charts").textContent=p3d&&Array.isArray(p3d.chartItems)?p3d.chartItems.length:"0";
+  el("saveBtn").disabled=!valid;
+
+  if(valid){
+    el("chain").className="status good";
+    el("chain").innerHTML=`✅ Phase 3-D PASS 已讀取。<br>來源報告：${escapeHtml(p3d.title||"未命名")}<br>Phase 6 只建立出版衍生層，不回寫前階段。`;
+  }else{
+    el("chain").className="status warn";
+    el("chain").innerHTML="⚠️ 尚未取得有效的 Phase 3-D PASS。請先在同一個 Safari／同網域完成 Phase 3-D。";
+  }
+
+  if(pub){
+    el("title").value=pub.metadata.title||"";
+    el("subtitle").value=pub.metadata.subtitle||"";
+    el("summary").value=pub.executiveSummary||"";
+    el("findings").value=(pub.keyFindings||[]).join("\n");
+    el("article").value=pub.mainArticle||"";
+    el("saveStatus").className="status good";
+    el("saveStatus").innerHTML=`✅ Phase 6 Publication 已建立。<br>更新時間：${new Date(pub.updatedAt||pub.createdAt).toLocaleString()}<br>來源指紋：${escapeHtml(pub.sourceFingerprint||"")}`;
+  }else{
+    el("saveStatus").className="status";
+    el("saveStatus").textContent="尚未建立 Phase 6 Publication。";
+  }
+
+  renderFacts(); renderSources(); renderPreview();
+
+  const downloadable=!!pub&&valid;
+  ["summaryMdBtn","fullMdBtn","htmlBtn","pdfBtn","factCsvBtn","sourceJsonBtn","pubJsonBtn","aiBtn"].forEach(id=>el(id).disabled=!downloadable);
+  el("passBtn").disabled=!readyForPass();
+
+  if(pubReview&&pubReview.status==="pass"&&readyForPass()&&pubReview.publicationFingerprint===pubFingerprint()){
+    el("review").className="status good";
+    el("review").innerHTML=`✅ Phase 6 已 PASS。<br>驗收時間：${new Date(pubReview.passedAt).toLocaleString()}`;
+  }else if(pubReview&&pubReview.status==="pass"){
+    el("review").className="status warn";
+    el("review").textContent="⚠️ 舊的 Phase 6 PASS 已失效；出版內容已變更，請重新驗收。";
+  }else{
+    el("review").className="status";
+    el("review").textContent="尚未驗收。";
+  }
+}
+
+function autoPrefill(){
+  if(!validP3D())return;
+  const hot=/Hot\s*Chips|HBM/i.test(String(p3d.title||"")+" "+String(p3d.article||""));
+  if(hot){
+    el("title").value="Hot Chips 2026 記憶體戰場：HBM 的下一戰不在 DRAM 顆粒，而在邏輯、封裝與資料搬運";
+    el("subtitle").value="從 Micron、Samsung、SK hynix 到 HBF、3D DRAM，看 AI Memory Wall 如何重寫記憶體產業規則";
+    el("summary").value=HOTCHIPS_SUMMARY;
+    el("findings").value=HOTCHIPS_FINDINGS.join("\n");
+    el("article").value=HOTCHIPS_ARTICLE;
+  }else{
+    el("title").value=p3d.title||"";
+    el("subtitle").value="由已 PASS 的 Phase 3-D 正式輸出建立之研究出版層";
+    el("summary").value="";
+    el("findings").value="";
+    el("article").value=p3d.article||"";
+  }
+}
+
+async function savePublication(){
+  if(!validP3D()){alert("請先取得有效 Phase 3-D PASS。");return;}
+  const findings=el("findings").value.split("\n").map(x=>x.trim()).filter(Boolean);
+  const title=el("title").value.trim();
+  const summary=el("summary").value.trim();
+  const article=el("article").value.trim();
+  if(!title||!summary||!article){alert("主標題、Executive Summary 與完整研究報告不可為空。");return;}
+  if(findings.length<3){alert("Key Findings 至少需要 3 點。");return;}
+
+  const now=Date.now();
+  pub={
+    version:P6_VERSION,
+    sourceFingerprint:p3dFingerprint(),
+    createdAt:pub&&pub.createdAt?pub.createdAt:now,
+    updatedAt:now,
+    metadata:{title,subtitle:el("subtitle").value.trim()},
+    provenance:{
+      phase3cdPreserved:true,
+      phase3dPassed:true,
+      phase3dSourceFingerprint:p3d.sourceFingerprint||"",
+      phase3dReportFingerprint:p3dReview.reportFingerprint||"",
+      rawOcrPreserved:true
+    },
+    executiveSummary:summary,
+    keyFindings:findings,
+    mainArticle:article,
+    factChecks:pub&&Array.isArray(pub.factChecks)?pub.factChecks:DEFAULT_FACTS,
+    sources:pub&&Array.isArray(pub.sources)?pub.sources:DEFAULT_SOURCES,
+    appendix:{
+      chartNotes:Array.isArray(p3d.chartItems)?p3d.chartItems:[],
+      sourceArticle:p3d.article||""
+    }
+  };
+  pubReview=null;
+  await saveSetting(P6_STATE_KEY,pub);
+  await saveSetting(P6_REVIEW_KEY,null);
+  render();
+}
+
+function summaryMarkdown(){
+  return `# ${pub.metadata.title}\n\n${pub.metadata.subtitle?`> ${pub.metadata.subtitle}\n\n`:""}## Executive Summary\n\n${pub.executiveSummary}\n\n## Key Findings\n\n${pub.keyFindings.map(x=>`- ${x}`).join("\n")}\n`;
+}
+function fullMarkdown(){
+  const factLines=pub.factChecks.map((f,i)=>`${i+1}. **${f.claim}** — ${statusLabel(f.status)}。${f.note}（來源：${sourceLabels(f.sources)}）`).join("\n\n");
+  const srcLines=pub.sources.map((s,i)=>`${i+1}. ${s.publisher}｜${s.title}\n   ${s.url}\n   支持：${(s.supports||[]).join("；")}`).join("\n\n");
+  return `${summaryMarkdown()}\n## 完整研究報告\n\n${pub.mainArticle}\n\n## Fact Check Appendix\n\n${factLines}\n\n## Source Manifest\n\n${srcLines}\n`;
+}
+function htmlBody(){
+  const paragraphs=s=>escapeHtml(s).replace(/^### (.*)$/gm,"<h3>$1</h3>").replace(/^## (.*)$/gm,"<h2>$1</h2>").replace(/^# (.*)$/gm,"<h1>$1</h1>").replace(/\n{2,}/g,"</p><p>").replace(/\n/g,"<br>");
+  const facts=pub.factChecks.map(f=>`<tr><td>${escapeHtml(f.claim)}</td><td>${escapeHtml(statusLabel(f.status))}</td><td>${escapeHtml(f.note)}</td></tr>`).join("");
+  const sources=pub.sources.map(s=>`<li><b>${escapeHtml(s.publisher)}</b> — ${escapeHtml(s.title)}<br><a href="${escapeHtml(s.url)}">${escapeHtml(s.url)}</a></li>`).join("");
+  return `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(pub.metadata.title)}</title><style>@page{size:A4;margin:18mm}body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;line-height:1.75;color:#111;max-width:180mm;margin:auto}h1{line-height:1.3}h2{margin-top:2em;border-bottom:1px solid #ccc;padding-bottom:.3em}.summary{background:#f5f5f5;padding:14px;border-radius:8px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #bbb;padding:6px;vertical-align:top}a{color:#2457a6;overflow-wrap:anywhere}p{orphans:3;widows:3}</style></head><body><h1>${escapeHtml(pub.metadata.title)}</h1>${pub.metadata.subtitle?`<p>${escapeHtml(pub.metadata.subtitle)}</p>`:""}<h2>Executive Summary</h2><div class="summary">${paragraphs(pub.executiveSummary)}</div><h2>Key Findings</h2><ol>${pub.keyFindings.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ol><h2>完整研究報告</h2><p>${paragraphs(pub.mainArticle)}</p><h2>Fact Check Appendix</h2><table><thead><tr><th>主張</th><th>狀態</th><th>處理</th></tr></thead><tbody>${facts}</tbody></table><h2>Sources</h2><ol>${sources}</ol></body></html>`;
+}
+function downloadBlob(name,content,type){const b=new Blob([content],{type:type||"text/plain;charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),30000);}
+function downloadSummaryMd(){downloadBlob(`${safeName(pub.metadata.title)}-Executive-Summary.md`,summaryMarkdown(),"text/markdown;charset=utf-8");}
+function downloadFullMd(){downloadBlob(`${safeName(pub.metadata.title)}-研究報告.md`,fullMarkdown(),"text/markdown;charset=utf-8");}
+function downloadHtml(){downloadBlob(`${safeName(pub.metadata.title)}.html`,htmlBody(),"text/html;charset=utf-8");}
+function printPublication(){const w=window.open("","_blank");if(!w){alert("Safari 阻擋新視窗，請允許彈出式視窗後再試。");return;}w.document.open();w.document.write(htmlBody());w.document.close();setTimeout(()=>{w.focus();w.print();},450);}
+function csvEscape(v){return `"${String(v==null?"":v).replace(/"/g,'""')}"`;}
+function downloadFactCsv(){const rows=[["序號","主張","狀態","處理註記","來源"]];pub.factChecks.forEach((f,i)=>rows.push([i+1,f.claim,statusLabel(f.status),f.note,sourceLabels(f.sources)]));const csv="\ufeff"+rows.map(r=>r.map(csvEscape).join(",")).join("\r\n");downloadBlob(`${safeName(pub.metadata.title)}-fact-check.csv`,csv,"text/csv;charset=utf-8");}
+function downloadSourceJson(){downloadBlob(`${safeName(pub.metadata.title)}-sources.json`,JSON.stringify({schema:"screenshot-report.phase6.sources.v1",exportedAt:new Date().toISOString(),sources:pub.sources},null,2),"application/json;charset=utf-8");}
+function downloadPublicationJson(){downloadBlob(`${safeName(pub.metadata.title)}-publication.json`,JSON.stringify({schema:"screenshot-report.phase6.publication.v1",exportedAt:new Date().toISOString(),publication:pub,review:pubReview},null,2),"application/json;charset=utf-8");}
+function downloadAiPackage(){
+  const text=`# AI Research Package\n\n## Publication\n${pub.metadata.title}\n\n## Guardrails\n- Phase 3-C-D 與 Phase 3-D 為不可回寫來源層。\n- Fact Check 的 confirmed / roadmap / vendor-claim / inference 必須保留區分。\n- 不要把 chart notes 或已排除 OCR 碎片重新塞回正文。\n\n## Executive Summary\n${pub.executiveSummary}\n\n## Key Findings\n${pub.keyFindings.map(x=>`- ${x}`).join("\n")}\n\n## Main Article\n${pub.mainArticle}\n\n## Fact Checks\n${pub.factChecks.map(f=>`- [${statusLabel(f.status)}] ${f.claim} — ${f.note}`).join("\n")}\n\n## Sources\n${pub.sources.map(s=>`- ${s.publisher}: ${s.url}`).join("\n")}`;
+  downloadBlob(`${safeName(pub.metadata.title)}-AI-Research-Package.md`,text,"text/markdown;charset=utf-8");
+}
+async function markPass(){
+  if(!readyForPass()){alert("Phase 6 尚未符合 PASS 條件。");return;}
+  if(!confirm("請確認：Executive Summary、Key Findings、完整正文、Fact Check 與來源清單均已檢查；Phase 6 未回寫前階段。要標記 Phase 6 PASS 嗎？"))return;
+  pubReview={version:P6_VERSION,status:"pass",sourceFingerprint:p3dFingerprint(),publicationFingerprint:pubFingerprint(),passedAt:Date.now()};
+  await saveSetting(P6_REVIEW_KEY,pubReview);
+  render();
+}
+
+el("importFile").addEventListener("change",async e=>{
+  const f=e.target.files&&e.target.files[0]; if(!f)return;
+  try{
+    const data=JSON.parse(await f.text());
+    const candidate=data.publication||data;
+    if(!candidate||candidate.version!==P6_VERSION)throw new Error("不是 Phase 6 Publication JSON");
+    pub=candidate;
+    pubReview=data.review||null;
+    await saveSetting(P6_STATE_KEY,pub);
+    await saveSetting(P6_REVIEW_KEY,pubReview);
+    render();
+  }catch(err){alert("匯入失敗："+(err.message||err));}
+  finally{e.target.value="";}
+});
+
+(async function(){
+  try{
+    db=await openDb();
+    const a=await getSetting(P3D_STATE_KEY),b=await getSetting(P3D_REVIEW_KEY),c=await getSetting(P6_STATE_KEY),d=await getSetting(P6_REVIEW_KEY);
+    p3d=a&&a.value?a.value:null;
+    p3dReview=b&&b.value?b.value:null;
+    pub=c&&c.value?c.value:null;
+    pubReview=d&&d.value?d.value:null;
+    if(!pub) autoPrefill();
+    render();
+  }catch(err){
+    el("chain").className="status bad";
+    el("chain").textContent="❌ Phase 6 初始化失敗："+(err.message||err);
+  }
+})();
+</script>
+</body>
+</html>
