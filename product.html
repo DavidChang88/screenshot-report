@@ -54,7 +54,7 @@ select{width:100%;margin-top:7px;border:1px solid #c9ccd2;border-radius:12px;pad
 <main class="wrap">
 
 <section class="card hero">
-  <div class="eyebrow">SCREENSHOT REPORT · PRODUCT MODE v1</div>
+  <div class="eyebrow">SCREENSHOT REPORT · PRODUCT MODE v1.1</div>
   <h1>手機截圖 → 完整報告</h1>
   <p>適合繁體／簡體中文手機截圖。保留原圖與 Raw OCR，只在高風險內容要求人工確認，再輸出可讀、可查核、可保存的正式報告。</p>
 
@@ -264,10 +264,14 @@ async function loadState(){
   let detail=[];
   if(s.ocr&&s.ocr.language) detail.push("OCR 語言："+safeText(s.ocr.language));
   if(s.humanState){
-    const pending=Array.isArray(s.humanState.candidates)
-      ? s.humanState.candidates.filter(x=>!x.decision||x.decision==="pending").length
-      : null;
-    if(pending!==null) detail.push("人工候選待確認："+pending);
+    const totalCandidates = Number(
+      s.humanState.candidateCount ??
+      (Array.isArray(s.humanState.candidates) ? s.humanState.candidates.length : 0)
+    );
+    const pending = Number(
+      s.humanState.pendingCount ?? 0
+    );
+    detail.push("人工候選："+totalCandidates+"；待確認："+pending);
     if(Array.isArray(s.humanState.chartItems)) detail.push("圖表／附註："+s.humanState.chartItems.length);
   }
   if(s.reportState&&s.reportState.article) detail.push("正式正文："+safeText(s.reportState.article).length+" 字元");
