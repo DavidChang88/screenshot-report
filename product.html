@@ -54,7 +54,7 @@ select{width:100%;margin-top:7px;border:1px solid #c9ccd2;border-radius:12px;pad
 <main class="wrap">
 
 <section class="card hero">
-  <div class="eyebrow">SCREENSHOT REPORT · PRODUCT MODE v1.1</div>
+  <div class="eyebrow">SCREENSHOT REPORT · PRODUCT MODE v2</div>
   <h1>手機截圖 → 完整報告</h1>
   <p>適合繁體／簡體中文手機截圖。保留原圖與 Raw OCR，只在高風險內容要求人工確認，再輸出可讀、可查核、可保存的正式報告。</p>
 
@@ -114,10 +114,27 @@ select{width:100%;margin-top:7px;border:1px solid #c9ccd2;border-radius:12px;pad
 </section>
 
 <section class="card">
-  <h2>開始下一份截圖</h2>
-  <p>目前 v1 先保留既有安全機制。建立新案前，建議先下載上一案的 Publication JSON／報告 JSON，再到核心工作區清除舊截圖並加入新批次。</p>
-  <a class="btn" href="./index.html">＋ 加入／管理手機截圖</a>
-  <div class="small" style="margin-top:10px">下一版 Product Mode 會把「清除舊案 → 選圖 → 排序 → 自動拼接 → OCR」收進同一個簡單介面；原本工程頁仍會保留作為診斷工具。</div>
+  <h2>開始新報告</h2>
+  <p>Product Mode v2 會先保護上一案，再建立乾淨工作區。為避免 iPhone 記憶體壓力，狀態備份不內嵌原始截圖；原圖仍保留在你的照片 App／原始來源。</p>
+
+  <div id="newProjectStatus" class="status">
+    先下載目前專案狀態備份，之後才會開放清空舊工作區。
+  </div>
+
+  <button id="backupProjectBtn" class="dark" onclick="downloadProjectStateBackup()">
+    1. 下載目前專案狀態備份 JSON
+  </button>
+
+  <button id="startNewProjectBtn" onclick="startFreshProject()" disabled>
+    2. 清空舊工作區並開始新報告
+  </button>
+
+  <a class="btn secondary" href="./index.html">只管理目前截圖，不清空</a>
+
+  <div class="small" style="margin-top:10px">
+    備份會包含目前 settings store 的全部流程狀態、Phase 3-D／Phase 6 成果、PASS 記錄與圖片中繼資料；
+    不包含圖片 Blob。本步驟不會自動刪除任何資料，只有你按下第 2 個按鈕並再次確認後才會清空。
+  </div>
 </section>
 
 <div class="footer">所有工作資料預設保存在這台裝置的瀏覽器 IndexedDB。</div>
@@ -285,6 +302,131 @@ async function loadState(){
   return {s,done,imageCount};
 }
 
+
+function getAllSettingsRecords(){
+  return new Promise((resolve,reject)=>{
+    if(!db.objectStoreNames.contains(SETTINGS_STORE)){resolve([]);return;}
+    const tx=db.transaction(SETTINGS_STORE,"readonly");
+    const r=tx.objectStore(SETTINGS_STORE).getAll();
+    r.onsuccess=()=>resolve(Array.isArray(r.result)?r.result:[]);
+    r.onerror=()=>reject(r.error);
+  });
+}
+
+function getImageMetadata(){
+  return new Promise((resolve,reject)=>{
+    if(!db.objectStoreNames.contains(IMAGE_STORE)){resolve([]);return;}
+    const tx=db.transaction(IMAGE_STORE,"readonly");
+    const r=tx.objectStore(IMAGE_STORE).getAll();
+    r.onsuccess=()=>{
+      const rows=Array.isArray(r.result)?r.result:[];
+      resolve(rows.map((item,index)=>{
+        const out={};
+        Object.keys(item||{}).forEach(k=>{
+          const v=item[k];
+          if(v instanceof Blob) return;
+          if(k==="blob" || k==="imageBlob" || k==="thumbnailBlob" || k==="file") return;
+          if(typeof v==="string" || typeof v==="number" || typeof v==="boolean" || v==null){
+            out[k]=v;
+          }else if(Array.isArray(v)){
+            out[k]=v;
+          }
+        });
+        out._order=index;
+        return out;
+      }));
+    };
+    r.onerror=()=>reject(r.error);
+  });
+}
+
+function downloadJsonFile(filename,obj){
+  const blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
+}
+
+async function downloadProjectStateBackup(){
+  try{
+    const settings=await getAllSettingsRecords();
+    const images=await getImageMetadata();
+    const payload={
+      schema:"screenshot-report.product-backup.v1",
+      exportedAt:new Date().toISOString(),
+      note:"此備份保存流程狀態與成果，但不內嵌原始圖片 Blob；原圖請保留在照片 App／原始來源。",
+      database:{name:DB_NAME,version:DB_VERSION},
+      imageCount:images.length,
+      imageMetadata:images,
+      settings:settings
+    };
+    const stamp=new Date().toISOString().replace(/[:.]/g,"-");
+    downloadJsonFile(`screenshot-report-project-backup-${stamp}.json`,payload);
+    sessionStorage.setItem("productModeBackupDone","1");
+    el("startNewProjectBtn").disabled=false;
+    el("newProjectStatus").className="status good";
+    el("newProjectStatus").innerHTML="✅ 已產生專案狀態備份。請確認 Safari 下載項目中已看到 JSON，再進行第 2 步。";
+  }catch(err){
+    el("newProjectStatus").className="status warn";
+    el("newProjectStatus").textContent="⚠️ 備份失敗："+(err&&err.message?err.message:err);
+  }
+}
+
+function clearWorkflowStoresPreservingPreferences(){
+  return new Promise(async(resolve,reject)=>{
+    try{
+      const pref=await getSetting(PREF_KEY);
+      const tx=db.transaction([IMAGE_STORE,SETTINGS_STORE],"readwrite");
+      tx.objectStore(IMAGE_STORE).clear();
+      tx.objectStore(SETTINGS_STORE).clear();
+      tx.oncomplete=async()=>{
+        try{
+          if(pref) await setSetting(PREF_KEY,pref);
+          resolve();
+        }catch(e){reject(e);}
+      };
+      tx.onerror=()=>reject(tx.error);
+    }catch(e){reject(e);}
+  });
+}
+
+async function startFreshProject(){
+  if(sessionStorage.getItem("productModeBackupDone")!=="1"){
+    alert("請先下載目前專案狀態備份。");
+    return;
+  }
+
+  const ok=confirm(
+    "將清除這個瀏覽器中的目前截圖與各 Phase 工作狀態，建立乾淨的新報告。\\n\\n"+
+    "已下載的備份檔與手機照片不會被刪除；中文偏好會保留。\\n\\n"+
+    "確定要開始新報告嗎？"
+  );
+  if(!ok) return;
+
+  el("startNewProjectBtn").disabled=true;
+  el("backupProjectBtn").disabled=true;
+  el("newProjectStatus").className="status";
+  el("newProjectStatus").textContent="正在建立乾淨工作區…";
+
+  try{
+    await clearWorkflowStoresPreservingPreferences();
+    sessionStorage.removeItem("productModeBackupDone");
+    el("newProjectStatus").className="status good";
+    el("newProjectStatus").textContent="✅ 新工作區已建立，現在帶你去加入手機截圖。";
+    setTimeout(()=>{ location.href="./index.html"; },450);
+  }catch(err){
+    el("backupProjectBtn").disabled=false;
+    el("startNewProjectBtn").disabled=false;
+    el("newProjectStatus").className="status warn";
+    el("newProjectStatus").textContent="⚠️ 建立新工作區失敗："+(err&&err.message?err.message:err);
+  }
+}
+
 async function loadPreferences(){
   const p=await getSetting(PREF_KEY)||{};
   el("languagePref").value=p.language||"auto";
@@ -304,6 +446,11 @@ async function savePreferences(){
     db=await openDb();
     await loadPreferences();
     await loadState();
+    if(sessionStorage.getItem("productModeBackupDone")==="1"){
+      el("startNewProjectBtn").disabled=false;
+      el("newProjectStatus").className="status good";
+      el("newProjectStatus").textContent="✅ 這個 Safari 分頁工作階段已完成狀態備份，可建立新報告。";
+    }
   }catch(err){
     el("headlineStatus").className="status warn";
     el("headlineStatus").textContent="⚠️ 無法讀取本機工作區："+(err&&err.message?err.message:err);
