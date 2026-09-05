@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<title>Screenshot Report｜Product Mode</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--sub:#6e6e73;--blue:#3478f6;--green:#2f7d54;--greenbg:#e8f5ec;--amber:#8a5a00;--amberbg:#fff3d6;--line:#e5e5ea;--dark:#536b7c}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:auto;padding:18px 14px 56px}
+.card{background:var(--card);border-radius:20px;padding:20px;margin-bottom:14px;box-shadow:0 3px 18px rgba(0,0,0,.055)}
+.hero{padding:24px 20px}
+.eyebrow{font-size:13px;font-weight:800;color:#52606d;letter-spacing:.04em}
+h1{font-size:31px;line-height:1.12;margin:7px 0 10px}
+h2{font-size:22px;margin:0 0 12px}
+p{margin:8px 0;line-height:1.65;color:var(--sub)}
+.status{border-radius:14px;padding:14px;line-height:1.6;background:#f2f2f7}
+.good{background:var(--greenbg);color:#17663b}
+.warn{background:var(--amberbg);color:var(--amber)}
+button,a.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px 14px;margin-top:10px;text-align:center;text-decoration:none;font:inherit;font-size:17px;font-weight:800;cursor:pointer;background:var(--blue);color:white}
+a.btn.dark,button.dark{background:var(--dark)}
+a.btn.secondary,button.secondary{background:#e9e9ee;color:var(--text)}
+button:disabled{opacity:.4}
+.top-actions{display:grid;grid-template-columns:1fr;gap:0}
+.progress{height:12px;background:#e7e7ec;border-radius:999px;overflow:hidden;margin:14px 0 7px}
+.progress>div{height:100%;width:0;background:#4f9155;transition:width .25s ease}
+.progress-label{font-size:13px;color:var(--sub);display:flex;justify-content:space-between;gap:8px}
+.step{display:grid;grid-template-columns:40px 1fr auto;gap:11px;align-items:start;padding:14px 0;border-top:1px solid var(--line)}
+.step:first-child{border-top:0}
+.icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;background:#eee;color:#555}
+.step.done .icon{background:var(--greenbg);color:var(--green)}
+.step.current .icon{background:#eaf1ff;color:#2d65d6}
+.step-title{font-size:16px;font-weight:800;margin-top:1px}
+.step-desc{font-size:13px;color:var(--sub);line-height:1.5;margin-top:3px}
+.badge{font-size:12px;font-weight:800;border-radius:999px;padding:6px 8px;background:#eee;color:#666;white-space:nowrap}
+.step.done .badge{background:var(--greenbg);color:var(--green)}
+.step.current .badge{background:#eaf1ff;color:#2d65d6}
+.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.metric{background:#f7f7f9;border-radius:14px;padding:13px}
+.metric span{font-size:12px;color:var(--sub);display:block}
+.metric strong{display:block;font-size:24px;margin-top:3px}
+label{display:block;font-size:14px;font-weight:800;margin-top:12px}
+select{width:100%;margin-top:7px;border:1px solid #c9ccd2;border-radius:12px;padding:12px;font:inherit;font-size:16px;background:white;color:var(--text)}
+.small{font-size:12.5px;color:var(--sub);line-height:1.55}
+.result-box{padding:14px;border-radius:14px;background:#f7f7f9;margin-top:12px}
+.hidden{display:none!important}
+.footer{text-align:center;font-size:12px;color:#8a8a8f;padding:10px}
+@media(min-width:620px){.top-actions{grid-template-columns:1fr 1fr;gap:10px}.top-actions a{margin-top:10px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+
+<section class="card hero">
+  <div class="eyebrow">SCREENSHOT REPORT · PRODUCT MODE v1</div>
+  <h1>手機截圖 → 完整報告</h1>
+  <p>適合繁體／簡體中文手機截圖。保留原圖與 Raw OCR，只在高風險內容要求人工確認，再輸出可讀、可查核、可保存的正式報告。</p>
+
+  <div id="headlineStatus" class="status">正在讀取本機工作區…</div>
+
+  <div class="progress"><div id="progressFill"></div></div>
+  <div class="progress-label"><span id="progressText">讀取中</span><span id="progressPct">0%</span></div>
+
+  <div class="top-actions">
+    <a id="nextBtn" class="btn" href="./index.html">繼續下一步</a>
+    <a class="btn secondary" href="./index.html">進階／工程模式</a>
+  </div>
+</section>
+
+<section class="card">
+  <h2>目前工作流</h2>
+  <div id="steps"></div>
+</section>
+
+<section class="card">
+  <h2>專案狀態</h2>
+  <div class="metrics">
+    <div class="metric"><span>手機截圖</span><strong id="imageCount">0</strong></div>
+    <div class="metric"><span>Raw OCR</span><strong id="ocrState">—</strong></div>
+    <div class="metric"><span>人工驗收</span><strong id="humanState">—</strong></div>
+    <div class="metric"><span>出版狀態</span><strong id="publishState">—</strong></div>
+  </div>
+  <div id="projectDetail" class="result-box small">正在讀取詳細狀態…</div>
+</section>
+
+<section class="card">
+  <h2>中文處理偏好</h2>
+  <p>Product Mode 會記住你的偏好。核心 OCR 仍保留原文；繁體化另外建立衍生層，不覆蓋 Raw OCR。</p>
+  <label>截圖主要語言
+    <select id="languagePref">
+      <option value="auto">自動判斷（推薦）</option>
+      <option value="traditional">繁體中文＋英文</option>
+      <option value="simplified">簡體中文＋英文</option>
+    </select>
+  </label>
+  <label>正式輸出中文
+    <select id="outputPref">
+      <option value="tw">台灣繁體（推薦）</option>
+      <option value="traditional">標準繁體</option>
+      <option value="source">保留來源字形</option>
+    </select>
+  </label>
+  <button class="secondary" onclick="savePreferences()">儲存偏好</button>
+  <div id="prefStatus" class="small"></div>
+</section>
+
+<section class="card" id="completedCard">
+  <h2>成果中心</h2>
+  <p id="completedText">完成 Phase 3-D 後即可在這裡進入正式輸出。</p>
+  <a id="reportBtn" class="btn dark" href="./phase3d.html">正式報告與下載</a>
+  <a id="publicationBtn" class="btn dark" href="./phase6.html">研究／出版成果</a>
+</section>
+
+<section class="card">
+  <h2>開始下一份截圖</h2>
+  <p>目前 v1 先保留既有安全機制。建立新案前，建議先下載上一案的 Publication JSON／報告 JSON，再到核心工作區清除舊截圖並加入新批次。</p>
+  <a class="btn" href="./index.html">＋ 加入／管理手機截圖</a>
+  <div class="small" style="margin-top:10px">下一版 Product Mode 會把「清除舊案 → 選圖 → 排序 → 自動拼接 → OCR」收進同一個簡單介面；原本工程頁仍會保留作為診斷工具。</div>
+</section>
+
+<div class="footer">所有工作資料預設保存在這台裝置的瀏覽器 IndexedDB。</div>
+</main>
+
+<script>
+const DB_NAME="ScreenshotReportDB";
+const DB_VERSION=2;
+const IMAGE_STORE="images";
+const SETTINGS_STORE="settings";
+const PREF_KEY="productModePreferences:v1";
+
+const KEYS={
+  articlePlan:"phase2eArticlePlan:v1",
+  phase3a:"phase3aReconstructionReview:v1",
+  ocr:"phase3cBatchOcrReview:v1",
+  text:"phase3cTextRebuildReview:v1",
+  human:"phase3cCorrectionTriageReview:v1",
+  humanState:"phase3cCorrectionTriage:v1",
+  report:"phase3dReportReview:v1",
+  reportState:"phase3dReport:v1",
+  publication:"phase6PublicationReview:v1",
+  publicationState:"phase6Publication:v1"
+};
+
+let db=null;
+const el=id=>document.getElementById(id);
+
+function openDb(){
+  return new Promise((resolve,reject)=>{
+    const r=indexedDB.open(DB_NAME,DB_VERSION);
+    r.onupgradeneeded=e=>{
+      const d=e.target.result;
+      if(!d.objectStoreNames.contains(SETTINGS_STORE)) d.createObjectStore(SETTINGS_STORE,{keyPath:"key"});
+      if(!d.objectStoreNames.contains(IMAGE_STORE)) d.createObjectStore(IMAGE_STORE,{keyPath:"id"});
+    };
+    r.onsuccess=()=>resolve(r.result);
+    r.onerror=()=>reject(r.error);
+  });
+}
+function getSetting(key){
+  return new Promise((resolve,reject)=>{
+    if(!db.objectStoreNames.contains(SETTINGS_STORE)){resolve(null);return;}
+    const tx=db.transaction(SETTINGS_STORE,"readonly");
+    const r=tx.objectStore(SETTINGS_STORE).get(key);
+    r.onsuccess=()=>resolve(r.result?r.result.value:null);
+    r.onerror=()=>reject(r.error);
+  });
+}
+function setSetting(key,value){
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(SETTINGS_STORE,"readwrite");
+    tx.objectStore(SETTINGS_STORE).put({key,value,updatedAt:Date.now()});
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>reject(tx.error);
+  });
+}
+function countImages(){
+  return new Promise((resolve,reject)=>{
+    if(!db.objectStoreNames.contains(IMAGE_STORE)){resolve(0);return;}
+    const tx=db.transaction(IMAGE_STORE,"readonly");
+    const r=tx.objectStore(IMAGE_STORE).count();
+    r.onsuccess=()=>resolve(r.result||0);
+    r.onerror=()=>reject(r.error);
+  });
+}
+function isPass(v){return !!(v&&v.status==="pass");}
+function fmtDate(ms){if(!ms)return "";try{return new Date(ms).toLocaleString();}catch(e){return "";}}
+function safeText(v){return String(v==null?"":v);}
+
+const stageDefs=[
+  {id:"capture",title:"加入手機截圖",desc:"選取同一篇內容的連續截圖，保留原圖。",href:"./index.html",anchor:""},
+  {id:"stitch",title:"排序與拼接",desc:"分析相鄰重疊、確認接縫、建立連續文章範圍。",href:"./index.html#batchOverlapPanel"},
+  {id:"ocr",title:"OCR 與中文重建",desc:"逐張 OCR；Raw OCR 保留，另建清理／繁體層。",href:"./index.html#phase3cbPanel"},
+  {id:"human",title:"只檢查高風險內容",desc:"疑似 OCR 錯字、圖表碎片與異常字串才要求人工決策。",href:"./index.html#phase3cdPanel"},
+  {id:"report",title:"建立正式報告",desc:"封裝校正後正文、圖表附註與下載格式。",href:"./phase3d.html"},
+  {id:"publish",title:"分析與出版",desc:"Executive Summary、Fact Check、Sources、PDF／JSON／AI Package。",href:"./phase6.html"}
+];
+
+async function loadState(){
+  const imageCount=await countImages();
+  const pairs=await Promise.all(Object.entries(KEYS).map(async([k,v])=>[k,await getSetting(v)]));
+  const s=Object.fromEntries(pairs);
+
+  const done={
+    capture:imageCount>0,
+    stitch:!!(s.articlePlan||isPass(s.phase3a)),
+    ocr:isPass(s.ocr)&&isPass(s.text),
+    human:isPass(s.human),
+    report:isPass(s.report),
+    publish:isPass(s.publication)
+  };
+
+  let completed=Object.values(done).filter(Boolean).length;
+  let percent=Math.round(completed/stageDefs.length*100);
+
+  // 找第一個未完成；若前一層資料不足，導向最安全入口。
+  let current=stageDefs.find(x=>!done[x.id])||stageDefs[stageDefs.length-1];
+  if(!done.capture) current=stageDefs[0];
+  else if(!done.stitch) current=stageDefs[1];
+  else if(!done.ocr) current=stageDefs[2];
+  else if(!done.human) current=stageDefs[3];
+  else if(!done.report) current=stageDefs[4];
+  else if(!done.publish) current=stageDefs[5];
+
+  el("imageCount").textContent=imageCount;
+  el("ocrState").textContent=done.ocr?"PASS":(done.capture?"進行中":"—");
+  el("humanState").textContent=done.human?"PASS":"—";
+  el("publishState").textContent=done.publish?"PASS":(done.report?"待出版":"—");
+  el("progressFill").style.width=percent+"%";
+  el("progressText").textContent=done.publish?"目前專案已完成":`下一步：${current.title}`;
+  el("progressPct").textContent=percent+"%";
+
+  const next=el("nextBtn");
+  if(done.publish){
+    next.textContent="查看完成成果";
+    next.href="./phase6.html";
+    el("headlineStatus").className="status good";
+    el("headlineStatus").innerHTML="✅ 目前專案已完成完整流程。你可以直接查看出版成果，或開始下一批手機截圖。";
+  }else{
+    next.textContent="繼續："+current.title;
+    next.href=current.href;
+    el("headlineStatus").className="status";
+    el("headlineStatus").innerHTML=`目前有 <b>${imageCount}</b> 張截圖。系統已替你找到最合理的下一步：<b>${current.title}</b>。`;
+  }
+
+  const steps=el("steps");steps.innerHTML="";
+  stageDefs.forEach(st=>{
+    const div=document.createElement("div");
+    const isCurrent=!done[st.id]&&st.id===current.id;
+    div.className="step "+(done[st.id]?"done":isCurrent?"current":"");
+    div.innerHTML=`
+      <div class="icon">${done[st.id]?"✓":stageDefs.indexOf(st)+1}</div>
+      <div>
+        <div class="step-title">${st.title}</div>
+        <div class="step-desc">${st.desc}</div>
+      </div>
+      <div class="badge">${done[st.id]?"完成":isCurrent?"下一步":"等待"}</div>
+    `;
+    div.addEventListener("click",()=>{location.href=st.href;});
+    steps.appendChild(div);
+  });
+
+  let detail=[];
+  if(s.ocr&&s.ocr.language) detail.push("OCR 語言："+safeText(s.ocr.language));
+  if(s.humanState){
+    const pending=Array.isArray(s.humanState.candidates)
+      ? s.humanState.candidates.filter(x=>!x.decision||x.decision==="pending").length
+      : null;
+    if(pending!==null) detail.push("人工候選待確認："+pending);
+    if(Array.isArray(s.humanState.chartItems)) detail.push("圖表／附註："+s.humanState.chartItems.length);
+  }
+  if(s.reportState&&s.reportState.article) detail.push("正式正文："+safeText(s.reportState.article).length+" 字元");
+  if(isPass(s.report)&&s.report.passedAt) detail.push("Phase 3-D PASS："+fmtDate(s.report.passedAt));
+  if(isPass(s.publication)&&s.publication.passedAt) detail.push("出版 PASS："+fmtDate(s.publication.passedAt));
+  el("projectDetail").innerHTML=detail.length?detail.join("<br>"):"尚無進階結果；加入截圖後開始。";
+
+  el("reportBtn").style.opacity=done.report?"1":".4";
+  el("publicationBtn").style.opacity=done.publish?"1":done.report?"1":".4";
+
+  return {s,done,imageCount};
+}
+
+async function loadPreferences(){
+  const p=await getSetting(PREF_KEY)||{};
+  el("languagePref").value=p.language||"auto";
+  el("outputPref").value=p.output||"tw";
+}
+async function savePreferences(){
+  await setSetting(PREF_KEY,{
+    language:el("languagePref").value,
+    output:el("outputPref").value,
+    updatedAt:Date.now()
+  });
+  el("prefStatus").textContent="✅ 已保存到本機。Product Mode v1 會用它作為後續工作流提示；Raw OCR 不會因此被覆蓋。";
+}
+
+(async()=>{
+  try{
+    db=await openDb();
+    await loadPreferences();
+    await loadState();
+  }catch(err){
+    el("headlineStatus").className="status warn";
+    el("headlineStatus").textContent="⚠️ 無法讀取本機工作區："+(err&&err.message?err.message:err);
+  }
+})();
+</script>
+</body>
+</html>
