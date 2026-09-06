@@ -54,7 +54,7 @@ select{width:100%;margin-top:7px;border:1px solid #c9ccd2;border-radius:12px;pad
 <main class="wrap">
 
 <section class="card hero">
-  <div class="eyebrow">SCREENSHOT REPORT · PRODUCT MODE v2.3</div>
+  <div class="eyebrow">SCREENSHOT REPORT · PRODUCT MODE v2.4</div>
   <h1>手機截圖 → 完整報告</h1>
   <p>適合繁體／簡體中文手機截圖。保留原圖與 Raw OCR，只在高風險內容要求人工確認，再輸出可讀、可查核、可保存的正式報告。</p>
 
@@ -160,7 +160,7 @@ select{width:100%;margin-top:7px;border:1px solid #c9ccd2;border-radius:12px;pad
     <div id="importProgressBox" class="result-box small">
       新工作區已準備好。建議一次選取同一篇文章的全部連續截圖。
     </div>
-    <a id="continueStitchBtn" class="btn hidden" href="./index.html#batchOverlapPanel">
+    <a id="continueStitchBtn" class="btn hidden" href="./stitch-v2.html">
       開始排序與拼接
     </a>
   </div>
@@ -190,6 +190,8 @@ let archiveDb=null;
 let localSnapshotReady=false;
 
 const KEYS={
+  phase2c:"phase2cBatchState:v1",
+  phase2d:"phase2dVirtualDocumentPlan:v1",
   articlePlan:"phase2eArticlePlan:v1",
   phase3a:"phase3aReconstructionReview:v1",
   ocr:"phase3cBatchOcrReview:v1",
@@ -252,7 +254,7 @@ function safeText(v){return String(v==null?"":v);}
 
 const stageDefs=[
   {id:"capture",title:"加入手機截圖",desc:"選取同一篇內容的連續截圖，保留原圖。",href:"./index.html",anchor:""},
-  {id:"stitch",title:"排序與拼接",desc:"分析相鄰重疊、確認接縫、建立連續文章範圍。",href:"./index.html#batchOverlapPanel"},
+  {id:"stitch",title:"排序與拼接",desc:"Auto Stitch v2 先自動放行高信心接縫，只把真正歧義的組合交給人工。",href:"./index.html#batchOverlapPanel"},
   {id:"ocr",title:"OCR 與中文重建",desc:"逐張 OCR；Raw OCR 保留，另建清理／繁體層。",href:"./index.html#phase3cbPanel"},
   {id:"human",title:"只檢查高風險內容",desc:"疑似 OCR 錯字、圖表碎片與異常字串才要求人工決策。",href:"./index.html#phase3cdPanel"},
   {id:"report",title:"建立正式報告",desc:"封裝校正後正文、圖表附註與下載格式。",href:"./phase3d.html"},
@@ -266,7 +268,15 @@ async function loadState(){
 
   const done={
     capture:imageCount>0,
-    stitch:!!(s.articlePlan||isPass(s.phase3a)),
+    stitch:!!(
+      s.articlePlan ||
+      isPass(s.phase3a) ||
+      (
+        s.phase2d &&
+        Number(s.phase2d.sourceImageCount||0)===imageCount &&
+        Number(s.phase2d.breakCount||0)===0
+      )
+    ),
     ocr:isPass(s.ocr)&&isPass(s.text),
     human:isPass(s.human),
     report:isPass(s.report),
@@ -324,6 +334,11 @@ async function loadState(){
   });
 
   let detail=[];
+  if(s.phase2c && Array.isArray(s.phase2c.results)){
+    const autoSafe=s.phase2c.results.filter(x=>x.status==="high"||x.status==="confirmed").length;
+    const needsReview=s.phase2c.results.filter(x=>!["high","confirmed","duplicate","rejected"].includes(x.status)).length;
+    detail.push("自動接縫可採用："+autoSafe+"；待確認："+needsReview);
+  }
   if(s.ocr&&s.ocr.language) detail.push("OCR 語言："+safeText(s.ocr.language));
   if(s.humanState){
     const totalCandidates = Number(
