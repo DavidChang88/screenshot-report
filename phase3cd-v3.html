@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<title>Screenshot Report · Phase 3-C-D v3 Auto Review</title>
+<style>
+:root{
+  --bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--muted:#6e6e73;
+  --green:#2f7d4a;--green-bg:#e9f5ed;--amber:#8a5b00;--amber-bg:#fff3d6;
+  --blue:#3478f6;--line:#e5e5ea;--soft:#f2f2f7;--red:#a52a20;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+main{max-width:760px;margin:auto;padding:20px 14px 56px}
+.card{background:var(--card);border-radius:22px;padding:20px;margin-bottom:16px;box-shadow:0 4px 18px rgba(0,0,0,.055)}
+.eyebrow{font-size:13px;font-weight:900;letter-spacing:.045em;color:#566473}
+h1{font-size:32px;line-height:1.16;margin:8px 0 10px}
+h2{font-size:24px;margin:0 0 12px}
+p{color:var(--muted);line-height:1.65;margin:8px 0}
+.status{border-radius:15px;padding:15px;line-height:1.6;margin:14px 0;background:var(--soft)}
+.status.good{background:var(--green-bg);color:#20663c}
+.status.warn{background:var(--amber-bg);color:#7c5400}
+.status.bad{background:#ffe9e5;color:var(--red)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.metric{background:var(--soft);padding:14px;border-radius:14px}
+.metric span{display:block;color:var(--muted);font-size:12px}
+.metric strong{display:block;font-size:27px;margin-top:4px}
+button,a.btn{display:block;width:100%;border:0;border-radius:15px;padding:16px;margin-top:11px;font:inherit;font-size:17px;font-weight:850;text-align:center;text-decoration:none}
+.primary{background:var(--blue);color:#fff}
+.safe{background:#557083;color:#fff}
+.secondary{background:#e9e9ee;color:var(--text)}
+.pass{background:var(--green);color:#fff}
+button:disabled{opacity:.38}
+.note{font-size:13px;line-height:1.65;color:var(--muted);margin-top:12px}
+.rule{padding:13px;border-radius:13px;background:var(--green-bg);color:#28683f;line-height:1.55;margin-top:10px}
+.candidate{border:1px solid var(--line);border-radius:16px;padding:15px;margin-top:12px}
+.candidate-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.candidate-title{font-weight:850;line-height:1.4}
+.badge{white-space:nowrap;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:850;background:var(--amber-bg);color:var(--amber)}
+.badge.auto{background:var(--green-bg);color:var(--green)}
+.raw{background:var(--soft);padding:12px;border-radius:12px;margin:11px 0;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.context{font-size:13px;line-height:1.55;color:var(--muted);padding:8px 0}
+select,input[type=text],textarea{width:100%;font:inherit;border:1px solid #c7c7cc;border-radius:12px;padding:12px;background:#fff;color:var(--text);margin-top:8px}
+textarea{min-height:92px;resize:vertical}
+.small{font-size:12px;color:var(--muted)}
+.hidden{display:none!important}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+</style>
+</head>
+<body>
+<main>
+  <section class="card">
+    <div class="eyebrow">SCREENSHOT REPORT · PHASE 3-C-D v3 AUTO REVIEW</div>
+    <h1>只把真正有歧義的 OCR 留給人工</h1>
+    <p>
+      本頁沿用既有 Phase 3-C-D v2 候選，不覆蓋 Raw OCR 或 Phase 3-C-C。
+      先用保守規則自動處理低風險項目，再把重疊候選合併，避免同一段文字重複判斷或互相造成「手動校正失敗」。
+    </p>
+
+    <div id="status" class="status">正在讀取目前工作區…</div>
+
+    <div class="grid">
+      <div class="metric"><span>原候選</span><strong id="totalCount">—</strong></div>
+      <div class="metric"><span>已安全自動處理</span><strong id="autoCount">—</strong></div>
+      <div class="metric"><span>真正需人工</span><strong id="manualCount">—</strong></div>
+      <div class="metric"><span>重疊／巢狀已消除</span><strong id="suppressedCount">—</strong></div>
+    </div>
+
+    <button id="analyzeBtn" class="primary" onclick="runSafeAutoReview()" disabled>
+      一鍵安全自動檢查
+    </button>
+    <button id="saveBtn" class="safe" onclick="saveCurrentDecisions()" disabled>
+      儲存目前決策並回到工程流程
+    </button>
+    <a class="btn secondary" href="./index.html#phase3cdPanel">返回 Phase 3-C-D</a>
+
+    <div class="note">
+      自動化只做可由結構證據支持的動作：既有高信心建議、明顯純符號／圖表亂碼、
+      正文上下文連續的正常文字、可證明為多餘的邊界符號，以及已被較大「整段校正」覆蓋的巢狀候選。
+      不會用語意 AI 猜未知字串。
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>安全自動化規則</h2>
+    <div class="rule">① <b>重疊候選只判一次：</b>整段人工校正若包含局部候選，局部候選會自動標為「由整段處理」，避免兩次修改同一字串。</div>
+    <div class="rule">② <b>正常正文自動保留：</b>只有字元結構正常、且前後都明顯位於同一正文段落時才自動保留。</div>
+    <div class="rule">③ <b>純符號／圖表亂碼自動分流：</b>只在原規則也建議圖表／附註，且字串幾乎沒有正文中文時才自動分流。</div>
+    <div class="rule">④ <b>邊界垃圾安全修剪：</b>只刪除可明確判定為 OCR 邊界雜訊的前／後綴，不補猜未知文字。</div>
+  </section>
+
+  <section class="card">
+    <h2>仍需人工確認</h2>
+    <div id="candidateList">
+      <div class="status">尚未分析。</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>相容性與品質閘門</h2>
+    <div id="quality" class="status">
+      尚未分析。
+    </div>
+    <p class="note">
+      v3 不直接標記 PASS。儲存後回到原本 Phase 3-C-D，由既有 PASS 按鈕再次檢查：
+      待確認必須為 0、手動校正失敗必須為 0、正文不可為空。這樣保留原來的輸出目標與驗收門檻。
+    </p>
+  </section>
+</main>
+
+<script>
+const DB_NAME="ScreenshotReportDB";
+const DB_VERSION=2;
+const SETTINGS_STORE="settings";
+const STATE_KEY="phase3cCorrectionTriage:v1";
+const REVIEW_KEY="phase3cCorrectionTriageReview:v1";
+
+let db=null;
+let state=null;
+let plan=[];
+let didAnalyze=false;
+
+const $=id=>document.getElementById(id);
+
+function openDb(){
+  return new Promise((resolve,reject)=>{
+    const r=indexedDB.open(DB_NAME,DB_VERSION);
+    r.onsuccess=()=>resolve(r.result);
+    r.onerror=()=>reject(r.error);
+  });
+}
+function getSetting(key){
+  return new Promise((resolve,reject)=>{
+    const r=db.transaction(SETTINGS_STORE,"readonly").objectStore(SETTINGS_STORE).get(key);
+    r.onsuccess=()=>resolve(r.result&&r.result.value?r.result.value:null);
+    r.onerror=()=>reject(r.error);
+  });
+}
+function putSetting(key,value){
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(SETTINGS_STORE,"readwrite");
+    tx.objectStore(SETTINGS_STORE).put({key,value,updatedAt:Date.now()});
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>reject(tx.error);
+  });
+}
+function clone(v){
+  return typeof structuredClone==="function" ? structuredClone(v) : JSON.parse(JSON.stringify(v));
+}
+function textOf(c){
+  return String(c.articleText||c.rawText||"").trim();
+}
+function isPending(c){
+  return !c.action || c.action==="pending";
+}
+function countChars(s,re){
+  const m=String(s||"").match(re);
+  return m?m.length:0;
+}
+function normalizeSpaces(s){
+  return String(s||"")
+    .replace(/[ \t]+\n/g,"\n")
+    .replace(/\n[ \t]+/g,"\n")
+    .replace(/[ \t]{2,}/g," ")
+    .replace(/\n{3,}/g,"\n\n")
+    .trim();
+}
+
+function findSpan(text,target,startHint=0){
+  if(!target) return null;
+  let i=text.indexOf(target,Math.max(0,startHint));
+  if(i<0) i=text.indexOf(target);
+  return i<0?null:{start:i,end:i+target.length};
+}
+function buildSpans(candidates,baseText){
+  const byTarget=new Map();
+  const spans=[];
+  for(let i=0;i<candidates.length;i++){
+    const c=candidates[i];
+    const target=textOf(c);
+    if(!target){spans.push(null);continue}
+    const next=byTarget.get(target)||0;
+    let from=0, found=-1;
+    for(let k=0;k<=next;k++){
+      found=baseText.indexOf(target,from);
+      if(found<0) break;
+      from=found+target.length;
+    }
+    if(found<0) found=baseText.indexOf(target);
+    if(found>=0){
+      spans.push({start:found,end:found+target.length});
+      byTarget.set(target,next+1);
+    }else{
+      spans.push(null);
+    }
+  }
+  return spans;
+}
+function contains(a,b){
+  return !!a&&!!b&&a.start<=b.start&&a.end>=b.end&&(a.start<b.start||a.end>b.end);
+}
+function intersects(a,b){
+  return !!a&&!!b&&a.start<b.end&&b.start<a.end;
+}
+function surroundingContext(base,span,n=48){
+  if(!span) return {before:"",after:""};
+  return {
+    before:base.slice(Math.max(0,span.start-n),span.start),
+    after:base.slice(span.end,Math.min(base.length,span.end+n))
+  };
+}
+function safeNormalText(c,span,base){
+  const t=textOf(c);
+  if(t.length<6||t.length>90||!span) return false;
+  if(/[=@#\\\/|<>{}\[\]]/.test(t)) return false;
+  const cjk=countChars(t,/[\u3400-\u9fff]/g);
+  const latin=countChars(t,/[A-Za-z]/g);
+  const digits=countChars(t,/[0-9]/g);
+  const useful=cjk+latin+digits+countChars(t,/[、，。；：！？（）()「」『』\s·\-]/g);
+  if(useful/Math.max(1,t.length)<0.9) return false;
+  const ctx=surroundingContext(base,span,60);
+  const beforeCJK=countChars(ctx.before,/[\u3400-\u9fff]/g);
+  const afterCJK=countChars(ctx.after,/[\u3400-\u9fff]/g);
+  const sameParagraph=!/\n\s*\n\s*$/.test(ctx.before)&&!/^\s*\n\s*\n/.test(ctx.after);
+  return sameParagraph && beforeCJK>=6 && afterCJK>=6;
+}
+function safeChartNoise(c){
+  const t=textOf(c);
+  if(!t||t.length<3) return false;
+  const rec=String(c.recommendedAction||"");
+  const reason=String(c.reason||"");
+  if(rec!=="chart" && !/圖表|符號|亂碼/.test(reason)) return false;
+  const cjk=countChars(t,/[\u3400-\u9fff]/g);
+  const asciiWeird=countChars(t,/[=@#\\\/|<>{}\[\]^~_*+%©]/g);
+  const latin=countChars(t,/[A-Za-z]/g);
+  const symbols=countChars(t,/[^A-Za-z0-9\u3400-\u9fff\s，。！？；：、（）()「」『』\-]/g);
+  if(cjk===0 && (asciiWeird>=1 || symbols>=2)) return true;
+  if(cjk<=1 && t.length>=8 && (latin+symbols)/t.length>0.65) return true;
+  return false;
+}
+function safeBoundaryCorrection(c,span,base){
+  const t=textOf(c);
+  if(!span||!t||t.length>8) return null;
+
+  // 只刪除孤立 ASCII 方括號，不新增語意文字。
+  if(/^\[[\u3400-\u9fff]{1,3}$/.test(t)){
+    const local=base.slice(Math.max(0,span.start-40),Math.min(base.length,span.end+40));
+    if(!local.includes("]")) return t.slice(1);
+  }
+  if(/^[\u3400-\u9fff]{1,3}[。！？]?]$/.test(t)){
+    const local=base.slice(Math.max(0,span.start-40),Math.min(base.length,span.end+40));
+    if(!local.includes("[")) return t.slice(0,-1);
+  }
+  return null;
+}
+function safeFulltextEdgeTrim(c){
+  if(c.type!=="fulltext") return null;
+  const t=textOf(c);
+  const cjk=countChars(t,/[\u3400-\u9fff]/g);
+  if(cjk<15) return null;
+
+  // 若前面是高密度 ASCII 垃圾、後面從中文引號開始形成長正文，只去掉引號前垃圾。
+  const q=t.indexOf("「");
+  if(q>=6){
+    const prefix=t.slice(0,q);
+    const prefixCJK=countChars(prefix,/[\u3400-\u9fff]/g);
+    const weird=countChars(prefix,/[^A-Za-z0-9\u3400-\u9fff\s，。！？；：、（）()「」『』\-]/g);
+    if(prefixCJK<=3 && (weird>=2 || /[A-Z]{2,}/.test(prefix))){
+      const rest=t.slice(q).trim();
+      if(countChars(rest,/[\u3400-\u9fff]/g)>=12) return rest;
+    }
+  }
+
+  // 若開頭至少 8 字元以 ASCII/符號為主，第一個中文後面有足夠正文，只去掉前綴。
+  let firstCjk=-1;
+  for(let i=0;i<t.length;i++){
+    if(/[\u3400-\u9fff]/.test(t[i])){firstCjk=i;break}
+  }
+  if(firstCjk>=8){
+    const prefix=t.slice(0,firstCjk);
+    const pCJK=countChars(prefix,/[\u3400-\u9fff]/g);
+    const pWeird=countChars(prefix,/[^A-Za-z0-9\s,.;:()\-]/g);
+    const rest=t.slice(firstCjk).trim();
+    if(pCJK===0 && (pWeird>=2||/[A-Z]{2,}/.test(prefix)) && countChars(rest,/[\u3400-\u9fff]/g)>=15){
+      return rest;
+    }
+  }
+  return null;
+}
+function actionPriority(c){
+  if(c.type==="fulltext"&&c.action==="correct") return 100;
+  if(c.type==="fulltext"&&(c.action==="chart"||c.action==="exclude")) return 90;
+  if(c.action==="correct") return 70;
+  if(c.action==="chart"||c.action==="exclude") return 60;
+  return 0;
+}
+
+function buildPlan(){
+  const candidates=state.candidates||[];
+  const base=String(state.baseText||"");
+  const spans=buildSpans(candidates,base);
+  const result=candidates.map((c,i)=>({
+    index:i,
+    span:spans[i],
+    originalAction:c.action||"pending",
+    action:c.action||"pending",
+    replacement:c.replacement||c.suggestion||"",
+    auto:false,
+    autoReason:"",
+    suppressedBy:null
+  }));
+
+  // 0. 既有人工決策不覆寫。
+  // 1. 既有 high-confidence 建議。
+  for(let i=0;i<candidates.length;i++){
+    const c=candidates[i],p=result[i];
+    if(!isPending(c)) continue;
+    if(c.confidence==="high"){
+      p.action=c.recommendedAction||"keep";
+      if(p.action==="correct"&&!p.replacement) p.replacement=c.suggestion||"";
+      if(p.action!=="correct"||String(p.replacement).trim()){
+        p.auto=true;p.autoReason="既有高信心建議";
+      }else p.action="pending";
+    }
+  }
+
+  // 2. 正文上下文連續 -> 保留。
+  for(let i=0;i<candidates.length;i++){
+    const c=candidates[i],p=result[i];
+    if(p.action!=="pending") continue;
+    if(safeNormalText(c,p.span,base)){
+      p.action="keep";p.auto=true;p.autoReason="正文上下文連續，字元結構正常";
+    }
+  }
+
+  // 3. 純符號／圖表亂碼 -> 圖表附註。
+  for(let i=0;i<candidates.length;i++){
+    const c=candidates[i],p=result[i];
+    if(p.action!=="pending") continue;
+    if(safeChartNoise(c)){
+      p.action="chart";p.auto=true;p.autoReason="原規則指向圖表，且缺乏正文中文";
+    }
+  }
+
+  // 4. 安全邊界符號修剪。
+  for(let i=0;i<candidates.length;i++){
+    const c=candidates[i],p=result[i];
+    if(p.action!=="pending") continue;
+    const rep=safeBoundaryCorrection(c,p.span,base);
+    if(rep!==null&&rep!==textOf(c)){
+      p.action="correct";p.replacement=rep;p.auto=true;p.autoReason="只移除可證明為孤立的 OCR 邊界符號";
+    }
+  }
+
+  // 5. 全文候選的純結構前綴修剪。
+  for(let i=0;i<candidates.length;i++){
+    const c=candidates[i],p=result[i];
+    if(p.action!=="pending") continue;
+    const rep=safeFulltextEdgeTrim(c);
+    if(rep&&rep!==textOf(c)){
+      p.action="correct";p.replacement=rep;p.auto=true;p.autoReason="只去除高密度 ASCII 邊界垃圾，保留原有中文正文";
+    }
+  }
+
+  // 6. 巢狀候選：若較大候選已確定會改寫/分流/排除，較小候選只保留、不再二次修改。
+  for(let outer=0;outer<candidates.length;outer++){
+    const po=result[outer],co=candidates[outer];
+    if(!po.span) continue;
+    if(!["correct","chart","exclude"].includes(po.action)) continue;
+    for(let inner=0;inner<candidates.length;inner++){
+      if(inner===outer) continue;
+      const pi=result[inner];
+      if(!contains(po.span,pi.span)) continue;
+      if(actionPriority({...candidates[inner],action:pi.action})>=actionPriority({...co,action:po.action})) continue;
+      if(pi.originalAction!=="pending" && !pi.auto) continue; // 不覆寫既有人工決策
+      pi.action="keep";
+      pi.auto=true;
+      pi.autoReason="由較完整的整段候選一次處理，避免重複校正";
+      pi.suppressedBy=outer;
+    }
+  }
+
+  return {result,spans};
+}
+
+function previewDerived(candidatePlan){
+  const base=String(state.baseText||"");
+  const candidates=state.candidates||[];
+  const edits=[];
+  const chartItems=[];
+  const excludedItems=[];
+  const failures=[];
+  const conflicts=[];
+
+  for(let i=0;i<candidates.length;i++){
+    const c=candidates[i],p=candidatePlan[i];
+    const target=textOf(c);
+    if(!p.span || !target){
+      if(["correct","chart","exclude"].includes(p.action)){
+        failures.push({i,reason:"找不到原 OCR 片段"});
+      }
+      continue;
+    }
+    if(p.action==="chart"){
+      chartItems.push({i,text:target});
+      edits.push({i,start:p.span.start,end:p.span.end,replacement:"",priority:actionPriority({...c,action:p.action})});
+    }else if(p.action==="exclude"){
+      excludedItems.push({i,text:target});
+      edits.push({i,start:p.span.start,end:p.span.end,replacement:"",priority:actionPriority({...c,action:p.action})});
+    }else if(p.action==="correct"){
+      const rep=String(p.replacement||"");
+      if(!rep.trim()){failures.push({i,reason:"校正文字為空"});continue}
+      edits.push({i,start:p.span.start,end:p.span.end,replacement:rep,priority:actionPriority({...c,action:p.action})});
+    }
+  }
+
+  // 重疊編輯只保留高優先權；同優先且互相交叉才視為衝突。
+  edits.sort((a,b)=>b.priority-a.priority || (b.end-b.start)-(a.end-a.start));
+  const accepted=[];
+  for(const e of edits){
+    const hit=accepted.find(x=>e.start<x.end&&x.start<e.end);
+    if(!hit){accepted.push(e);continue}
+    const contained=(hit.start<=e.start&&hit.end>=e.end)||(e.start<=hit.start&&e.end>=hit.end);
+    if(!contained && hit.priority===e.priority){
+      conflicts.push({a:hit.i,b:e.i});
+    }
+    // 其餘視為由較高優先編輯覆蓋，不列 failure。
+  }
+
+  accepted.sort((a,b)=>b.start-a.start);
+  let text=base;
+  for(const e of accepted){
+    text=text.slice(0,e.start)+e.replacement+text.slice(e.end);
+  }
+  text=normalizeSpaces(text);
+
+  const pending=candidatePlan.filter(p=>p.action==="pending").length;
+  return {text,chartItems,excludedItems,failures,conflicts,pending,accepted};
+}
+
+function render(){
+  if(!state) return;
+  const candidates=state.candidates||[];
+  const total=candidates.length;
+  const auto=plan.filter(p=>p.auto).length;
+  const manual=plan.filter(p=>p.action==="pending").length;
+  const suppressed=plan.filter(p=>p.suppressedBy!==null).length;
+
+  $("totalCount").textContent=String(total);
+  $("autoCount").textContent=String(auto);
+  $("manualCount").textContent=String(manual);
+  $("suppressedCount").textContent=String(suppressed);
+
+  const wrap=$("candidateList");
+  wrap.innerHTML="";
+  const remaining=plan.filter(p=>p.action==="pending");
+  if(!remaining.length){
+    wrap.innerHTML='<div class="status good">✅ 沒有剩餘人工候選。請先儲存，回原 Phase 3-C-D 做最後 PASS 驗收。</div>';
+  }else{
+    for(const p of remaining){
+      const c=candidates[p.index];
+      const div=document.createElement("div");
+      div.className="candidate";
+      const ctx=surroundingContext(String(state.baseText||""),p.span,60);
+      div.innerHTML=`
+        <div class="candidate-head">
+          <div class="candidate-title">${c.displayNumber?`第 ${c.displayNumber} 張｜`:""}${escapeHtml(c.reason||"待確認")}</div>
+          <span class="badge">需人工</span>
+        </div>
+        <div class="raw">${escapeHtml(textOf(c))}</div>
+        <div class="context">前後文：…${escapeHtml(ctx.before.slice(-45))}<b>〔候選〕</b>${escapeHtml(ctx.after.slice(0,45))}…</div>
+        <select data-index="${p.index}" class="action">
+          <option value="pending">尚未確認</option>
+          <option value="keep">保留正文</option>
+          <option value="chart">分流到圖表／附註</option>
+          <option value="exclude">排除本階段衍生正文</option>
+          <option value="correct">人工校正</option>
+        </select>
+        <textarea data-index="${p.index}" class="replacement" placeholder="只有選擇人工校正時才需要輸入"></textarea>
+      `;
+      wrap.appendChild(div);
+      const sel=div.querySelector("select");
+      const ta=div.querySelector("textarea");
+      sel.value=p.action;
+      ta.value=p.replacement||"";
+      sel.addEventListener("change",()=>{
+        p.action=sel.value;
+        if(p.action==="correct"&&!ta.value&&c.suggestion) ta.value=c.suggestion;
+        p.replacement=ta.value;
+        renderQuality();
+      });
+      ta.addEventListener("input",()=>{
+        p.replacement=ta.value;
+        renderQuality();
+      });
+    }
+  }
+  renderQuality();
+}
+
+function renderQuality(){
+  const q=previewDerived(plan);
+  const el=$("quality");
+  const ok=q.pending===0&&q.failures.length===0&&q.conflicts.length===0&&String(q.text||"").trim();
+  el.className="status "+(ok?"good":"warn");
+  el.innerHTML=
+    `${ok?"✅":"⚠️"} 預覽品質閘門：`+
+    `待確認 ${q.pending}｜校正失敗 ${q.failures.length}｜重疊衝突 ${q.conflicts.length}`+
+    `<br>預計正文 ${q.text.length} 字元｜圖表/附註 ${q.chartItems.length} 項。`+
+    (ok?`<br><b>可安全寫回 v2 相容工作區。</b>`:`<br>未通過前不建議進 Phase 3-D。`);
+  $("saveBtn").disabled=!didAnalyze;
+}
+
+function escapeHtml(s){
+  return String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+
+async function runSafeAutoReview(){
+  if(!state) return;
+  const built=buildPlan();
+  plan=built.result;
+  didAnalyze=true;
+  $("status").className="status good";
+  $("status").innerHTML="✅ 安全自動檢查完成。只顯示仍需人工判斷的候選；既有人工決策不會被覆寫。";
+  render();
+}
+
+async function saveCurrentDecisions(){
+  if(!state||!didAnalyze) return;
+  const q=previewDerived(plan);
+  // 可在尚有 pending 時先存草稿；但會明確提醒。
+  if(q.conflicts.length||q.failures.length){
+    alert(`目前仍有 ${q.failures.length} 個校正失敗、${q.conflicts.length} 個重疊衝突，請先處理。`);
+    return;
+  }
+
+  const candidates=state.candidates||[];
+  for(let i=0;i<candidates.length;i++){
+    const p=plan[i],c=candidates[i];
+    c.action=p.action;
+    c.replacement=p.replacement||"";
+    if(p.auto){
+      c.autoReviewV3={
+        applied:true,
+        reason:p.autoReason,
+        suppressedBy:p.suppressedBy,
+        appliedAt:Date.now()
+      };
+    }
+  }
+
+  // 寫回 v2 相容的衍生欄位，舊版頁面重新開啟後仍能正確驗收。
+  state.correctedText=q.text;
+  state.chartItems=q.chartItems.map(x=>{
+    const c=candidates[x.i];
+    return {id:c.id,displayNumber:c.displayNumber,text:textOf(c),reason:c.reason};
+  });
+  state.excludedItems=q.excludedItems.map(x=>{
+    const c=candidates[x.i];
+    return {id:c.id,displayNumber:c.displayNumber,text:textOf(c),reason:c.reason};
+  });
+  state.appliedCorrections=q.accepted
+    .filter(e=>e.replacement!=="")
+    .map(e=>({id:candidates[e.i].id,from:textOf(candidates[e.i]),to:e.replacement}));
+  state.correctionFailures=[];
+  state.pendingCount=q.pending;
+  state.updatedAt=Date.now();
+  state.autoReviewV3={
+    version:3,
+    analyzedAt:Date.now(),
+    autoHandled:plan.filter(p=>p.auto).length,
+    manualRemaining:q.pending,
+    suppressedNested:plan.filter(p=>p.suppressedBy!==null).length,
+    qualityGate:{
+      correctionFailures:0,
+      overlapConflicts:0
+    }
+  };
+
+  await putSetting(STATE_KEY,state);
+  await putSetting(REVIEW_KEY,null);
+
+  $("status").className="status good";
+  $("status").innerHTML=
+    `✅ 已寫回 Phase 3-C-D 相容工作區。<br>`+
+    `待確認 ${q.pending}｜校正失敗 0｜重疊衝突 0。`+
+    `<br>請回原 Phase 3-C-D 進行最後 PASS 驗收。`;
+
+  if(q.pending===0){
+    setTimeout(()=>{location.href="./index.html#phase3cdPanel";},700);
+  }
+}
+
+async function init(){
+  try{
+    db=await openDb();
+    state=await getSetting(STATE_KEY);
+    if(!state||!Array.isArray(state.candidates)){
+      $("status").className="status warn";
+      $("status").innerHTML="⚠️ 找不到 Phase 3-C-D 工作區。請先在工程頁完成 Phase 3-C-C PASS，並建立 Phase 3-C-D 工作區。";
+      return;
+    }
+    $("analyzeBtn").disabled=false;
+    $("status").className="status good";
+    $("status").innerHTML=
+      `✅ 已讀取目前 Phase 3-C-D 工作區：${state.candidates.length} 個候選。`+
+      `<br>按「一鍵安全自動檢查」前不會改動任何資料。`;
+    plan=(state.candidates||[]).map((c,i)=>({
+      index:i,span:null,originalAction:c.action||"pending",
+      action:c.action||"pending",replacement:c.replacement||c.suggestion||"",
+      auto:false,autoReason:"",suppressedBy:null
+    }));
+    $("totalCount").textContent=String(state.candidates.length);
+    $("autoCount").textContent="0";
+    $("manualCount").textContent=String(state.pendingCount??state.candidates.filter(isPending).length);
+    $("suppressedCount").textContent="0";
+  }catch(e){
+    $("status").className="status bad";
+    $("status").textContent="❌ "+String(e&&e.message?e.message:e);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
