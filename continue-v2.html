@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<title>Screenshot Report｜Continue v2</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f5f7;color:#1d1d1f;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+.wrap{max-width:720px;margin:auto;padding:22px 16px 50px}
+.card{background:#fff;border-radius:20px;padding:22px;box-shadow:0 4px 20px rgba(0,0,0,.06)}
+.eyebrow{font-size:13px;font-weight:900;letter-spacing:.04em;color:#586574}
+h1{font-size:30px;line-height:1.15;margin:8px 0 12px}
+p{line-height:1.65;color:#666}
+.status{padding:15px;border-radius:14px;background:#f2f2f7;line-height:1.65;margin-top:14px}
+.good{background:#e8f5ec;color:#17663b}
+.warn{background:#fff3d6;color:#835600}
+.bad{background:#ffe9e5;color:#96251c}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.metric{padding:13px;border-radius:13px;background:#f7f7f9}
+.metric span{display:block;color:#777;font-size:12px}
+.metric strong{display:block;font-size:25px;margin-top:3px}
+button,a.btn{display:block;width:100%;border:0;border-radius:14px;padding:16px;margin-top:12px;text-align:center;text-decoration:none;font:inherit;font-size:17px;font-weight:850;background:#3478f6;color:#fff}
+button:disabled{opacity:.4}
+.secondary{background:#e9e9ee!important;color:#1d1d1f!important}
+.note{font-size:13px;color:#707070;line-height:1.6;margin-top:12px}
+</style>
+</head>
+<body>
+<main class="wrap">
+<section class="card">
+<div class="eyebrow">SCREENSHOT REPORT · PHASE 2-D → 2-E BRIDGE</div>
+<h1>沿用已驗證的虛擬文件</h1>
+<p>不重新分析接縫，也不要求把 Auto Stitch 高信心結果再人工確認一次。這一頁只把有效的 Phase 2-D 文件鏈轉成舊版後續 OCR 可讀的 Phase 2-E 相容格式。</p>
+
+<div id="status" class="status">正在檢查目前專案…</div>
+
+<div class="grid">
+ <div class="metric"><span>原始截圖</span><strong id="rawCount">—</strong></div>
+ <div class="metric"><span>有效切片</span><strong id="sliceCount">—</strong></div>
+ <div class="metric"><span>有效接縫</span><strong id="seamCount">—</strong></div>
+ <div class="metric"><span>斷點</span><strong id="breakCount">—</strong></div>
+</div>
+
+<button id="continueButton" onclick="convertAndContinue()" disabled>
+直接沿用 Phase 2-D 並進入 Phase 3-A
+</button>
+<a class="btn secondary" href="./stitch-v2.html">返回 Auto Stitch</a>
+
+<div class="note">
+安全規則：只接受「1 條文件鏈、0 斷點、切片數 = 接縫數 + 1」的 Phase 2-D 計畫。原始圖片 Blob、Raw OCR 與人工確認資料都不會被修改。
+</div>
+</section>
+</main>
+
+<script>
+const DB_NAME="ScreenshotReportDB";
+const DB_VERSION=2;
+const IMAGE_STORE="images";
+const SETTINGS_STORE="settings";
+const P2D_KEY="phase2dVirtualDocumentPlan:v1";
+const P2E_WORKSPACE_KEY="phase2eArticleWorkspace:v1";
+const P2E_PLAN_KEY="phase2eArticlePlan:v1";
+let db=null,images=[],p2d=null,validChain=null,rawRangeIds=[];
+
+const $=id=>document.getElementById(id);
+
+function openDb(){
+  return new Promise((resolve,reject)=>{
+    const r=indexedDB.open(DB_NAME,DB_VERSION);
+    r.onsuccess=()=>resolve(r.result);
+    r.onerror=()=>reject(r.error);
+  });
+}
+function getAllImages(){
+  return new Promise((resolve,reject)=>{
+    const r=db.transaction(IMAGE_STORE,"readonly").objectStore(IMAGE_STORE).getAll();
+    r.onsuccess=()=>{
+      const rows=Array.isArray(r.result)?r.result:[];
+      rows.sort((a,b)=>(Number(a.sequence)||Number(a.id)||0)-(Number(b.sequence)||Number(b.id)||0));
+      resolve(rows);
+    };
+    r.onerror=()=>reject(r.error);
+  });
+}
+function getSetting(key){
+  return new Promise((resolve,reject)=>{
+    const r=db.transaction(SETTINGS_STORE,"readonly").objectStore(SETTINGS_STORE).get(key);
+    r.onsuccess=()=>resolve(r.result&&r.result.value?r.result.value:null);
+    r.onerror=()=>reject(r.error);
+  });
+}
+function putSetting(key,value){
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(SETTINGS_STORE,"readwrite");
+    tx.objectStore(SETTINGS_STORE).put({key,value,updatedAt:Date.now()});
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>reject(tx.error);
+  });
+}
+function deepCopy(value){
+  if(typeof structuredClone==="function") return structuredClone(value);
+  return JSON.parse(JSON.stringify(value));
+}
+
+function validatePlan(plan){
+  if(!plan) return {ok:false,message:"找不到 Phase 2-D 虛擬文件計畫。"};
+  if(Number(plan.chainCount)!==1) return {ok:false,message:`Phase 2-D 目前有 ${Number(plan.chainCount)||0} 條文件鏈，不可直接自動進入正文。`};
+  if(Number(plan.breakCount)!==0) return {ok:false,message:`Phase 2-D 還有 ${Number(plan.breakCount)||0} 個斷點，需要先處理。`};
+
+  const chains=Array.isArray(plan.chains)?plan.chains:[];
+  const chain=chains[0]||null;
+  if(!chain||!Array.isArray(chain.slices)||chain.slices.length<2){
+    return {ok:false,message:"Phase 2-D 文件鏈切片資料不足。"};
+  }
+  const seamCount=Array.isArray(chain.acceptedEdges)?chain.acceptedEdges.length:Number(plan.acceptedSeamCount)||0;
+  if(seamCount!==chain.slices.length-1){
+    return {ok:false,message:`安全檢查未通過：${chain.slices.length} 個切片但有 ${seamCount} 個接縫。`};
+  }
+  return {ok:true,chain,seamCount};
+}
+
+async function initialize(){
+  try{
+    db=await openDb();
+    [images,p2d]=await Promise.all([getAllImages(),getSetting(P2D_KEY)]);
+    $("rawCount").textContent=images.length;
+
+    const check=validatePlan(p2d);
+    if(!check.ok){
+      $("status").className="status warn";
+      $("status").textContent="⚠️ "+check.message;
+      return;
+    }
+
+    validChain=check.chain;
+    $("sliceCount").textContent=validChain.slices.length;
+    $("seamCount").textContent=check.seamCount;
+    $("breakCount").textContent=Number(p2d.breakCount)||0;
+
+    const firstId=Number(validChain.slices[0].imageId);
+    const lastId=Number(validChain.slices[validChain.slices.length-1].imageId);
+    const firstIndex=images.findIndex(x=>Number(x.id)===firstId);
+    const lastIndex=images.findIndex(x=>Number(x.id)===lastId);
+
+    if(firstIndex<0||lastIndex<firstIndex){
+      throw new Error("無法把 Phase 2-D 切片對應回目前原始截圖。");
+    }
+
+    rawRangeIds=images.slice(firstIndex,lastIndex+1).map(x=>x.id);
+
+    const missing=validChain.slices.some(s=>!images.some(x=>Number(x.id)===Number(s.imageId)));
+    if(missing) throw new Error("Phase 2-D 有切片找不到對應原始圖片。");
+
+    const skipped=rawRangeIds.length-validChain.slices.length;
+    $("status").className="status good";
+    $("status").innerHTML=
+      `✅ Phase 2-D 安全檢查通過。<br>`+
+      `${rawRangeIds.length} 張原始截圖 → ${validChain.slices.length} 個有效切片 → ${check.seamCount} 個有效接縫。`+
+      (skipped>0?`<br>已沿用 Phase 2-D 略過 ${skipped} 張冗餘／近乎重複截圖。`:"");
+
+    $("continueButton").disabled=false;
+  }catch(e){
+    $("status").className="status bad";
+    $("status").textContent="❌ "+String(e&&e.message?e.message:e);
+  }
+}
+
+async function convertAndContinue(){
+  if(!validChain||!rawRangeIds.length) return;
+  const btn=$("continueButton");
+  btn.disabled=true;
+  btn.textContent="正在建立相容文章計畫…";
+
+  try{
+    let existingWorkspace=await getSetting(P2E_WORKSPACE_KEY);
+    const ignoreChrome=Boolean(p2d.ignoreChrome);
+
+    const sameWorkspace=
+      existingWorkspace &&
+      Array.isArray(existingWorkspace.imageIds) &&
+      existingWorkspace.imageIds.length===rawRangeIds.length &&
+      existingWorkspace.imageIds.every((id,i)=>Number(id)===Number(rawRangeIds[i])) &&
+      Boolean(existingWorkspace.ignoreChrome)===ignoreChrome;
+
+    const workspace=sameWorkspace
+      ? {...existingWorkspace,updatedAt:Date.now(),sourceBridge:"phase2d-auto-stitch-v2"}
+      : {
+          version:1,
+          imageIds:[...rawRangeIds],
+          ignoreChrome,
+          results:[],
+          nextPairOffset:0,
+          completed:false,
+          createdAt:Date.now(),
+          updatedAt:Date.now(),
+          sourceBridge:"phase2d-auto-stitch-v2"
+        };
+
+    const chain=deepCopy(validChain);
+    const seams=Array.isArray(chain.acceptedEdges)?deepCopy(chain.acceptedEdges):[];
+
+    const articlePlan={
+      version:1,
+      imageIds:[...rawRangeIds],
+      ignoreChrome,
+      builtAt:Date.now(),
+      chainCount:1,
+      acceptedSeamCount:seams.length,
+      breakCount:0,
+      sliceCount:chain.slices.length,
+      chain,
+      seams,
+      source:"phase2d-auto-stitch-v2.1",
+      sourcePhase2DBuiltAt:p2d.builtAt||null
+    };
+
+    await putSetting(P2E_WORKSPACE_KEY,workspace);
+    await putSetting(P2E_PLAN_KEY,articlePlan);
+
+    $("status").className="status good";
+    $("status").innerHTML=
+      `✅ Phase 2-E 相容文章計畫已建立。<br>`+
+      `1 條文件鏈｜${articlePlan.acceptedSeamCount} 接縫｜0 斷點｜${articlePlan.sliceCount} 切片。<br>`+
+      `正在前往 Phase 3-A…`;
+
+    setTimeout(()=>{
+      location.href="./index.html#phase3ReaderPanel";
+    },600);
+  }catch(e){
+    btn.disabled=false;
+    btn.textContent="直接沿用 Phase 2-D 並進入 Phase 3-A";
+    $("status").className="status bad";
+    $("status").textContent="❌ 建立失敗："+String(e&&e.message?e.message:e);
+  }
+}
+
+initialize();
+</script>
+</body>
+</html>
