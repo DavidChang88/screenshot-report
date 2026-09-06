@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<title>Screenshot Report｜Auto Stitch v2</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--sub:#6e6e73;--blue:#3478f6;--green:#2f7d54;--greenbg:#e8f5ec;--amber:#8a5a00;--amberbg:#fff3d6;--red:#9f241b;--redbg:#ffe9e5;--line:#e5e5ea;--dark:#536b7c}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:auto;padding:18px 14px 60px}
+.card{background:var(--card);border-radius:20px;padding:20px;margin-bottom:14px;box-shadow:0 3px 18px rgba(0,0,0,.055)}
+.eyebrow{font-size:13px;font-weight:900;color:#52606d;letter-spacing:.04em}
+h1{font-size:31px;line-height:1.13;margin:7px 0 10px}
+h2{font-size:22px;margin:0 0 12px}
+p{margin:8px 0;line-height:1.65;color:var(--sub)}
+.status,.box{border-radius:14px;padding:14px;line-height:1.6;background:#f2f2f7;margin-top:10px}
+.good{background:var(--greenbg)!important;color:#17663b}
+.warn{background:var(--amberbg)!important;color:var(--amber)}
+.bad{background:var(--redbg)!important;color:var(--red)}
+button,a.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px 14px;margin-top:10px;text-align:center;text-decoration:none;font:inherit;font-size:17px;font-weight:850;cursor:pointer;background:var(--blue);color:#fff}
+button.dark,a.btn.dark{background:var(--dark)}
+button.secondary,a.btn.secondary{background:#e9e9ee;color:var(--text)}
+button:disabled{opacity:.42;cursor:default}
+.progress{height:12px;background:#e7e7ec;border-radius:999px;overflow:hidden;margin:13px 0 5px}
+.progress>div{height:100%;width:0;background:#4f9155;transition:width .2s}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.metric{background:#f7f7f9;border-radius:14px;padding:13px}
+.metric span{font-size:12px;color:var(--sub);display:block}
+.metric strong{display:block;font-size:24px;margin-top:3px}
+.note{font-size:12.5px;color:var(--sub);line-height:1.55}
+.pair{padding:14px;border:1px solid var(--line);border-radius:14px;margin-top:10px;background:#fff}
+.pairhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.pairtitle{font-weight:900}
+.badge{flex:0 0 auto;font-size:12px;font-weight:900;border-radius:999px;padding:6px 9px;background:#eee;color:#666}
+.badge.high,.badge.confirmed{background:var(--greenbg);color:var(--green)}
+.badge.medium{background:var(--amberbg);color:var(--amber)}
+.badge.low,.badge.none,.badge.error{background:var(--redbg);color:var(--red)}
+.badge.redundant{background:#eef0ff;color:#4f46e5}
+.meta{font-size:13px;color:#555;line-height:1.6;margin-top:8px}
+.review-tools{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+select{width:100%;padding:11px 12px;border:1px solid #c9ccd2;border-radius:11px;background:#fff;font:inherit;font-size:15px}
+.canvaswrap{border:1px solid #d8d8dc;border-radius:12px;overflow:hidden;background:#fff;margin-top:10px}
+.canvaswrap b{display:block;padding:9px 11px 0;font-size:13px}
+canvas{display:block;width:100%;height:auto;background:#fff}
+.hidden{display:none!important}
+.smallrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#advancedBox summary{font-weight:850;cursor:pointer}
+.footer{text-align:center;color:#8a8a8f;font-size:12px;padding:8px}
+</style>
+</head>
+<body>
+<main class="wrap">
+<section class="card">
+  <div class="eyebrow">SCREENSHOT REPORT · AUTO STITCH v2.1</div>
+  <h1>自動排序／接縫判定</h1>
+  <p>優先自動完成高信心接縫；只有多個候選接近、資訊不足或畫面尺寸異常時才要求人工確認。Raw 圖片不會被裁切或改寫。</p>
+  <div id="projectStatus" class="status">正在讀取截圖…</div>
+  <div class="grid" style="margin-top:12px">
+    <div class="metric"><span>截圖</span><strong id="imageCount">0</strong></div>
+    <div class="metric"><span>相鄰接縫</span><strong id="pairCount">0</strong></div>
+    <div class="metric"><span>自動處理</span><strong id="autoCount">0</strong></div>
+    <div class="metric"><span>需人工確認</span><strong id="reviewCount">0</strong></div>
+  </div>
+
+  <div class="progress"><div id="progressFill"></div></div>
+  <div id="progressText" class="note">尚未開始。</div>
+
+  <button id="analyzeBtn" onclick="analyzeAll()">一鍵自動分析全部接縫</button>
+  <button id="buildPlanBtn" class="dark" onclick="buildCompatiblePlan()" disabled>建立相容虛擬文件計畫</button>
+  <a id="continueBtn" class="btn secondary" href="./index.html#virtualDocPanel">前往後續正文／OCR 流程</a>
+</section>
+
+<section class="card">
+  <h2>自動判定策略</h2>
+  <div class="status good">
+    <b>一般文章預期共同區域約 25–40%</b><br>
+    系統會先做「近乎重複截圖」檢查；若下一張幾乎沒有新增內容，會標成冗餘並在虛擬文件中自動略過。真正接縫再於合理區間搜尋，並做較寬的安全 fallback。高信心必須同時通過：像素／邊緣雙證據、候選優勢、分段一致性、尺寸一致性與合理重疊比例。
+  </div>
+  <p class="note">這不是把所有候選「硬判成正確」。只要證據不夠一致，就會留給人工；因此減少人工的方式是「只放行真正強的候選」，而不是降低驗收標準。</p>
+
+  <details id="advancedBox">
+    <summary>進階設定</summary>
+    <div class="box">
+      <label>預期重疊中心
+        <select id="expectedOverlap">
+          <option value="0.30">30%</option>
+          <option value="0.33" selected>33%（推薦）</option>
+          <option value="0.35">35%</option>
+          <option value="0.40">40%</option>
+        </select>
+      </label>
+      <label style="display:block;margin-top:10px">分析模式
+        <select id="chromeMode">
+          <option value="auto" selected>自動偵測固定 UI＋基本忽略</option>
+          <option value="basic">只使用基本上下忽略</option>
+        </select>
+      </label>
+    </div>
+  </details>
+</section>
+
+<section class="card">
+  <h2>接縫結果</h2>
+  <div id="pairList" class="note">分析後只會把需要注意的組合突出顯示。</div>
+</section>
+
+<section id="reviewPanel" class="card hidden">
+  <h2>快速人工確認</h2>
+  <div id="reviewTitle" class="status"></div>
+  <label style="display:block;margin-top:10px">候選重疊量
+    <select id="candidateSelect" onchange="renderQuickPreview()"></select>
+  </label>
+
+  <div class="canvaswrap">
+    <b>接縫預覽</b>
+    <canvas id="seamCanvas" width="720" height="520"></canvas>
+  </div>
+
+  <div class="canvaswrap">
+    <b>重疊區疊合</b>
+    <canvas id="overlayCanvas" width="720" height="300"></canvas>
+  </div>
+
+  <div class="smallrow">
+    <button class="secondary" onclick="closeReview()">稍後再看</button>
+    <button onclick="confirmQuickCandidate()">確認目前候選</button>
+  </div>
+  <a class="btn secondary" href="./index.html#seamPanel">需要自由調 px → 進階工程模式</a>
+</section>
+
+<div class="footer">Auto Stitch v2.1 會先攔截近乎重複截圖，再判定真正接縫；原始截圖 Blob 保持不變。</div>
+</main>
+
+<script>
+const DB_NAME="ScreenshotReportDB", DB_VERSION=2;
+const IMAGE_STORE="images", SETTINGS_STORE="settings";
+const PHASE2C_KEY="phase2cBatchState:v1";
+const PHASE2D_KEY="phase2dVirtualDocumentPlan:v1";
+const ANALYSIS_WIDTH=280, BLOCKS=40, SIDE_IGNORE=.04;
+const BASIC_TOP_IGNORE=.08, BASIC_BOTTOM_IGNORE=.12;
+let db=null, images=[], state=null, featureCache=new Map(), currentReview=null;
+
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+
+function openDb(){
+  return new Promise((resolve,reject)=>{
+    const r=indexedDB.open(DB_NAME,DB_VERSION);
+    r.onupgradeneeded=e=>{
+      const d=e.target.result;
+      if(!d.objectStoreNames.contains(SETTINGS_STORE)) d.createObjectStore(SETTINGS_STORE,{keyPath:"key"});
+      if(!d.objectStoreNames.contains(IMAGE_STORE)){
+        const s=d.createObjectStore(IMAGE_STORE,{keyPath:"id",autoIncrement:true});
+        s.createIndex("sequence","sequence",{unique:false});
+      }
+    };
+    r.onsuccess=()=>resolve(r.result); r.onerror=()=>reject(r.error);
+  });
+}
+function getAllImages(){
+  return new Promise((resolve,reject)=>{
+    const r=db.transaction(IMAGE_STORE,"readonly").objectStore(IMAGE_STORE).getAll();
+    r.onsuccess=()=>resolve((r.result||[]).sort((a,b)=>(Number(a.sequence)||Number(a.id)||0)-(Number(b.sequence)||Number(b.id)||0)));
+    r.onerror=()=>reject(r.error);
+  });
+}
+function getSetting(key){
+  return new Promise((resolve,reject)=>{
+    const r=db.transaction(SETTINGS_STORE,"readonly").objectStore(SETTINGS_STORE).get(key);
+    r.onsuccess=()=>resolve(r.result||null); r.onerror=()=>reject(r.error);
+  });
+}
+function putSetting(key,value){
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(SETTINGS_STORE,"readwrite");
+    tx.objectStore(SETTINGS_STORE).put({key,value,updatedAt:Date.now()});
+    tx.oncomplete=resolve; tx.onerror=()=>reject(tx.error);
+  });
+}
+function seamKey(a,b){return `confirmedSeam:${a}:${b}`;}
+function signature(){return images.map(x=>String(x.id)).join(",");}
+
+function loadImage(blob){
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(blob), img=new Image();
+    img.onload=()=>{resolve({img,url});}; img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("圖片無法解碼"));};
+    img.src=url;
+  });
+}
+
+async function fullFeatures(item){
+  if(featureCache.has(item.id)) return featureCache.get(item.id);
+  const blob=(item.thumbnailBlob instanceof Blob && item.thumbnailBlob.size)?item.thumbnailBlob:item.blob;
+  if(!(blob instanceof Blob)) throw new Error("找不到圖片資料");
+  const loaded=await loadImage(blob);
+  try{
+    const iw=loaded.img.naturalWidth, ih=loaded.img.naturalHeight;
+    const scale=Math.min(1,ANALYSIS_WIDTH/iw);
+    const w=Math.max(64,Math.round(iw*scale)), h=Math.max(64,Math.round(ih*scale));
+    const c=document.createElement("canvas"); c.width=w;c.height=h;
+    const ctx=c.getContext("2d",{willReadFrequently:true}); ctx.drawImage(loaded.img,0,0,w,h);
+    const rgba=ctx.getImageData(0,0,w,h).data;
+    const gray=new Float32Array(w*h);
+    for(let i=0,p=0;i<gray.length;i++,p+=4) gray[i]=(rgba[p]*.299+rgba[p+1]*.587+rgba[p+2]*.114)/255;
+    const sx=Math.floor(w*SIDE_IGNORE), ex=Math.ceil(w*(1-SIDE_IGNORE)), usable=ex-sx;
+    const gRows=[], inkRows=[], edgeRows=[];
+    for(let y=0;y<h;y++){
+      const gr=new Float32Array(BLOCKS), ir=new Float32Array(BLOCKS), er=new Float32Array(BLOCKS);
+      for(let b=0;b<BLOCKS;b++){
+        const x0=sx+Math.floor(usable*b/BLOCKS), x1=sx+Math.floor(usable*(b+1)/BLOCKS);
+        let gs=0, ink=0, edge=0, n=0;
+        for(let x=x0;x<Math.max(x0+1,x1);x++){
+          const xx=Math.min(ex-1,x), idx=y*w+xx, v=gray[idx];
+          gs+=v; if(v<.90) ink++;
+          const left=xx>0?gray[idx-1]:v, up=y>0?gray[idx-w]:v;
+          if(Math.abs(v-left)+Math.abs(v-up)>.14) edge++;
+          n++;
+        }
+        gr[b]=gs/Math.max(1,n); ir[b]=ink/Math.max(1,n); er[b]=edge/Math.max(1,n);
+      }
+      gRows.push(gr);inkRows.push(ir);edgeRows.push(er);
+    }
+    const out={gray:gRows,ink:inkRows,edge:edgeRows,analysisHeight:h,originalWidth:Number(item.width)||iw,originalHeight:Number(item.height)||ih};
+    featureCache.set(item.id,out); return out;
+  } finally {URL.revokeObjectURL(loaded.url);}
+}
+
+function rowDiff(a,b,ia,ib){
+  let d=0;
+  for(let k=0;k<BLOCKS;k++){
+    d+=Math.abs(a.gray[ia][k]-b.gray[ib][k])*.35;
+    d+=Math.abs(a.ink[ia][k]-b.ink[ib][k])*.35;
+    d+=Math.abs(a.edge[ia][k]-b.edge[ib][k])*.30;
+  }
+  return d/BLOCKS;
+}
+function detectBounds(a,b){
+  let top=BASIC_TOP_IGNORE,bottom=BASIC_BOTTOM_IGNORE;
+  if($("chromeMode").value!=="auto") return {top,bottom};
+  const H=Math.min(a.analysisHeight,b.analysisHeight), max=Math.floor(H*.25), threshold=.06;
+  let lastTop=Math.floor(H*BASIC_TOP_IGNORE), bad=0;
+  for(let y=0;y<max;y++){
+    const ia=Math.floor(y*a.analysisHeight/H), ib=Math.floor(y*b.analysisHeight/H);
+    const d=rowDiff(a,b,ia,ib);
+    if(d<threshold){lastTop=y+1;bad=0}else{bad++;if(bad>=8 && y>H*.03)break}
+  }
+  let firstBottom=H-Math.floor(H*BASIC_BOTTOM_IGNORE);bad=0;
+  for(let y=H-1;y>=H-max;y--){
+    const ia=Math.floor(y*a.analysisHeight/H), ib=Math.floor(y*b.analysisHeight/H);
+    const d=rowDiff(a,b,ia,ib);
+    if(d<threshold){firstBottom=y;bad=0}else{bad++;if(bad>=8 && y<H-H*.03)break}
+  }
+  top=Math.max(BASIC_TOP_IGNORE,Math.min(.22,lastTop/H));
+  bottom=Math.max(BASIC_BOTTOM_IGNORE,Math.min(.22,(H-firstBottom)/H));
+  return {top,bottom};
+}
+function contentView(f,bounds){
+  const s=Math.floor(f.analysisHeight*bounds.top), e=Math.ceil(f.analysisHeight*(1-bounds.bottom));
+  return {
+    gray:f.gray.slice(s,e),ink:f.ink.slice(s,e),edge:f.edge.slice(s,e),
+    analysisHeight:Math.max(1,e-s),
+    originalContentHeight:f.originalHeight*(1-bounds.top-bounds.bottom),
+    bounds
+  };
+}
+
+function nearDuplicateEvidence(a,b){
+  const widthRatio=Math.min(a.originalWidth,b.originalWidth)/Math.max(a.originalWidth,b.originalWidth);
+  const heightRatio=Math.min(a.originalHeight,b.originalHeight)/Math.max(a.originalHeight,b.originalHeight);
+  if(widthRatio<.985 || heightRatio<.985) return null;
+
+  const H=Math.min(a.analysisHeight,b.analysisHeight);
+  if(H<40) return null;
+
+  const start=Math.max(0,Math.floor(H*.12));
+  const end=Math.min(H,Math.ceil(H*(1-.15)));
+  if(end-start<24) return null;
+
+  let total=0,count=0,info=0;
+  const seg=[{s:0,n:0},{s:0,n:0},{s:0,n:0},{s:0,n:0}];
+
+  for(let y=start;y<end;y++){
+    const ia=Math.round(y*(a.analysisHeight-1)/Math.max(1,H-1));
+    const ib=Math.round(y*(b.analysisHeight-1)/Math.max(1,H-1));
+    const si=Math.min(3,Math.floor((y-start)*4/Math.max(1,end-start)));
+
+    for(let k=0;k<BLOCKS;k++){
+      const gd=Math.abs(a.gray[ia][k]-b.gray[ib][k]);
+      const id=Math.abs(a.ink[ia][k]-b.ink[ib][k]);
+      const ed=Math.abs(a.edge[ia][k]-b.edge[ib][k]);
+      const d=gd*.12+id*.46+ed*.42;
+      total+=d;
+      info+=(a.ink[ia][k]+b.ink[ib][k]+a.edge[ia][k]+b.edge[ib][k])*.25;
+      seg[si].s+=d;seg[si].n++;count++;
+    }
+  }
+
+  if(!count) return null;
+  const score=total/count;
+  const segmentScores=seg.filter(x=>x.n).map(x=>x.s/x.n);
+  const segmentMax=Math.max(...segmentScores);
+  const information=info/count;
+  const similarity=clamp((1-score)*100,0,100);
+
+  const strong=
+    score<=.020 &&
+    segmentMax<=.045 &&
+    widthRatio>=.99 &&
+    heightRatio>=.99;
+
+  return {
+    strong,
+    score,
+    segmentMax,
+    information,
+    similarity,
+    widthRatio,
+    heightRatio
+  };
+}
+
+function evaluate(a,b,ov,maxOv,expected){
+  let raw=0,ink=0,edge=0,rowInk=0,rowEdge=0,info=0,n=0;
+  const seg=[{s:0,n:0},{s:0,n:0},{s:0,n:0},{s:0,n:0}];
+  for(let y=0;y<ov;y++){
+    const ai=a.analysisHeight-ov+y, bi=y;
+    let riA=0,riB=0,reA=0,reB=0;
+    for(let k=0;k<BLOCKS;k++){
+      const gd=Math.abs(a.gray[ai][k]-b.gray[bi][k]);
+      const id=Math.abs(a.ink[ai][k]-b.ink[bi][k]);
+      const ed=Math.abs(a.edge[ai][k]-b.edge[bi][k]);
+      raw+=gd;ink+=id;edge+=ed; info+=(a.ink[ai][k]+b.ink[bi][k]+a.edge[ai][k]+b.edge[bi][k])*.25;
+      const si=Math.min(3,Math.floor(y*4/ov)); seg[si].s+=gd*.15+id*.48+ed*.37;seg[si].n++;
+      riA+=a.ink[ai][k];riB+=b.ink[bi][k];reA+=a.edge[ai][k];reB+=b.edge[bi][k];n++;
+    }
+    rowInk+=Math.abs(riA-riB)/BLOCKS;rowEdge+=Math.abs(reA-reB)/BLOCKS;
+  }
+  if(!n)return null;
+  const rawMae=raw/n,inkMae=ink/n,edgeMae=edge/n;
+  const rowInkMae=rowInk/ov,rowEdgeMae=rowEdge/ov, information=info/n;
+  let base=rawMae*.10+inkMae*.42+edgeMae*.33+rowInkMae*.10+rowEdgeMae*.05;
+  const segScores=seg.filter(x=>x.n).map(x=>x.s/x.n), segMax=Math.max(...segScores), segSpread=Math.sqrt(segScores.reduce((s,x)=>s+(x-segScores.reduce((a,z)=>a+z,0)/segScores.length)**2,0)/segScores.length);
+  const ratio=ov/Math.min(a.analysisHeight,b.analysisHeight);
+  let score=base+segSpread*.16+Math.abs(ratio-expected)*.010+(1-ov/maxOv)*.003;
+  if(information<.018)score+=(.018-information)*.7;
+  if(ratio<.18)score+=(.18-ratio)*.10;
+  if(ratio>.60)score+=(ratio-.60)*.12;
+  return {overlapRows:ov,score,base,information,segmentMax:segMax,segmentSpread:segSpread,ratio};
+}
+function findCandidates(a,b){
+  const mh=Math.min(a.analysisHeight,b.analysisHeight), expected=Number($("expectedOverlap").value)||.33;
+  const collect=(lo,hi)=>{
+    const max=Math.max(1,Math.round(mh*hi)), out=[];
+    for(let ov=Math.max(12,Math.round(mh*lo));ov<=max;ov++){
+      const r=evaluate(a,b,ov,max,expected);if(r)out.push(r);
+    }
+    return out;
+  };
+  let all=collect(.18,.60).sort((x,y)=>x.score-y.score);
+  if(!all.length || all[0].score>.16){
+    all=all.concat(collect(.10,.78)).sort((x,y)=>x.score-y.score);
+  }
+  const best=all[0]||null;if(!best)return {best:null,second:null,top:[]};
+  const sep=Math.max(8,Math.round(mh*.06));
+  const second=all.find(x=>Math.abs(x.overlapRows-best.overlapRows)>=sep)||null;
+  const top=[];for(const x of all){if(top.every(z=>Math.abs(z.overlapRows-x.overlapRows)>=sep)){top.push(x);if(top.length>=3)break}}
+  return {best,second,top};
+}
+function classify(best,second,widthRatio){
+  if(!best)return {level:"none",status:"none",why:"找不到候選"};
+  const margin=second?second.score-best.score:0;
+  const inPrimary=best.ratio>=.18&&best.ratio<=.60;
+  if(widthRatio>=.96 && inPrimary && best.score<=.095 && margin>=.012 && best.information>=.018 && best.segmentMax<=.14 && best.segmentSpread<=.045){
+    return {level:"high",status:"high",why:"雙證據一致，候選優勢明顯"};
+  }
+  if(widthRatio>=.92 && best.score<=.17 && margin>=.004 && best.segmentMax<=.24){
+    return {level:"medium",status:"medium",why:"有合理候選，但證據不足以完全自動放行"};
+  }
+  return {level:"low",status:"low",why:"候選歧義或資訊不足"};
+}
+function pxFromRows(best,a,b){
+  return Math.round(best.overlapRows*((a.originalContentHeight/a.analysisHeight)+(b.originalContentHeight/b.analysisHeight))/2);
+}
+
+async function analyzePair(i){
+  const A=images[i],B=images[i+1];
+  const saved=await getSetting(seamKey(A.id,B.id));
+  if(saved&&saved.value&&saved.value.status==="confirmed"){
+    return {pairIndex:i,aId:A.id,bId:B.id,status:"confirmed",confidenceLevel:saved.value.confidenceLevel||"人工確認",overlapPixels:Number(saved.value.overlapPixels)||0,automaticPixels:Number(saved.value.automaticPixels)||null,similarity:Number(saved.value.similarity)||null,ignoreChrome:true,analyzedAt:Date.now(),source:"saved-confirmed"};
+  }
+  if(saved&&saved.value&&saved.value.status==="rejected"){
+    return {pairIndex:i,aId:A.id,bId:B.id,status:"rejected",ignoreChrome:true,analyzedAt:Date.now()};
+  }
+  if(A.fingerprint&&B.fingerprint&&A.fingerprint===B.fingerprint){
+    return {pairIndex:i,aId:A.id,bId:B.id,status:"duplicate",ignoreChrome:true,analyzedAt:Date.now()};
+  }
+  const [fa,fb]=await Promise.all([fullFeatures(A),fullFeatures(B)]);
+  const widthRatio=Math.min(fa.originalWidth,fb.originalWidth)/Math.max(fa.originalWidth,fb.originalWidth);
+
+  const near=nearDuplicateEvidence(fa,fb);
+  if(near&&near.strong){
+    return {
+      pairIndex:i,aId:A.id,bId:B.id,
+      status:"redundant",
+      confidenceLevel:"近乎重複",
+      overlapPixels:0,
+      similarity:near.similarity,
+      widthRatio,
+      widthWarning:false,
+      ignoreChrome:true,
+      analyzedAt:Date.now(),
+      source:"auto-near-duplicate-v2.1",
+      autoV2:{
+        reason:"下一張與前一張內容幾乎相同；新增內容不足，虛擬文件將自動略過下一張。",
+        nearDuplicate:true,
+        redundancyScore:near.score,
+        redundancySimilarity:near.similarity,
+        segmentMax:near.segmentMax,
+        information:near.information
+      }
+    };
+  }
+
+  const bounds=detectBounds(fa,fb),a=contentView(fa,bounds),b=contentView(fb,bounds);
+  const found=findCandidates(a,b);
+  if(!found.best)return {pairIndex:i,aId:A.id,bId:B.id,status:"none",widthRatio,ignoreChrome:true,analyzedAt:Date.now()};
+  const cls=classify(found.best,found.second,widthRatio);
+  const px=pxFromRows(found.best,a,b);
+  const sim=clamp((1-found.best.score)*100,0,100);
+  const margin=found.second?Math.max(0,(found.second.score-found.best.score)*100):0;
+  return {
+    pairIndex:i,aId:A.id,bId:B.id,status:cls.status,confidenceLevel:cls.level==="high"?"高":cls.level==="medium"?"中":"低",
+    overlapPixels:px,similarity:sim,candidateMargin:margin,widthRatio,widthWarning:widthRatio<.92,ignoreChrome:true,analyzedAt:Date.now(),
+    autoV2:{reason:cls.why,ratio:found.best.ratio,score:found.best.score,segmentMax:found.best.segmentMax,segmentSpread:found.best.segmentSpread,information:found.best.information,bounds,
+      candidates:found.top.map(x=>({overlapPixels:pxFromRows(x,a,b),ratio:x.ratio,score:x.score,similarity:clamp((1-x.score)*100,0,100)}))}
+  };
+}
+
+function counts(){
+  const c={confirmed:0,high:0,redundant:0,review:0,excluded:0};
+  for(const r of (state?.results||[])){
+    if(r.status==="confirmed")c.confirmed++;
+    else if(r.status==="high")c.high++;
+    else if(r.status==="redundant")c.redundant++;
+    else if(r.status==="duplicate"||r.status==="rejected")c.excluded++;
+    else c.review++;
+  }
+  return c;
+}
+function render(){
+  $("imageCount").textContent=images.length;$("pairCount").textContent=Math.max(0,images.length-1);
+  const c=counts();$("autoCount").textContent=c.confirmed+c.high+c.redundant;$("reviewCount").textContent=c.review;
+  $("buildPlanBtn").disabled=!(state&&state.completed);
+  const list=$("pairList");list.innerHTML="";
+  if(!state||!state.results?.length){list.textContent="尚未分析。";return}
+  state.results.forEach((r,i)=>{
+    const div=document.createElement("div");div.className="pair";
+    const statusText=
+      r.status==="confirmed"?"已人工確認":
+      r.status==="high"?"自動高信心":
+      r.status==="redundant"?"近乎重複・自動略過":
+      r.status==="medium"?"需快速確認":
+      r.status==="low"?"需人工確認":r.status;
+    const ratio=r.autoV2?.ratio!=null?`${(r.autoV2.ratio*100).toFixed(0)}%`:"—";
+
+    if(r.status==="redundant"){
+      div.innerHTML=`<div class="pairhead"><div class="pairtitle">第 ${i+1} 張 → 第 ${i+2} 張</div><div class="badge redundant">${statusText}</div></div>
+        <div class="meta">近乎重複度：<b>${Number(r.similarity||0).toFixed(1)}%</b><br>
+        第 ${i+2} 張新增內容極少；建立虛擬文件時會自動略過，不會當成一般接縫硬裁切。</div>`;
+    }else{
+      div.innerHTML=`<div class="pairhead"><div class="pairtitle">第 ${i+1} 張 → 第 ${i+2} 張</div><div class="badge ${r.status}">${statusText}</div></div>
+        <div class="meta">重疊：<b>${Math.round(Number(r.overlapPixels)||0)} px</b>｜重疊比例：<b>${ratio}</b>｜相似度：<b>${Number(r.similarity||0).toFixed(1)}%</b>
+        ${r.autoV2?`<br>${r.autoV2.reason}`:""}${r.widthWarning?"<br>⚠️ 圖片寬度不一致":""}</div>`;
+    }
+    if(["medium","low","none","error"].includes(r.status)){
+      const b=document.createElement("button");b.className="secondary";b.textContent="只確認這一組";b.onclick=()=>openReview(i);div.appendChild(b);
+    }
+    list.appendChild(div);
+  });
+  if(c.review===0 && state.completed){
+    $("projectStatus").className="status good";
+    $("projectStatus").innerHTML=c.redundant>0
+      ? `✅ 自動分析完成；${c.redundant} 張近乎重複截圖將自動略過，其餘接縫都有高信心或人工確認結果。`
+      : "✅ 所有相鄰接縫都已有高信心或人工確認結果。可以直接建立虛擬文件計畫。";
+  }else if(state.completed){
+    $("projectStatus").className="status warn";$("projectStatus").innerHTML=`⚠️ 自動分析完成；只剩 <b>${c.review}</b> 組需要人工確認。其他接縫不必檢查。`;
+  }
+}
+
+async function analyzeAll(){
+  if(images.length<2){alert("至少需要 2 張截圖。");return}
+  $("analyzeBtn").disabled=true;featureCache.clear();
+  state={version:1,signature:signature(),ignoreChrome:true,totalPairs:images.length-1,nextPairIndex:0,completed:false,stopped:false,results:[],createdAt:Date.now(),updatedAt:Date.now(),engine:"auto-stitch-v2.1"};
+  try{
+    for(let i=0;i<images.length-1;i++){
+      $("progressText").textContent=`正在分析第 ${i+1} / ${images.length-1} 組：第 ${i+1} 張 → 第 ${i+2} 張`;
+      $("progressFill").style.width=`${i/(images.length-1)*100}%`;
+      try{state.results.push(await analyzePair(i));}catch(e){state.results.push({pairIndex:i,aId:images[i].id,bId:images[i+1].id,status:"error",message:String(e.message||e),ignoreChrome:true,analyzedAt:Date.now()});}
+      state.nextPairIndex=i+1;state.updatedAt=Date.now();await putSetting(PHASE2C_KEY,state);render();
+      await new Promise(r=>setTimeout(r,80));
+    }
+    state.completed=true;state.updatedAt=Date.now();await putSetting(PHASE2C_KEY,state);
+    $("progressFill").style.width="100%";$("progressText").textContent="✅ 自動接縫分析完成。";render();
+  }finally{$("analyzeBtn").disabled=false}
+}
+
+function legacySourceFingerprint(){
+  const compact=(state.results||[]).map(r=>[Number(r.pairIndex),String(r.status||""),Number(r.overlapPixels)||0,Number(r.similarity)||0]);
+  return JSON.stringify({projectSignature:signature(),ignoreChrome:true,completed:Boolean(state.completed),nextPairIndex:Number(state.nextPairIndex)||0,results:compact});
+}
+function boundsForImage(img){
+  const h=Math.max(1,Number(img.height)||1),top=Math.round(h*BASIC_TOP_IGNORE),bottom=Math.round(h*(1-BASIC_BOTTOM_IGNORE));
+  return {top,bottom:Math.max(top+1,bottom),height:Math.max(1,bottom-top)};
+}
+function slice(img,index,top,bottom,incoming){
+  const sw=Math.max(1,Number(img.width)||1),sh=Math.max(1,Number(img.height)||1);
+  const t=clamp(Math.round(top),0,sh-1),b=clamp(Math.round(bottom),t+1,sh);
+  return {imageId:img.id,imageIndex:index,displayNumber:index+1,sourceWidth:sw,sourceHeight:sh,cropTop:t,cropBottom:b,retainedHeight:b-t,incomingEdge:incoming||null};
+}
+function finalizeChain(chain){
+  if(!chain.slices.length)return chain;
+  const tw=Math.max(1,Number(chain.slices[0].sourceWidth)||1);let y=0;
+  for(const s of chain.slices){const scale=tw/Math.max(1,s.sourceWidth);s.targetWidth=tw;s.scaleToTarget=scale;s.virtualYStart=y;s.normalizedHeight=s.retainedHeight*scale;s.virtualYEnd=y+s.normalizedHeight;y=s.virtualYEnd}
+  chain.targetWidth=tw;chain.virtualHeight=y;chain.firstImageNumber=chain.slices[0].displayNumber;chain.lastImageNumber=chain.slices[chain.slices.length-1].displayNumber;return chain;
+}
+async function buildCompatiblePlan(){
+  if(!state||!state.completed){alert("請先完成自動分析。");return}
+
+  const chains=[],breaks=[],accepted=[],skipped=[];
+  let chain={id:"chain-1",slices:[],acceptedEdges:[]};
+
+  const firstB=boundsForImage(images[0]);
+  chain.slices.push(slice(images[0],0,firstB.top,firstB.bottom,null));
+
+  for(let i=0;i<images.length-1;i++){
+    const r=state.results[i],next=images[i+1],b=boundsForImage(next);
+
+    if(r&&r.status==="redundant"){
+      skipped.push({
+        imageId:next.id,
+        displayNumber:i+2,
+        duplicateOfImageId:images[i].id,
+        similarity:Number(r.similarity)||null,
+        reason:"Auto Stitch v2.1 近乎重複截圖，自動略過"
+      });
+      continue;
+    }
+
+    const ok=r&&["high","confirmed"].includes(r.status);
+
+    if(ok){
+      const ov=clamp(Math.round(Number(r.overlapPixels)||0),0,b.height-1);
+      const lastSlice=chain.slices[chain.slices.length-1];
+      const actualFromImageId=lastSlice?lastSlice.imageId:images[i].id;
+
+      const edge={
+        pairIndex:i,
+        fromImageId:actualFromImageId,
+        toImageId:next.id,
+        sourcePairFromImageId:images[i].id,
+        status:r.status,
+        reason:r.status==="confirmed"
+          ?"Phase 2-B 已人工確認"
+          :(actualFromImageId!==images[i].id
+            ?"Auto Stitch v2.1 高信心候選（前一張為已略過的近乎重複圖，沿用其接縫幾何）"
+            :"Auto Stitch v2.1 高信心候選"),
+        overlapPixels:ov,
+        similarity:Number(r.similarity)||null
+      };
+
+      chain.acceptedEdges.push(edge);
+      accepted.push(edge);
+      chain.slices.push(slice(next,i+1,b.top+ov,b.bottom,edge));
+    }else{
+      finalizeChain(chain);
+      if(chain.slices.length) chains.push(chain);
+
+      const lastSlice=chain.slices[chain.slices.length-1];
+      breaks.push({
+        pairIndex:i,
+        afterImageId:lastSlice?lastSlice.imageId:images[i].id,
+        beforeImageId:next.id,
+        afterDisplayNumber:lastSlice?lastSlice.displayNumber:i+1,
+        beforeDisplayNumber:i+2,
+        status:r?.status||"pending",
+        reason:"Auto Stitch v2.1：此接縫仍需人工確認",
+        overlapPixels:Number(r?.overlapPixels)||0,
+        similarity:Number(r?.similarity)||null
+      });
+
+      chain={id:`chain-${chains.length+1}`,slices:[],acceptedEdges:[]};
+      chain.slices.push(slice(next,i+1,b.top,b.bottom,null));
+    }
+  }
+
+  finalizeChain(chain);
+  if(chain.slices.length) chains.push(chain);
+
+  const plan={
+    version:1,
+    projectSignature:signature(),
+    sourceFingerprint:legacySourceFingerprint(),
+    allowHighConfidence:true,
+    ignoreChrome:true,
+    builtAt:Date.now(),
+    updatedAt:Date.now(),
+    sourceImageCount:images.length,
+    totalPairs:images.length-1,
+    chainCount:chains.length,
+    acceptedSeamCount:accepted.length,
+    breakCount:breaks.length,
+    sliceCount:chains.reduce((n,c)=>n+c.slices.length,0),
+    redundantImageCount:skipped.length,
+    skippedImages:skipped,
+    chains,
+    breaks,
+    acceptedEdges:accepted,
+    engine:"auto-stitch-v2.1"
+  };
+
+  await putSetting(PHASE2D_KEY,plan);
+
+  $("projectStatus").className=breaks.length?"status warn":"status good";
+  if(breaks.length){
+    $("projectStatus").innerHTML=`⚠️ 虛擬文件計畫已建立；只有 ${breaks.length} 個斷點仍需人工確認。${skipped.length?` 已自動略過 ${skipped.length} 張近乎重複截圖。`:""}`;
+  }else{
+    $("projectStatus").innerHTML=`✅ 虛擬文件計畫已建立；全部接縫可直接進入後續 OCR／正文流程。${skipped.length?` 已安全略過 ${skipped.length} 張近乎重複截圖。`:""}`;
+  }
+}
+
+async function openReview(i){
+  currentReview=i;const r=state.results[i];$("reviewPanel").classList.remove("hidden");
+  $("reviewTitle").innerHTML=`第 ${i+1} 張 → 第 ${i+2} 張｜目前：${r.status}`;
+  const sel=$("candidateSelect");sel.innerHTML="";
+  const cands=r.autoV2?.candidates?.length?r.autoV2.candidates:[{overlapPixels:r.overlapPixels,similarity:r.similarity}];
+  cands.forEach((c,j)=>{const o=document.createElement("option");o.value=String(Math.round(c.overlapPixels));o.textContent=`候選 ${j+1}：${Math.round(c.overlapPixels)} px｜約 ${((c.ratio||0)*100).toFixed(0)}%｜${Number(c.similarity||0).toFixed(1)}%`;sel.appendChild(o)});
+  await renderQuickPreview();$("reviewPanel").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function closeReview(){$("reviewPanel").classList.add("hidden");currentReview=null}
+async function originalImage(item){
+  const blob=item.blob instanceof Blob?item.blob:item.thumbnailBlob;if(!(blob instanceof Blob))throw new Error("找不到原圖");
+  return loadImage(blob);
+}
+async function renderQuickPreview(){
+  if(currentReview==null)return;
+  const A=images[currentReview],B=images[currentReview+1],ov=Number($("candidateSelect").value)||0;
+  const [la,lb]=await Promise.all([originalImage(A),originalImage(B)]);
+  try{
+    const ba=boundsForImage(A),bb=boundsForImage(B);
+    const scaleYA=la.img.naturalHeight/Math.max(1,Number(A.height)||la.img.naturalHeight);
+    const scaleYB=lb.img.naturalHeight/Math.max(1,Number(B.height)||lb.img.naturalHeight);
+    const aTop=ba.top*scaleYA,aBottom=ba.bottom*scaleYA,bTop=bb.top*scaleYB,bBottom=bb.bottom*scaleYB,ovA=ov*scaleYA,ovB=ov*scaleYB;
+
+    const ca=$("seamCanvas"),ctx=ca.getContext("2d"),w=ca.width,h=ca.height,half=h/2;
+    ctx.fillStyle="#fff";ctx.fillRect(0,0,w,h);
+    const sa=w/la.img.naturalWidth,sb=w/lb.img.naturalWidth;
+    const srcA=Math.min(half/sa,Math.max(1,aBottom-aTop));
+    const bStart=Math.min(bBottom-1,bTop+ovB);
+    const srcB=Math.min(half/sb,Math.max(1,bBottom-bStart));
+    ctx.drawImage(la.img,0,Math.max(aTop,aBottom-srcA),la.img.naturalWidth,srcA,0,0,w,half);
+    ctx.drawImage(lb.img,0,bStart,lb.img.naturalWidth,srcB,0,half,w,half);
+    ctx.strokeStyle="#e23b2d";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(0,half);ctx.lineTo(w,half);ctx.stroke();
+
+    const co=$("overlayCanvas"),oc=co.getContext("2d"),oh=co.height;
+    oc.fillStyle="#fff";oc.fillRect(0,0,co.width,oh);
+    const shA=Math.min(ovA,Math.max(1,aBottom-aTop)),shB=Math.min(ovB,Math.max(1,bBottom-bTop));
+    if(shA>1&&shB>1){
+      oc.globalAlpha=.5;
+      oc.drawImage(la.img,0,aBottom-shA,la.img.naturalWidth,shA,0,0,co.width,oh);
+      oc.drawImage(lb.img,0,bTop,lb.img.naturalWidth,shB,0,0,co.width,oh);
+      oc.globalAlpha=1;
+    }
+  }finally{URL.revokeObjectURL(la.url);URL.revokeObjectURL(lb.url)}
+}
+async function confirmQuickCandidate(){
+  if(currentReview==null)return;const i=currentReview,A=images[i],B=images[i+1],px=Math.max(1,Math.round(Number($("candidateSelect").value)||0)),r=state.results[i];
+  await putSetting(seamKey(A.id,B.id),{status:"confirmed",aId:A.id,bId:B.id,overlapPixels:px,automaticPixels:Number(r.overlapPixels)||px,ignoreChrome:true,confidenceLevel:"快速人工確認",similarity:Number(r.similarity)||null,confirmedAt:Date.now(),source:"auto-stitch-v2.1"});
+  state.results[i]={...r,status:"confirmed",confidenceLevel:"快速人工確認",overlapPixels:px,analyzedAt:Date.now(),source:"quick-confirm"};
+  await putSetting(PHASE2C_KEY,state);closeReview();render();
+}
+
+(async()=>{
+  try{
+    db=await openDb();images=await getAllImages();$("imageCount").textContent=images.length;$("pairCount").textContent=Math.max(0,images.length-1);
+    const saved=await getSetting(PHASE2C_KEY);
+    if(saved?.value && saved.value.signature===signature()){state=saved.value;render()}
+    $("projectStatus").className=images.length>=2?"status good":"status warn";
+    $("projectStatus").innerHTML=images.length>=2?`✅ 已讀取 ${images.length} 張截圖。建議新拍攝時每張保留約 25–40% 共同內容。`:"⚠️ 至少需要 2 張截圖。";
+  }catch(e){$("projectStatus").className="status bad";$("projectStatus").textContent="❌ 讀取失敗："+(e.message||e)}
+})();
+</script>
+</body>
+</html>
