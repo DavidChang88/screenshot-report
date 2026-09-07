@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<title>Screenshot Report · Phase 3-C-D v3.4 Final-Gate Semantic Residual Audit</title>
+<style>
+:root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--muted:#6e6e73;--green:#2f7d4a;--green-bg:#e9f5ed;--amber:#8a5b00;--amber-bg:#fff3d6;--blue:#3478f6;--blue-bg:#edf3ff;--line:#e5e5ea;--soft:#f2f2f7;--red:#a52a20;--red-bg:#ffe9e5;--slate:#557083}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:760px;margin:auto;padding:20px 14px 56px}.card{background:var(--card);border-radius:22px;padding:20px;margin-bottom:16px;box-shadow:0 4px 18px rgba(0,0,0,.055)}
+.eyebrow{font-size:13px;font-weight:900;letter-spacing:.045em;color:#566473}h1{font-size:32px;line-height:1.16;margin:8px 0 10px}h2{font-size:24px;margin:0 0 12px}
+p{color:var(--muted);line-height:1.65;margin:8px 0}.status{border-radius:15px;padding:15px;line-height:1.6;margin:14px 0;background:var(--soft)}.status.good{background:var(--green-bg);color:#20663c}.status.warn{background:var(--amber-bg);color:#7c5400}.status.bad{background:var(--red-bg);color:var(--red)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric{background:var(--soft);padding:14px;border-radius:14px}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;font-size:27px;margin-top:4px}
+button,a.btn{display:block;width:100%;border:0;border-radius:15px;padding:16px;margin-top:11px;font:inherit;font-size:17px;font-weight:850;text-align:center;text-decoration:none;-webkit-tap-highlight-color:transparent}.primary{background:var(--blue);color:#fff}.safe{background:var(--slate);color:#fff}.secondary{background:#e9e9ee;color:var(--text)}.pass{background:var(--green);color:#fff}.suggest{background:#dce9ff;color:#174da8}.danger{background:#f4e7e5;color:#8e2a20}
+button:disabled,a.btn.disabled{opacity:.38;pointer-events:none}.note{font-size:13px;line-height:1.65;color:var(--muted);margin-top:12px}.rule{padding:13px;border-radius:13px;background:var(--green-bg);color:#28683f;line-height:1.55;margin-top:10px}.rule.blue{background:var(--blue-bg);color:#284f93}.rule.amber{background:var(--amber-bg);color:#7c5400}
+.candidate{border:1px solid #e7c97a;border-radius:17px;padding:15px;margin-top:14px;background:#fffdf7}.candidate.resolved{border-color:#b9dac5;background:#fbfffc}.candidate.inherited{border-style:dashed}.candidate-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.candidate-title{font-weight:900;line-height:1.4}.badge{white-space:nowrap;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:850;background:var(--amber-bg);color:var(--amber)}.badge.strong{background:var(--blue-bg);color:#2d55a0}.badge.done{background:var(--green-bg);color:var(--green)}
+.raw{background:var(--soft);padding:12px;border-radius:12px;margin:11px 0;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}.suggestion{background:var(--blue-bg);color:#244d91;padding:12px;border-radius:12px;margin:9px 0;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}.reason{font-size:13px;line-height:1.55;color:#7c5400;padding:6px 0}.context{font-size:13px;line-height:1.55;color:var(--muted);padding:6px 0;overflow-wrap:anywhere}.context mark{background:#fff0a8;color:inherit;border-radius:4px;padding:0 2px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.actions button{margin:0;padding:12px;font-size:15px}.manualBox{display:none;margin-top:8px}.manualBox.show{display:block}textarea{width:100%;font:inherit;border:1px solid #c7c7cc;border-radius:12px;padding:12px;background:#fff;color:var(--text);min-height:92px;resize:vertical}.mini{font-size:12px;color:var(--muted);line-height:1.5;margin-top:7px}
+.preview{white-space:pre-wrap;overflow-wrap:anywhere;max-height:440px;overflow:auto;padding:14px;background:#f7f7f9;border:1px solid var(--line);border-radius:13px;line-height:1.6}.toolbar{display:grid;grid-template-columns:1fr;gap:0}
+@media (max-width:420px){h1{font-size:29px}.card{padding:18px}.actions{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<main>
+<section class="card">
+  <div class="eyebrow">SCREENSHOT REPORT · PHASE 3-C-D v3.4 FINAL GATE</div>
+  <h1>候選少報之外，再檢查「改完後的最終正文」</h1>
+  <p>v3.4 延續 v3.3 Precision Mode，並新增「最終正文二次品質閘門」：所有人工決策套用後，再重新檢查引號／括號配對、已知 OCR 殘尾與本批實際漏網型態。即使所有候選都已按過，最終正文仍有結構殘留時也不允許 PASS。</p>
+  <div id="status" class="status">正在讀取目前工作區…</div>
+  <div class="grid">
+    <div class="metric"><span>目前正文</span><strong id="sourceChars">—</strong></div>
+    <div class="metric"><span>精準候選</span><strong id="flagCount">—</strong></div>
+    <div class="metric"><span>強證據建議</span><strong id="suggestCount">—</strong></div>
+    <div class="metric"><span>仍需你判斷</span><strong id="pendingCount">—</strong></div>
+  </div>
+  <div class="toolbar">
+    <button id="analyzeBtn" class="primary" onclick="runAudit()" disabled>一鍵掃描 v3.4 最終語意殘留</button>
+    <button id="passBtn" class="pass" onclick="saveAndPass()" disabled>✓ 最終正文已檢查，標記 Phase 3-C-D v3.4 PASS</button>
+    <a id="phase3dLink" class="btn secondary disabled" href="./phase3d.html">前往 Phase 3-D 重新建立正式報告</a>
+    <button class="safe" onclick="downloadBackup()">下載目前 Phase 3-C-D 備份 JSON</button>
+  </div>
+  <div class="note">v3.4 繼續取消批次自動採用；每一個語意替換仍逐項確認。新增的 Final Gate 會在你每次修改後重新掃描最終輸出，避免「卡片全處理完但正文仍有錯」的假綠燈。</div>
+</section>
+
+<section class="card">
+  <h2>v3.4 品質規則</h2>
+  <div class="rule">① <b>承接你在 v3.2 已做的判斷：</b>同一版正文會讀取 v3.2 草稿；已完成的人工校正、排除與圖表分流不會因重掃而消失。</div>
+  <div class="rule">② <b>詞頻不再等於正確：</b>「某詞出現比較多次」只能當弱證據，不能單獨產生替換建議。</div>
+  <div class="rule">③ <b>左右文一致性：</b>近似詞必須在同文件中找到相似的前後鄰接語境；兩字詞尤其嚴格，通常要左右兩側都吻合才會列出。</div>
+  <div class="rule">④ <b>已知假陽性回歸保護：</b>例如「聯發→研發」「解讀→解決」「科在→都在」「之後→之間」「插在→都在」「一齣→一個」不會再次被當成有效建議。</div>
+  <div class="rule amber">⑤ <b>Precision Mode 優先少報：</b>保留 v3.3 已驗證的低假陽性策略；再用 Final Gate 補抓「改完後仍殘留」的結構錯誤。</div>
+  <div class="rule blue">⑥ <b>Final Gate 強制二次驗證：</b>未配對引號／括號、OCR 式 J 殘尾、已知漏網字形等只要仍存在，PASS 按鈕就會保持停用。<br>⑦ <b>PASS 仍會使舊 Phase 3-D / Phase 6 失效：</b>完成後必須重新建立 Phase 3-D，避免正式報告繼續使用舊正文。</div>
+</section>
+
+<section class="card">
+  <h2>v3.4 精準語意殘留候選</h2>
+  <div id="candidateList"><div class="status">尚未分析。</div></div>
+</section>
+
+<section class="card">
+  <h2>最終輸出預覽</h2>
+  <div id="quality" class="status">尚未分析。</div>
+  <div id="finalPreview" class="preview">尚無內容。</div>
+</section>
+</main>
+<script>
+const DB_NAME="ScreenshotReportDB",DB_VERSION=2,SETTINGS_STORE="settings";
+const STATE_KEY="phase3cCorrectionTriage:v1",REVIEW_KEY="phase3cCorrectionTriageReview:v1";
+const DRAFT_KEY="phase3cdSemanticResidualAudit:v3",V33_DRAFT_KEY="phase3cdSemanticResidualAudit:v2",V32_DRAFT_KEY="phase3cdSemanticResidualAudit:v1";
+const PHASE3D_STATE_KEY="phase3dReport:v1",PHASE3D_REVIEW_KEY="phase3dReportReview:v1";
+const PHASE6_STATE_KEY="phase6Publication:v1",PHASE6_REVIEW_KEY="phase6PublicationReview:v1";
+let db=null,state=null,review=null,sourceText="",sourceFingerprint="",plan=[],didAnalyze=false,carryStats={restored:0,imported:0,suppressed:0};
+const $=id=>document.getElementById(id);
+const ALLOW_LATIN=new Set(["ai","nvidia","marvell","broadcom","intel","google","amazon","meta","openai","fusion","asic","hbm","cowos","gpu","cpu","io","i/o","ethernet","infiniband","celestial","celestialai","tsmc","samsung","micron","sk","hynix","dram","sram","pcie","ucie","nvlink","nvlinkfusion","serdes","rack","scale","cloud","sony","microsoft","ieee","amd","arm","network","memory","chip","chips","server","servers"]);
+const BLOCKED_NEAR=new Set(["聯發→研發","解讀→解決","科在→都在","之後→之間","插在→都在","一齣→一個"]);
+const KNOWN_OCR_DIFFS=new Set(["齣→出","捕→片","嘔→片","丘→片","月→片","八→人"]);
+
+function openDb(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB_NAME,DB_VERSION);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains(SETTINGS_STORE))d.createObjectStore(SETTINGS_STORE,{keyPath:"key"});};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+function getSetting(key){return new Promise((resolve,reject)=>{const r=db.transaction(SETTINGS_STORE,"readonly").objectStore(SETTINGS_STORE).get(key);r.onsuccess=()=>resolve(r.result&&r.result.value?r.result.value:null);r.onerror=()=>reject(r.error);});}
+function putSetting(key,value){return new Promise((resolve,reject)=>{const tx=db.transaction(SETTINGS_STORE,"readwrite");tx.objectStore(SETTINGS_STORE).put({key,value,updatedAt:Date.now()});tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
+function deleteSetting(key){return new Promise((resolve,reject)=>{const tx=db.transaction(SETTINGS_STORE,"readwrite");tx.objectStore(SETTINGS_STORE).delete(key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
+function esc(s){return String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));}
+function count(s,re){const m=String(s||"").match(re);return m?m.length:0;}
+function hash32(s){let h=2166136261;for(let i=0;i<String(s).length;i++){h^=String(s).charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0).toString(16).padStart(8,"0");}
+function mkId(type,start,end,text){return type+":"+start+":"+end+":"+hash32(text);}
+function cjkOnly(s){return /^[\u3400-\u9fff]+$/.test(String(s||""));}
+function levenshtein(a,b){a=String(a);b=String(b);const dp=Array.from({length:b.length+1},(_,j)=>j);for(let i=1;i<=a.length;i++){let prev=dp[0];dp[0]=i;for(let j=1;j<=b.length;j++){const tmp=dp[j];dp[j]=Math.min(dp[j]+1,dp[j-1]+1,prev+(a[i-1]===b[j-1]?0:1));prev=tmp;}}return dp[b.length];}
+function around(start,end,n=72){return{before:sourceText.slice(Math.max(0,start-n),start),after:sourceText.slice(end,Math.min(sourceText.length,end+n))};}
+function pairBalanced(text,open,close){let depth=0,bad=[];for(let i=0;i<text.length;i++){if(text[i]===open)depth++;else if(text[i]===close){if(depth===0)bad.push(i);else depth--;}}return{badClose:bad,openRemain:depth};}
+function overlaps(a,b){return a.start<b.end&&b.start<a.end;}
+function isPunct(ch){return !ch||/[\s。！？；：，、,.!?()（）\[\]「」『』【】]/.test(ch);}
+function neighborChar(text,pos,dir){let i=dir<0?pos-1:pos;while(i>=0&&i<text.length&&/\s/.test(text[i]))i+=dir;return i>=0&&i<text.length?text[i]:"";}
+function allOccurrences(text,term){const out=[];let p=0;while(term&&(p=text.indexOf(term,p))!==-1){out.push(p);p+=Math.max(1,term.length);}return out;}
+function differingPair(a,b){if(a.length!==b.length)return"";let pair="";for(let i=0;i<a.length;i++){if(a[i]!==b[i]){if(pair)return"";pair=a[i]+"→"+b[i];}}return pair;}
+function contextAgreement(text,start,end,canon){
+ const left=neighborChar(text,start,-1),right=neighborChar(text,end,1);let best=-1,bestPos=-1,bestParts=[];
+ for(const p of allOccurrences(text,canon)){if(p>=start-1&&p<=end)continue;const l=neighborChar(text,p,-1),r=neighborChar(text,p+canon.length,1);let score=0,parts=[];
+   if(left&&l&&left===l){score+=2;parts.push("左鄰字相同");}else if(isPunct(left)&&isPunct(l)){score+=0.5;parts.push("左側皆為邊界");}
+   if(right&&r&&right===r){score+=2;parts.push("右鄰字相同");}else if(isPunct(right)&&isPunct(r)){score+=0.5;parts.push("右側皆為邊界");}
+   if(score>best){best=score;bestPos=p;bestParts=parts;}
+ }
+ return{score:Math.max(0,best),bestPos,left,right,parts:bestParts};
+}
+
+function getSentenceSegments(text){
+ const out=[];try{if(Intl&&Intl.Segmenter){const seg=new Intl.Segmenter("zh-Hant",{granularity:"sentence"});for(const x of seg.segment(text)){if(String(x.segment).trim())out.push({text:x.segment,index:x.index,end:x.index+x.segment.length});}if(out.length)return out;}}catch(e){}
+ let start=0;const re=/[^。！？!?\n]+[。！？!?]?|\n+/g;let m;while((m=re.exec(text))){const t=m[0];if(t.trim())out.push({text:t,index:m.index,end:m.index+t.length});start=re.lastIndex;}if(start<text.length&&text.slice(start).trim())out.push({text:text.slice(start),index:start,end:text.length});return out;
+}
+function getWordSegments(text){
+ const out=[];try{if(Intl&&Intl.Segmenter){const seg=new Intl.Segmenter("zh-Hant",{granularity:"word"});for(const x of seg.segment(text)){const t=String(x.segment);if(!t.trim())continue;out.push({text:t,index:x.index,end:x.index+t.length,isWordLike:x.isWordLike!==false});}if(out.length)return out;}}catch(e){}
+ const re=/[\u3400-\u9fff]+|[A-Za-z][A-Za-z0-9_.+\-/]*|\d+(?:\.\d+)?|[^\s]/g;let m;while((m=re.exec(text)))out.push({text:m[0],index:m.index,end:m.index+m[0].length,isWordLike:/[A-Za-z0-9\u3400-\u9fff]/.test(m[0])});return out;
+}
+function corpusInfo(text){
+ const words=getWordSegments(text),zhFreq=new Map(),latinFreq=new Map();
+ for(const w of words){const t=w.text.trim();if(cjkOnly(t)&&t.length>=2&&t.length<=6)zhFreq.set(t,(zhFreq.get(t)||0)+1);if(/^[A-Za-z][A-Za-z0-9_.+\-/]*$/.test(t)){const k=t.toLowerCase();latinFreq.set(k,(latinFreq.get(k)||0)+1);}}
+ return{words,zhFreq,latinFreq};
+}
+function explicitContextRepair(candidate,start,end,text){
+ if(candidate==="一齣"&&/消息\s*$/.test(text.slice(Math.max(0,start-10),start)))return{canon:"一出",freq:0,confidence:"strong",contextScore:4,evidence:"固定語境「消息一出」；避免舊版錯建議成「一個」",reason:"已知 OCR 字形誤判的上下文修復"};
+ return null;
+}
+function bestNearCanonical(candidate,zhFreq,text,start,end){
+ if(!cjkOnly(candidate)||candidate.length<2||candidate.length>6)return null;let best=null,tie=false;
+ for(const [canon,freq] of zhFreq.entries()){
+   if(freq<3||canon.length!==candidate.length||canon===candidate)continue;
+   if(levenshtein(candidate,canon)!==1)continue;
+   const edge=(candidate[0]===canon[0]||candidate[candidate.length-1]===canon[canon.length-1]);if(!edge)continue;
+   if(BLOCKED_NEAR.has(candidate+"→"+canon))continue;
+   const ctx=contextAgreement(text,start,end,canon),diff=differingPair(candidate,canon),ocrHint=KNOWN_OCR_DIFFS.has(diff);
+   const strong=ctx.score>=4&&freq>=3;
+   const review=(candidate.length>=3&&ctx.score>=2&&freq>=4)||(ocrHint&&ctx.score>=2&&freq>=3);
+   if(!strong&&!review)continue;
+   const score=ctx.score*100+freq*10+(ocrHint?25:0)+(candidate[0]===canon[0]?2:0)+(candidate[candidate.length-1]===canon[canon.length-1]?1:0);
+   if(!best||score>best.score){best={canon,freq,score,contextScore:ctx.score,contextParts:ctx.parts,confidence:strong?"strong":"review",ocrHint};tie=false;}else if(score===best.score&&canon!==best.canon)tie=true;
+ }
+ return tie?null:best;
+}
+function addCandidate(list,c){
+ if(c.start<0||c.end<=c.start||!String(c.text||"").trim())return;
+ for(const x of list){if(c.start===x.start&&c.end===x.end){x.reasons=[...new Set([...(x.reasons||[]),...(c.reasons||[])])];if(!x.suggestion&&c.suggestion){x.suggestion=c.suggestion;x.confidence=c.confidence;x.evidence=c.evidence;}return;}}
+ list.push({...c,id:c.id||mkId(c.type,c.start,c.end,c.text),action:c.action||"pending",replacement:c.replacement||""});
+}
+function coveredByPrecise(list,start,end){return list.some(x=>x.precise&&x.start>=start&&x.end<=end);}
+
+function detectNearVariants(text,info,list){
+ const words=info.words,seen=new Set();
+ for(let i=0;i<words.length;i++){
+   const w=words[i],t=w.text.trim();
+   if(cjkOnly(t)&&t.length>=2&&t.length<=6&&(info.zhFreq.get(t)||0)===1){
+     const explicit=explicitContextRepair(t,w.index,w.end,text),near=explicit||bestNearCanonical(t,info.zhFreq,text,w.index,w.end);
+     if(near){const k=w.index+":"+w.end;if(!seen.has(k)){seen.add(k);addCandidate(list,{type:"near-word",start:w.index,end:w.end,text:t,precise:true,suggestion:near.canon,confidence:near.confidence||"review",evidence:near.evidence||`同文件「${near.canon}」出現 ${near.freq} 次；左右文一致性分數 ${near.contextScore}/4${near.contextParts&&near.contextParts.length?"（"+near.contextParts.join("、")+"）":""}`,reasons:[near.reason||"罕見詞與同文件常見詞近似，且局部上下文亦相符"]});}}
+   }
+   if(i+1<words.length){const a=words[i],b=words[i+1];if(a.end===b.index&&cjkOnly(a.text)&&cjkOnly(b.text)&&a.text.length===1&&b.text.length===1){const pair=a.text+b.text,explicit=explicitContextRepair(pair,a.index,b.end,text),near=explicit||bestNearCanonical(pair,info.zhFreq,text,a.index,b.end);if(near&&near.confidence==="strong"){const k=a.index+":"+b.end;if(!seen.has(k)){seen.add(k);addCandidate(list,{type:"near-pair",start:a.index,end:b.end,text:pair,precise:true,suggestion:near.canon,confidence:"strong",evidence:near.evidence||`同文件「${near.canon}」出現 ${near.freq} 次；兩側上下文同時吻合`,reasons:[near.reason||"疑似 OCR 拆成兩個單字，且上下文提供強證據"]});}}}
+   }
+ }
+}
+function detectSymbolToTerm(text,info,list){
+ const re=/[&＠@]\s*([\u3400-\u9fff])/g;let m;while((m=re.exec(text))){const local=text.slice(Math.max(0,m.index-12),Math.min(text.length,m.index+m[0].length+12));if(count(local,/[\u3400-\u9fff]/g)<2)continue;addCandidate(list,{type:"symbol-term",start:m.index,end:m.index+m[0].length,text:m[0],precise:true,suggestion:"",confidence:"manual",evidence:"v3.4 延續 Precision Mode，不依『同尾字高頻詞』猜完整技術詞",reasons:["中文附近出現疑似 OCR 異常符號；只列人工確認，不自動猜字"]});}
+}
+function latinTokenRisk(token,latinFreq){
+ const raw=String(token||"").replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/g,"");if(!raw)return false;const low=raw.toLowerCase();if(ALLOW_LATIN.has(low)||(latinFreq.get(low)||0)>=2)return false;if(/^[A-Z]{2,3}$/.test(raw))return false;if(/^[0-9]+(?:\.\d+)?$/.test(raw))return false;if(/^[A-Za-z]{1,3}$/.test(raw))return false;if(/^[A-Z]{4,9}$/.test(raw))return true;if(/[a-z][A-Z]|[A-Z][a-z]+[A-Z]/.test(raw))return true;if(/[A-Za-z]/.test(raw)&&/[0-9]/.test(raw)&&raw.length>=5)return true;if(raw.length>=10&&/^[A-Za-z]+$/.test(raw))return true;return false;
+}
+function detectSentenceRisks(text,info,list){
+ const sentences=getSentenceSegments(text);
+ for(const s of sentences){const st=s.text.trim();if(st.length<4)continue;const cjk=count(st,/[\u3400-\u9fff]/g),tokens=st.match(/[A-Za-z][A-Za-z0-9_.+\-/]*/g)||[],bad=tokens.filter(t=>latinTokenRisk(t,info.latinFreq)),weird=count(st,/[©#$%^*=<>\[\]{}|\\~]/g),singleLatin=count(st,/(?:^|\s)[A-Za-z](?=\s|[，。！？；：,.!?]|$)/g);const reasons=[];
+   if(bad.length)reasons.push("未知或異常英數字串："+bad.slice(0,3).join("、"));if(weird>=2)reasons.push("異常符號密度高");if(singleLatin>=2)reasons.push("中文句中出現多個孤立英文字母");
+   if(reasons.length&&cjk>=4&&!coveredByPrecise(list,s.index,s.end))addCandidate(list,{type:"mixed-sentence",start:s.index,end:s.end,text:st,precise:false,suggestion:"",confidence:"manual",evidence:"",reasons});
+ }
+}
+function detectPunctuationRisks(text,list){
+ const pairs=[["「","」"],["『","』"],["【","】"],["（","）"],["(",")"],["[","]"]],sentences=getSentenceSegments(text);
+ for(const [o,c] of pairs){const b=pairBalanced(text,o,c);for(const pos of b.badClose){const s=sentences.find(x=>pos>=x.index&&pos<x.end);if(s&&!coveredByPrecise(list,s.index,s.end))addCandidate(list,{type:"punctuation",start:s.index,end:s.end,text:s.text.trim(),precise:false,suggestion:"",confidence:"manual",evidence:"",reasons:[`偵測到沒有對應開頭的「${c}」`]});}}
+ const re=/」[^。！？\n]{1,6}[。！？]?/g;let m;while((m=re.exec(text))){const tail=m[0].slice(1).replace(/[。！？\s]/g,"");if(!tail)continue;if(/[一二三四五六七八九十0-9]/.test(tail)||tail.length<=2){const s=sentences.find(x=>m.index>=x.index&&m.index<x.end);if(s&&!coveredByPrecise(list,s.index,s.end))addCandidate(list,{type:"quote-tail",start:s.index,end:s.end,text:s.text.trim(),precise:false,suggestion:"",confidence:"manual",evidence:"",reasons:["引號後出現極短、可能是 OCR 殘尾的文字"]});}}
+}
+function detectRegressionSignatures(text,list){
+ const repairs=[{re:/晶捕/g,to:"晶片"},{re:/晶嘔/g,to:"晶片"},{re:/晶丘/g,to:"晶片"},{re:/AI\s*&\s*片/g,to:"AI 晶片"}];
+ for(const r of repairs){let m;while((m=r.re.exec(text))){if(list.some(x=>m.index>=x.start&&m.index+m[0].length<=x.end))continue;addCandidate(list,{type:"regression",start:m.index,end:m.index+m[0].length,text:m[0],precise:true,suggestion:r.to,confidence:"strong",evidence:"v3.1 實際漏網案例回歸簽章，且已有明確修復型態",reasons:["先前正式正文中曾觀察到的殘留 OCR 型態"]});}}
+ const manual=[/的自己八/g];for(const re of manual){let m;while((m=re.exec(text))){if(list.some(x=>m.index>=x.start&&m.index+m[0].length<=x.end))continue;addCandidate(list,{type:"regression",start:m.index,end:m.index+m[0].length,text:m[0],precise:true,suggestion:"",confidence:"manual",evidence:"v3.1 實際漏網案例回歸簽章",reasons:["先前正式正文中曾觀察到的殘留 OCR 型態"]});}}
+}
+function detectKnownFinalResiduals(text,list){
+ const repairs=[
+   {re:/晶月/g,to:"晶片",why:"本批最終預覽實際漏網：晶月→晶片"},
+   {re:/自己八/g,to:"自己人",why:"本批最終預覽實際漏網：自己八→自己人"},
+   {re:/Gooogle/g,to:"Google",why:"本批最終預覽實際漏網：英文品牌多一個 o"},
+   {re:/融門/g,to:"敲門",why:"同句後文出現「業務去敲門」，屬本批明確 OCR 誤字"},
+   {re:/「特快車J/g,to:"「特快車」",why:"J 為關閉引號 OCR 殘尾"},
+   {re:/\[ASIC\s*承包商J/g,to:"「ASIC 承包商」",why:"方括號與 J 混成中文引號"}
+ ];
+ for(const r of repairs){let m;while((m=r.re.exec(text))){if(list.some(x=>m.index>=x.start&&m.index+m[0].length<=x.end))continue;addCandidate(list,{type:"final-regression",start:m.index,end:m.index+m[0].length,text:m[0],precise:true,suggestion:r.to,confidence:"strong",evidence:r.why,reasons:["v3.4 Final Gate 回歸簽章"]});}}
+ let m;const weird=/「\s*[!！]\s*「/g;while((m=weird.exec(text))){if(list.some(x=>m.index>=x.start&&m.index+m[0].length<=x.end))continue;addCandidate(list,{type:"final-structure",start:m.index,end:m.index+m[0].length,text:m[0],precise:true,suggestion:"「",confidence:"strong",evidence:"連續開引號中夾入驚嘆號，符合 OCR 殘尾型態",reasons:["v3.4 最終結構回歸"]});}
+ const bullets=/(?:^|\n)\s*[.．。]{1,2}\s*[【\[]\s*「/g;while((m=bullets.exec(text))){const start=m.index+(m[0].startsWith("\n")?1:0);if(list.some(x=>start>=x.start&&start+m[0].trim().length<=x.end))continue;addCandidate(list,{type:"final-structure",start,end:start+m[0].trim().length,text:text.slice(start,start+m[0].trim().length),precise:true,suggestion:"",confidence:"manual",evidence:"句首出現「.。 【「」型殘留，需確認原始條列格式",reasons:["v3.4 最終結構回歸"]});}
+}
+function removeOverlaps(list){
+ const ranked=[...list].sort((a,b)=>{const pa=(a.confidence==="strong"?0:(a.precise?1:2)),pb=(b.confidence==="strong"?0:(b.precise?1:2));return pa-pb||(a.end-a.start)-(b.end-b.start)||a.start-b.start;});const keep=[];
+ for(const c of ranked){if(keep.some(x=>overlaps(x,c)))continue;keep.push(c);}return keep.sort((a,b)=>a.start-b.start);
+}
+function detectAll(text){const info=corpusInfo(text),list=[];detectNearVariants(text,info,list);detectSymbolToTerm(text,info,list);detectSentenceRisks(text,info,list);detectPunctuationRisks(text,list);detectRegressionSignatures(text,list);detectKnownFinalResiduals(text,list);return removeOverlaps(list);}
+
+function parseDecisionRange(id){const p=String(id||"").split(":");if(p.length<4)return null;const start=Number(p[p.length-3]),end=Number(p[p.length-2]);if(!Number.isInteger(start)||!Number.isInteger(end)||start<0||end<=start||end>sourceText.length)return null;return{start,end,type:p.slice(0,p.length-3).join(":")||"legacy"};}
+function validDraft(draft){return !!(draft&&draft.sourceFingerprint===sourceFingerprint&&Array.isArray(draft.decisions));}
+function applyDraftCarry(draft,label){
+ if(!validDraft(draft))return;const resolved=draft.decisions.filter(d=>d&&d.action&&d.action!=="pending").map(d=>({d,range:parseDecisionRange(d.id)})).filter(x=>x.range);
+ for(const x of resolved){const exact=plan.find(c=>c.id===x.d.id);if(exact){exact.action=x.d.action;exact.replacement=x.d.replacement||"";exact.inheritedFrom=label;carryStats.restored++;}}
+ const exactIds=new Set(plan.map(c=>c.id));const protectedRanges=resolved.map(x=>({...x.range,id:x.d.id}));const before=plan.length;
+ plan=plan.filter(c=>protectedRanges.some(r=>r.id===c.id)||!protectedRanges.some(r=>overlaps(c,r)));carryStats.suppressed+=before-plan.length;
+ for(const x of resolved){if(exactIds.has(x.d.id))continue;if(!["correct","exclude","chart"].includes(x.d.action))continue;const text=sourceText.slice(x.range.start,x.range.end);plan.push({id:x.d.id,type:x.range.type,start:x.range.start,end:x.range.end,text,precise:true,suggestion:"",confidence:"manual",evidence:`承接 ${label} 已完成的決策`,reasons:[`這是你在 ${label} 已經完成的人工決策；v3.4 保留它，不要求重做`],action:x.d.action,replacement:x.d.replacement||"",inheritedFrom:label});carryStats.imported++;}
+ plan.sort((a,b)=>a.start-b.start);
+}
+function restoreCurrentDraft(draft){
+ if(!validDraft(draft))return;const map=new Map(draft.decisions.map(x=>[x.id,x]));for(const c of plan){const d=map.get(c.id);if(d){c.action=d.action||"pending";c.replacement=d.replacement||"";c.inheritedFrom=d.action&&d.action!=="pending"?"v3.4 草稿":"";}}
+}
+
+function applyPlan(text,items){
+ const edits=[],chart=[],excluded=[],corrections=[],failures=[];
+ for(const c of items){if(c.action==="pending"||c.action==="keep")continue;if(c.action==="correct"){const rep=String(c.replacement||"").trim();if(!rep){failures.push({id:c.id,reason:"人工／建議校正文字為空"});continue;}edits.push({start:c.start,end:c.end,replacement:rep});corrections.push({from:c.text,to:rep,source:"phase3cd-v3.4-final-gate-semantic-residual",reason:(c.reasons||[]).join("；")});}else if(c.action==="exclude"){edits.push({start:c.start,end:c.end,replacement:""});excluded.push({text:c.text,reason:"Phase 3-C-D v3.4 語意殘留排除",source:"phase3cd-v3.4-final-gate-semantic-residual"});}else if(c.action==="chart"){edits.push({start:c.start,end:c.end,replacement:""});chart.push({text:c.text,reason:"Phase 3-C-D v3.4 語意殘留分流",source:"phase3cd-v3.4-final-gate-semantic-residual"});}}
+ const active=[...edits].sort((a,b)=>a.start-b.start);let conflicts=0;for(let i=1;i<active.length;i++)if(active[i].start<active[i-1].end)conflicts++;
+ let out=String(text||"");for(const e of [...edits].sort((a,b)=>b.start-a.start))out=out.slice(0,e.start)+e.replacement+out.slice(e.end);out=out.replace(/\n{3,}/g,"\n\n").trim();return{text:out,chart,excluded,corrections,failures,conflicts};
+}
+function scanFinalGate(text){
+ const issues=[],stack=[],pairs={"「":"」","『":"』","【":"】","（":"）","(" :")","[":"]","｛":"｝","{":"}"},closers=new Set(Object.values(pairs));
+ for(let i=0;i<text.length;i++){const ch=text[i];if(pairs[ch])stack.push({ch,pos:i,expect:pairs[ch]});else if(closers.has(ch)){const top=stack[stack.length-1];if(!top||top.expect!==ch){issues.push({type:"pair",pos:i,msg:`沒有對應開頭的「${ch}」`});}else stack.pop();}}
+ for(const x of stack.slice(-8))issues.push({type:"pair",pos:x.pos,msg:`「${x.ch}」缺少對應結尾「${x.expect}」`});
+ const patterns=[
+   {re:/「\s*[!！]\s*「/g,msg:"連續開引號中夾入驚嘆號（疑似 OCR 殘尾）"},
+   {re:/「[^」\n]{1,80}[JＪ](?=[，,。！？；;：:\s]|$)/g,msg:"中文引號疑似被 J 取代"},
+   {re:/\[[^\]\n]{1,80}[JＪ](?=[，,。！？；;：:\s]|$)/g,msg:"方括號／J 疑似混成中文引號"},
+   {re:/(?:^|\n)\s*[.．。]{1,2}\s*[【\[]\s*「/g,msg:"句首殘留「.。 【「」型 OCR 條列符號"},
+   {re:/晶(?:月|丘|捕|嘔)/g,msg:"仍存在已知「晶片」OCR 字形殘留"},
+   {re:/自己八/g,msg:"仍存在已知「自己人」OCR 字形殘留"},
+   {re:/Gooogle/g,msg:"Google 品牌拼字仍有多餘 o"},
+   {re:/融門/g,msg:"仍存在本批已確認的「敲門」OCR 誤字"}
+ ];
+ for(const p of patterns){let m;while((m=p.re.exec(text))){issues.push({type:"signature",pos:m.index,msg:p.msg,sample:m[0]});if(!m[0].length)p.re.lastIndex++;}}
+ issues.sort((a,b)=>a.pos-b.pos);return{issues:issues.slice(0,24),count:issues.length};
+}
+function unresolvedCount(){return plan.filter(c=>c.action==="pending"||(c.action==="correct"&&!String(c.replacement||"").trim())).length;}
+async function saveDraft(){if(!didAnalyze)return;await putSetting(DRAFT_KEY,{version:"3.4",sourceFingerprint,updatedAt:Date.now(),decisions:plan.map(c=>({id:c.id,action:c.action,replacement:c.replacement||""}))});}
+function actionLabel(c){if(c.action==="keep")return c.inheritedFrom?"已承接保留":"已確認保留";if(c.action==="chart")return c.inheritedFrom?"已承接分流":"已分流圖表／附註";if(c.action==="exclude")return c.inheritedFrom?"已承接排除":"已排除";if(c.action==="correct"&&c.replacement)return c.inheritedFrom?"已承接校正":"已套用校正";if(c.suggestion&&c.confidence==="strong")return"強證據建議";return"需判斷";}
+function typeLabel(c){if(c.type==="near-word"||c.type==="near-pair")return"同文件詞彙近似異常";if(c.type==="symbol-term")return"技術詞／符號異常";if(c.type==="punctuation"||c.type==="quote-tail"||c.type==="final-structure")return"標點／句尾結構異常";if(c.type==="mixed-sentence")return"中英混合殘留 OCR";if(c.type==="final-regression")return"最終正文回歸候選";return"殘留 OCR 回歸候選";}
+function renderCandidates(){
+ const wrap=$("candidateList");wrap.innerHTML="";if(!plan.length){wrap.innerHTML='<div class="status good">✅ v3.4 沒有偵測到需要人工處理的新候選；仍會以 Final Gate 驗證最終正文。</div>';return;}
+ for(const c of plan){const ctx=around(c.start,c.end,74),div=document.createElement("div");div.className="candidate"+(c.action!=="pending"?" resolved":"")+(c.inheritedFrom?" inherited":"");const badgeClass=c.action!=="pending"?"done":(c.suggestion&&c.confidence==="strong"?"strong":"");
+   div.innerHTML=`<div class="candidate-head"><div class="candidate-title">${esc(typeLabel(c))}</div><span class="badge ${badgeClass}">${esc(actionLabel(c))}</span></div><div class="raw">${esc(c.text)}</div>${c.suggestion?`<div class="suggestion"><b>建議：</b>${esc(c.text)} → <b>${esc(c.suggestion)}</b><br><span class="mini">${esc(c.evidence||"")}</span></div>`:""}${c.inheritedFrom?`<div class="rule"><b>承接：</b>${esc(c.inheritedFrom)} 已完成的決策，v3.4 不要求你重做。</div>`:""}<div class="reason">偵測原因：${esc((c.reasons||[]).join("；"))}</div><div class="context">前後文：…${esc(ctx.before.slice(-58))}<mark>${esc(c.text)}</mark>${esc(ctx.after.slice(0,58))}…</div><div class="actions">${c.suggestion?'<button class="suggest useSuggestion">採用建議</button>':''}<button class="secondary keepBtn">保留正文</button><button class="secondary manualBtn">人工校正</button><button class="secondary chartBtn">圖表／附註</button><button class="danger excludeBtn">排除片段</button><button class="secondary resetBtn">復原未確認</button></div><div class="manualBox ${c.action==="correct"?"show":""}"><textarea placeholder="輸入完整替換文字；v3.4 不會自動預填系統建議"></textarea></div>`;
+   wrap.appendChild(div);const ta=div.querySelector("textarea");ta.value=c.replacement||"";
+   const set=async(action,replacement)=>{c.action=action;c.inheritedFrom="";if(replacement!==undefined)c.replacement=replacement;if(action!=="correct")c.replacement="";await saveDraft();renderCandidates();renderQuality();};
+   const sug=div.querySelector(".useSuggestion");if(sug)sug.onclick=()=>set("correct",c.suggestion);div.querySelector(".keepBtn").onclick=()=>set("keep","");div.querySelector(".chartBtn").onclick=()=>set("chart","");div.querySelector(".excludeBtn").onclick=()=>set("exclude","");div.querySelector(".resetBtn").onclick=()=>set("pending","");
+   div.querySelector(".manualBtn").onclick=async()=>{c.action="correct";c.inheritedFrom="";if(c.replacement===c.suggestion)c.replacement="";await saveDraft();renderCandidates();setTimeout(()=>{const cards=[...document.querySelectorAll(".candidate")],idx=plan.indexOf(c);const t=cards[idx]&&cards[idx].querySelector("textarea");if(t)t.focus();},20);renderQuality();};
+   ta.oninput=async()=>{c.action="correct";c.inheritedFrom="";c.replacement=ta.value;div.classList.add("resolved");const badge=div.querySelector(".badge");if(badge){badge.className="badge done";badge.textContent=String(ta.value||"").trim()?"已套用校正":"需判斷";}await saveDraft();renderQuality();};
+ }
+}
+function renderQuality(){
+ const final=applyPlan(sourceText,plan),pending=unresolvedCount(),strong=plan.filter(c=>c.suggestion&&c.confidence==="strong").length,gate=scanFinalGate(final.text),ok=didAnalyze&&pending===0&&final.failures.length===0&&final.conflicts===0&&gate.count===0&&final.text.trim().length>0;
+ $("sourceChars").textContent=String(sourceText.length);$("flagCount").textContent=didAnalyze?String(plan.length):"—";$("suggestCount").textContent=didAnalyze?String(strong):"—";$("pendingCount").textContent=didAnalyze?String(pending):"—";$("passBtn").disabled=!ok;
+ const gateHtml=gate.count?`<br><b>Final Gate 殘留 ${gate.count}：</b><br>${gate.issues.slice(0,6).map(x=>"• "+esc(x.msg)+(x.sample?`：${esc(x.sample)}`:"")).join("<br>")}${gate.count>6?"<br>…其餘請繼續處理候選或最終預覽。":""}`:"<br>Final Gate：0 個結構／回歸殘留";
+ const q=$("quality");q.className="status "+(ok?"good":"warn");q.innerHTML=didAnalyze?`${ok?"✅":"⚠️"} v3.4 品質閘門：待判斷 ${pending}｜校正失敗 ${final.failures.length}｜重疊衝突 ${final.conflicts}｜Final Gate ${gate.count}<br>正文 ${final.text.length} 字元｜校正 ${final.corrections.length}｜圖表/附註 ${final.chart.length}｜排除 ${final.excluded.length}<br>承接舊決策：恢復 ${carryStats.restored}｜匯入既有編輯 ${carryStats.imported}｜避免重複詢問 ${carryStats.suppressed}${gateHtml}${ok?"<br><b>可標記 Phase 3-C-D v3.4 PASS，然後重建 Phase 3-D。</b>":"<br><b>目前不可 PASS：</b>除了候選必須全部處理，Final Gate 也必須為 0。"}`:"尚未分析。";
+ $("finalPreview").textContent=didAnalyze?final.text:sourceText;
+}
+
+async function runAudit(){
+ carryStats={restored:0,imported:0,suppressed:0};plan=detectAll(sourceText);
+ const v33=await getSetting(V33_DRAFT_KEY);applyDraftCarry(v33,"v3.3 草稿");
+ const v32=await getSetting(V32_DRAFT_KEY);applyDraftCarry(v32,"v3.2 草稿");
+ const current=await getSetting(DRAFT_KEY);restoreCurrentDraft(current);
+ didAnalyze=true;$("status").className="status good";$("status").innerHTML=`✅ v3.4 掃描完成。共 ${plan.length} 個候選；強證據建議 ${plan.filter(c=>c.suggestion&&c.confidence==="strong").length} 個。<br>已承接 v3.3 / v3.2 決策；每次修改後會再對最終正文執行 Final Gate。`;renderCandidates();renderQuality();await saveDraft();
+}
+async function saveAndPass(){
+ if(!didAnalyze)return;const final=applyPlan(sourceText,plan),pending=unresolvedCount(),gate=scanFinalGate(final.text);if(pending||final.failures.length||final.conflicts||gate.count||!final.text.trim()){alert(`v3.4 品質閘門尚未通過。待判斷 ${pending}；Final Gate 殘留 ${gate.count}。請先修正後再 PASS。`);return;}
+ const stamp=Date.now(),oldChart=Array.isArray(state.chartItems)?state.chartItems:[],oldExcluded=Array.isArray(state.excludedItems)?state.excludedItems:[],oldCorrections=Array.isArray(state.appliedCorrections)?state.appliedCorrections:[];
+ const newChart=final.chart.map((x,i)=>({id:`v34-chart-${stamp}-${i}`,displayNumber:null,text:x.text,reason:x.reason,source:x.source}));const newExcluded=final.excluded.map((x,i)=>({id:`v34-exclude-${stamp}-${i}`,displayNumber:null,text:x.text,reason:x.reason,source:x.source}));const newCorrections=final.corrections.map((x,i)=>({id:`v34-correct-${stamp}-${i}`,from:x.from,to:x.to,reason:x.reason,source:x.source}));
+ state.correctedText=final.text;state.chartItems=[...oldChart,...newChart];state.excludedItems=[...oldExcluded,...newExcluded];state.appliedCorrections=[...oldCorrections,...newCorrections];state.correctionFailures=[];state.pendingCount=0;state.updatedAt=stamp;state.finalSemanticAuditV34={version:"3.4",mode:"precision-final-gate",analyzedAt:stamp,sourceFingerprint,sourceChars:sourceText.length,finalChars:final.text.length,flaggedCount:plan.length,strongSuggestionCount:plan.filter(c=>c.suggestion&&c.confidence==="strong").length,keptCount:plan.filter(c=>c.action==="keep").length,correctedCount:final.corrections.length,chartCount:final.chart.length,excludedCount:final.excluded.length,pendingCount:0,carryStats:{...carryStats},qualityGate:{pending:0,correctionFailures:0,overlapConflicts:0,finalGateResiduals:0}};
+ await putSetting(STATE_KEY,state);await putSetting(REVIEW_KEY,{status:"pass",passedAt:stamp,version:"phase3cd-v3.4-final-gate-semantic-residual-audit",correctedChars:final.text.length,chartCount:state.chartItems.length,correctionCount:state.appliedCorrections.length,excludedCount:state.excludedItems.length,pendingCount:0,correctionFailureCount:0,semanticResidualFlaggedCount:plan.length,semanticResidualPendingCount:0});await deleteSetting(DRAFT_KEY);await deleteSetting(PHASE3D_STATE_KEY);await deleteSetting(PHASE3D_REVIEW_KEY);await deleteSetting(PHASE6_STATE_KEY);await deleteSetting(PHASE6_REVIEW_KEY);
+ sourceText=final.text;sourceFingerprint=hash32(sourceText);$("status").className="status good";$("status").innerHTML=`✅ Phase 3-C-D v3.4 PASS。<br>最終正文 ${final.text.length} 字元｜校正 ${final.corrections.length}｜排除 ${final.excluded.length}｜圖表/附註 ${final.chart.length}。<br>舊 Phase 3-D / Phase 6 已安全標記失效，請重新建立 Phase 3-D。`;$("phase3dLink").classList.remove("disabled");$("analyzeBtn").disabled=true;$("passBtn").disabled=true;window.scrollTo({top:0,behavior:"smooth"});
+}
+function downloadBackup(){if(!state){alert("尚未讀取 Phase 3-C-D 工作區。");return;}const payload={schema:"phase3cd-v3.4-backup-v1",exportedAt:new Date().toISOString(),review,state};const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`phase3cd-v3.4-backup-${new Date().toISOString().replace(/[:.]/g,"-")}.json`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);}
+async function init(){try{db=await openDb();state=await getSetting(STATE_KEY);review=await getSetting(REVIEW_KEY);if(!state||!String(state.correctedText||"").trim()){$("status").className="status warn";$("status").innerHTML="⚠️ 找不到可用的 Phase 3-C-D correctedText。請先完成 Phase 3-C-D 前一版 PASS。";return;}if(!review||review.status!=="pass"){$("status").className="status warn";$("status").innerHTML="⚠️ correctedText 存在，但目前 Phase 3-C-D 尚未 PASS。請先完成前一層驗收。";return;}sourceText=String(state.correctedText);sourceFingerprint=hash32(sourceText);$("sourceChars").textContent=String(sourceText.length);$("finalPreview").textContent=sourceText;$("analyzeBtn").disabled=false;$("status").className="status good";$("status").innerHTML=`✅ 已讀取 Phase 3-C-D PASS。<br>目前 correctedText：${sourceText.length} 字元｜來源指紋：${sourceFingerprint}。<br>按下 v3.4 掃描前不會修改任何資料。`;const v33=await getSetting(V33_DRAFT_KEY),v32=await getSetting(V32_DRAFT_KEY),current=await getSetting(DRAFT_KEY);if(validDraft(v33))$("status").innerHTML+=`<br>偵測到同一版正文的 v3.3 草稿，掃描時會承接你已完成的決策。`;if(validDraft(v32))$("status").innerHTML+=`<br>偵測到 v3.2 草稿，會作為較舊決策補充承接。`;if(validDraft(current))$("status").innerHTML+=`<br>偵測到 v3.4 草稿，掃描後會自動恢復。`; }catch(e){$("status").className="status bad";$("status").textContent="❌ "+String(e&&e.message?e.message:e);}}
+init();
+</script>
+</body>
+</html>
