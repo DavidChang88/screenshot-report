@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f5f5f7">
-<title>Screenshot Report · Phase 3-C-D v3.9 Actionable Final-Gate One-Click Repair</title>
+<title>Screenshot Report · Phase 3-C-D v3.9 Actionable Zero-Residual One-Click Repair</title>
 <style>
 :root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--muted:#6e6e73;--green:#2f7d4a;--green-bg:#e9f5ed;--amber:#8a5b00;--amber-bg:#fff3d6;--blue:#3478f6;--blue-bg:#edf3ff;--line:#e5e5ea;--soft:#f2f2f7;--red:#a52a20;--red-bg:#ffe9e5;--slate:#557083}
 *{box-sizing:border-box}
@@ -24,9 +24,9 @@ button:disabled,a.btn.disabled{opacity:.38;pointer-events:none}.note{font-size:1
 <body>
 <main>
 <section class="card">
-  <div class="eyebrow">SCREENSHOT REPORT · PHASE 3-C-D v3.9 ACTIONABLE FINAL-GATE ONE-CLICK</div>
-  <h1>一鍵修到 Final Gate 0；若停下就一定給你可操作的修復框</h1>
-  <p>v3.9 延續 v3.8 的零殘留安全迴圈，新增「零殘留安全迴圈」：自動修復後會再掃 Final Gate、再做一次可證明安全的根因修復，最多迭代 4 輪；並補上本批最後兩種漏網：混合【…」引號與 GPU » 但 的 OCR 標點。若五項品質指標全部為 0，主按鈕可在同一次操作中安全 PASS；只要仍有歧義就立即停止，不會硬改。</p>
+  <div class="eyebrow">SCREENSHOT REPORT · PHASE 3-C-D v3.9 ACTIONABLE ZERO-RESIDUAL ONE-CLICK</div>
+  <h1>Final Gate 自己變成可修項；能確定的就一鍵修到 0</h1>
+  <p>v3.9 延續 v3.9 的零殘留安全迴圈，修正一個實際操作缺口：Final Gate 若是在「最終正規化之後」才出現，舊版只會在底部警告，卻沒有上方候選卡可操作。v3.9 會先嘗試根因安全修復；像本批「問句末尾有 」 但同一句缺少 「」這種可證明的單側引號遺失，會直接補回開引號。若仍不能安全判斷，Final Gate 會顯示獨立修復卡與上下文，不再叫你自己往上找。五項品質指標全為 0 時，同一次點擊直接 PASS。</p>
   <div id="status" class="status">正在讀取目前工作區…</div>
   <div class="grid">
     <div class="metric"><span>目前正文</span><strong id="sourceChars">—</strong></div>
@@ -35,21 +35,21 @@ button:disabled,a.btn.disabled{opacity:.38;pointer-events:none}.note{font-size:1
     <div class="metric"><span>仍需你判斷</span><strong id="pendingCount">—</strong></div>
   </div>
   <div class="toolbar">
-    <button id="analyzeBtn" class="primary" onclick="runOneClickComplete()" disabled>一鍵完成 v3.9（Final Gate 可直接修＋零殘留才 PASS）</button>
+    <button id="analyzeBtn" class="primary" onclick="runOneClickComplete()" disabled>一鍵完成 v3.9（Final Gate 可修＋零殘留才 PASS）</button>
     <button id="passBtn" class="pass" onclick="saveAndPass()" disabled>✓ 手動確認通過 Phase 3-C-D v3.9 PASS</button>
     <a id="phase3dLink" class="btn secondary disabled" href="./phase3d.html">前往 Phase 3-D 重新建立正式報告</a>
     <button class="safe" onclick="downloadBackup()">下載目前 Phase 3-C-D 備份 JSON</button>
   </div>
-  <div class="note">v3.9 主按鈕會：承接舊決策 → 套用白名單安全修復 → 迭代最終正規化 → 重掃 Final Gate。只有「一般待判斷、待輸入、真正失敗、重疊衝突、Final Gate」全部為 0 時，才會在同一次點擊中寫回 PASS；否則停下並顯示剩餘問題。</div>
+  <div class="note">v3.9 主按鈕會：承接舊決策 → 套用白名單安全修復 → 迭代最終正規化 → 修復可證明的 Final Gate 根因 → 再掃 Final Gate。Final Gate 若仍有歧義，會在下方顯示獨立修復卡，不再只顯示警告文字。五項品質指標全部為 0 才會同次點擊寫回 PASS。</div>
 </section>
 
 <section class="card">
   <h2>v3.9 品質規則</h2>
-  <div class="rule">① <b>零殘留安全迴圈：</b>每輪只套用可證明安全的修復，然後重新掃描；最多 4 輪，直到沒有新修復或 Final Gate 歸零。</div>
-  <div class="rule amber">② <b>舊決策安全承接：</b>v3.7～v3.2 的人工校正、排除與分流照舊承接；舊版保留不會遮住新版安全候選。</div>
+  <div class="rule">① <b>Final Gate 根因也納入安全迴圈：</b>每輪先做確定性修復，再檢查未配對符號；可證明是「同一句缺開引號」時直接補上，不再留下只有警告、沒有卡片的死角。</div>
+  <div class="rule amber">② <b>舊決策安全承接：</b>v3.8～v3.2 的人工校正、排除與分流照舊承接；舊版保留不會遮住新版安全候選。</div>
   <div class="rule">③ <b>詞頻仍只是弱證據：</b>同文件高頻詞不能單獨決定替換；兩字近似詞仍需左右文或已知 OCR 型態支持。</div>
   <div class="rule">④ <b>已知假陽性保護持續生效：</b>「聯發→研發」「解讀→解決」「科在→都在」「之後→之間」「插在→都在」「一齣→一個」不會被當成有效建議。</div>
-  <div class="rule">⑤ <b>Final Gate 先修根因＋可直接操作：</b>若零殘留迴圈仍停在 Final Gate，頁面會產生專用修復卡，不再要求你回頭找原始候選。</div>
+  <div class="rule">⑤ <b>Final Gate 先修根因：</b>新增【…」／「…】混合引號，以及本文已確認的「GPU » 但 → GPU，但」；根因修完才檢查配對，避免一錯多報。</div>
   <div class="rule blue">⑥ <b>真正五項同時為 0 才能 PASS：</b>待判斷 0、待輸入人工校正 0、真正套用失敗 0、重疊衝突 0、Final Gate 0；主按鈕只有在此條件成立時才自動 PASS。<br>⑦ <b>PASS 後仍必須重建 Phase 3-D：</b>舊 Phase 3-D / Phase 6 會失效，避免使用舊正文。</div>
 </section>
 
@@ -58,9 +58,9 @@ button:disabled,a.btn.disabled{opacity:.38;pointer-events:none}.note{font-size:1
   <div id="candidateList"><div class="status">尚未分析。</div></div>
 </section>
 
-<section class="card" id="gateRepairSection" style="display:none">
-  <h2>Final Gate 直接修復</h2>
-  <div class="rule amber"><b>Final Gate 若不是 0，就在這裡處理。</b> v3.9 會把最終正文的殘留直接轉成修復卡，不需要再往上找舊候選。</div>
+<section class="card" id="gateRepairCard" style="display:none">
+  <h2>Final Gate 修復卡</h2>
+  <div class="rule amber"><b>只會列出自動安全修復無法證明的殘留。</b>每一項都顯示實際最終正文上下文，避免你再回頭搜尋不存在的候選卡。</div>
   <div id="gateRepairList"></div>
 </section>
 
@@ -76,7 +76,7 @@ const STATE_KEY="phase3cCorrectionTriage:v1",REVIEW_KEY="phase3cCorrectionTriage
 const DRAFT_KEY="phase3cdSemanticResidualAudit:v8",V38_DRAFT_KEY="phase3cdSemanticResidualAudit:v7",V37_DRAFT_KEY="phase3cdSemanticResidualAudit:v6",V36_DRAFT_KEY="phase3cdSemanticResidualAudit:v5",V35_DRAFT_KEY="phase3cdSemanticResidualAudit:v4",V34_DRAFT_KEY="phase3cdSemanticResidualAudit:v3",V33_DRAFT_KEY="phase3cdSemanticResidualAudit:v2",V32_DRAFT_KEY="phase3cdSemanticResidualAudit:v1";
 const PHASE3D_STATE_KEY="phase3dReport:v1",PHASE3D_REVIEW_KEY="phase3dReportReview:v1";
 const PHASE6_STATE_KEY="phase6Publication:v1",PHASE6_REVIEW_KEY="phase6PublicationReview:v1";
-let db=null,state=null,review=null,sourceText="",sourceFingerprint="",plan=[],didAnalyze=false,autoFixes=[],finalManualRepairs=[],carryStats={restored:0,imported:0,suppressed:0,rechecked:0,autoApplied:0};
+let db=null,state=null,review=null,sourceText="",sourceFingerprint="",plan=[],didAnalyze=false,autoFixes=[],carryStats={restored:0,imported:0,suppressed:0,rechecked:0,autoApplied:0};
 const $=id=>document.getElementById(id);
 const ALLOW_LATIN=new Set(["ai","nvidia","marvell","broadcom","intel","google","amazon","meta","openai","fusion","asic","hbm","cowos","gpu","cpu","io","i/o","ethernet","infiniband","celestial","celestialai","tsmc","samsung","micron","sk","hynix","dram","sram","pcie","ucie","nvlink","nvlinkfusion","serdes","rack","scale","cloud","sony","microsoft","ieee","amd","arm","network","memory","chip","chips","server","servers"]);
 const BLOCKED_NEAR=new Set(["聯發→研發","解讀→解決","科在→都在","之後→之間","插在→都在","一齣→一個"]);
@@ -262,7 +262,6 @@ function applyDraftCarry(draft,label){
 }
 function restoreCurrentDraft(draft){
  if(!validDraft(draft))return;const map=new Map(draft.decisions.map(x=>[x.id,x]));for(const c of plan){const d=map.get(c.id);if(d){c.action=d.action||"pending";c.replacement=d.replacement||"";c.inheritedFrom=d.action&&d.action!=="pending"?"v3.9 草稿":"";}}
- finalManualRepairs=Array.isArray(draft.finalManualRepairs)?draft.finalManualRepairs.filter(x=>x&&typeof x.from==="string"&&typeof x.to==="string"):[];
 }
 
 function applyPlan(text,items){
@@ -274,13 +273,13 @@ function applyPlan(text,items){
      // 空白人工校正仍屬「待輸入」，不是套用失敗；避免同一問題重複計數。
      if(!rep)continue;
      edits.push({start:c.start,end:c.end,replacement:rep});
-     corrections.push({from:c.text,to:rep,source:"phase3cd-v3.9-actionable-final-gate-one-click",reason:(c.reasons||[]).join("；")});
+     corrections.push({from:c.text,to:rep,source:"phase3cd-v3.8-zero-residual-one-click",reason:(c.reasons||[]).join("；")});
    }else if(c.action==="exclude"){
      edits.push({start:c.start,end:c.end,replacement:""});
-     excluded.push({text:c.text,reason:"Phase 3-C-D v3.9 語意殘留排除",source:"phase3cd-v3.9-actionable-final-gate-one-click"});
+     excluded.push({text:c.text,reason:"Phase 3-C-D v3.9 語意殘留排除",source:"phase3cd-v3.8-zero-residual-one-click"});
    }else if(c.action==="chart"){
      edits.push({start:c.start,end:c.end,replacement:""});
-     chart.push({text:c.text,reason:"Phase 3-C-D v3.9 語意殘留分流",source:"phase3cd-v3.9-actionable-final-gate-one-click"});
+     chart.push({text:c.text,reason:"Phase 3-C-D v3.9 語意殘留分流",source:"phase3cd-v3.8-zero-residual-one-click"});
    }
  }
  const active=[...edits].sort((a,b)=>a.start-b.start);let conflicts=0;for(let i=1;i<active.length;i++)if(active[i].start<active[i-1].end)conflicts++;
@@ -308,8 +307,6 @@ function safeNormalizeFinal(text){
  apply(/「([^「」\n]{2,120})\]/g,(m,a)=>`「${a}」`,"中文引號開頭／方括號結尾統一為中文引號");
  apply(/【([^】「」\n]{2,120})」/g,(m,a)=>`「${a}」`,"全形方括號開頭／中文引號結尾統一為中文引號");
  apply(/「([^「」\n]{2,120})】/g,(m,a)=>`「${a}」`,"中文引號開頭／全形方括號結尾統一為中文引號");
- // 本批最後一個由最終預覽確認的句型：完整問句只有關閉引號。
- apply(/(^|\n)([ \t]*)(發熱量這麼大[，,]要怎麼插進超高功率的機櫃裡[？?])」/g,(m,pad,ws,q)=>`${pad}${ws}「${q}」`,"本批已確認完整問句缺少中文開引號");
  apply(/\bGPU\s*[»«]\s*但/g,"GPU，但","本文已確認 GPU 與『但』之間的 guillemet 為逗號 OCR 殘留");
  apply(/晶(?:月|丘|捕|嘔)/g,"晶片","已確認晶片 OCR 字形回歸");
  apply(/自己八/g,"自己人","已確認自己人 OCR 字形回歸");
@@ -326,14 +323,40 @@ function safeNormalizeFinal(text){
  apply(/[ \t]+([，。！？；：」】）])/g,(m,p)=>p,"移除中文標點前多餘空白");
  return{text:out,fixes};
 }
+function repairProvableFinalGate(text){
+ let out=String(text||""),fixes=[];
+ // 只處理「沒有對應開頭的中文閉引號」且同一句本身以問號/驚嘆號結尾的情形。
+ // 這是本批實際漏網：發熱量這麼大，要怎麼插進超高功率的機櫃裡？」
+ const b=pairBalanced(out,"「","」");
+ const edits=[];
+ for(const pos of b.badClose||[]){
+   const before=out.slice(0,pos);
+   let end=pos;
+   let j=pos-1; while(j>=0 && /\s/.test(out[j]))j--;
+   if(j<0 || !/[？！]/.test(out[j]))continue;
+   let k=j-1;
+   while(k>=0 && !/[\n。！？]/.test(out[k]))k--;
+   let start=k+1; while(start<pos && /\s/.test(out[start]))start++;
+   const seg=out.slice(start,pos);
+   if(seg.length<4 || seg.length>100)continue;
+   if(/[「」]/.test(seg))continue;
+   // 問句需有明顯中文內容，避免英文/技術符號誤補。
+   if((seg.match(/[\u3400-\u9fff]/g)||[]).length<4)continue;
+   edits.push({start,replacement:"「",from:"",to:"「",reason:"Final Gate 證明同一句問句只有閉引號、缺少開引號；自動補回開引號"});
+ }
+ for(const e of [...edits].sort((a,b)=>b.start-a.start)){out=out.slice(0,e.start)+e.replacement+out.slice(e.start);fixes.push(e);}
+ return{text:out,fixes};
+}
 function finalizeOutput(){
- const base=applyPlan(sourceText,plan);let text=base.text,fixes=[],gateFixes=[];
+ const base=applyPlan(sourceText,plan);let text=base.text,fixes=[];
  // v3.9 零殘留安全迴圈：修復可能暴露下一層安全型態，最多 4 輪直到穩定。
- for(let round=0;round<4;round++){const norm=safeNormalizeFinal(text);if(!norm.fixes.length)break;text=norm.text;fixes.push(...norm.fixes.map(x=>({...x,round:round+1})));}
- // Final Gate 專用修復直接套在正規化後正文，避免 sourceText 座標位移。
- for(const r of finalManualRepairs){if(!r||!r.from||r.to===undefined||r.from===r.to)continue;const idx=text.indexOf(r.from);if(idx<0)continue;text=text.slice(0,idx)+r.to+text.slice(idx+r.from.length);gateFixes.push({from:r.from,to:r.to,reason:r.reason||"Final Gate 直接人工修復"});}
- const tail=safeNormalizeFinal(text);if(tail.fixes.length){text=tail.text;fixes.push(...tail.fixes.map(x=>({...x,round:"post-gate"})));}
- return{...base,text,autoFixes:fixes,gateFixes,allCorrections:[...base.corrections,...fixes.map(x=>({from:x.from,to:x.to,source:"phase3cd-v3.9-auto-normalize",reason:x.reason})),...gateFixes.map(x=>({from:x.from,to:x.to,source:"phase3cd-v3.9-final-gate-repair",reason:x.reason}))]};
+ for(let round=0;round<4;round++){
+   let changed=0;
+   const norm=safeNormalizeFinal(text);if(norm.fixes.length){text=norm.text;fixes.push(...norm.fixes.map(x=>({...x,round:round+1})));changed+=norm.fixes.length;}
+   const gateFix=repairProvableFinalGate(text);if(gateFix.fixes.length){text=gateFix.text;fixes.push(...gateFix.fixes.map(x=>({...x,round:round+1})));changed+=gateFix.fixes.length;}
+   if(!changed)break;
+ }
+ return{...base,text,autoFixes:fixes,allCorrections:[...base.corrections,...fixes.map(x=>({from:x.from,to:x.to,source:"phase3cd-v3.9-auto-normalize",reason:x.reason}))]};
 }
 function scanFinalGate(text){
  const issues=[],pairs=[["「","」"],["『","』"],["【","】"],["（","）"],["(",")"],["[","]"],["｛","｝"],["{","}"]];
@@ -368,13 +391,13 @@ function scanFinalGate(text){
  return{issues:uniq.slice(0,24),count:uniq.length};
 }
 function unresolvedCount(){return plan.filter(c=>c.action==="pending"||(c.action==="correct"&&!String(c.replacement||"").trim())).length;}
-async function saveDraft(){if(!didAnalyze)return;await putSetting(DRAFT_KEY,{version:"3.9",sourceFingerprint,updatedAt:Date.now(),decisions:plan.map(c=>({id:c.id,action:c.action,replacement:c.replacement||""})),finalManualRepairs});}
+async function saveDraft(){if(!didAnalyze)return;await putSetting(DRAFT_KEY,{version:"3.9",sourceFingerprint,updatedAt:Date.now(),decisions:plan.map(c=>({id:c.id,action:c.action,replacement:c.replacement||""}))});}
 function actionLabel(c){if(c.action==="keep")return c.inheritedFrom?"已承接保留":"已確認保留";if(c.action==="chart")return c.inheritedFrom?"已承接分流":"已分流圖表／附註";if(c.action==="exclude")return c.inheritedFrom?"已承接排除":"已排除";if(c.action==="correct"&&c.replacement)return c.inheritedFrom?"已承接校正":"已套用校正";if(c.suggestion&&c.confidence==="strong")return"強證據建議";return"需判斷";}
 function typeLabel(c){if(c.type==="near-word"||c.type==="near-pair")return"同文件詞彙近似異常";if(c.type==="symbol-term")return"技術詞／符號異常";if(c.type==="punctuation"||c.type==="quote-tail"||c.type==="final-structure")return"標點／句尾結構異常";if(c.type==="mixed-sentence")return"中英混合殘留 OCR";if(c.type==="final-regression")return"最終正文回歸候選";return"殘留 OCR 回歸候選";}
 function renderCandidates(){
- const wrap=$("candidateList");wrap.innerHTML="";if(!plan.length){wrap.innerHTML='<div class="status good">✅ v3.8 沒有偵測到需要人工處理的新候選；仍會以 Final Gate 驗證最終正文。</div>';return;}
+ const wrap=$("candidateList");wrap.innerHTML="";if(!plan.length){wrap.innerHTML='<div class="status good">✅ v3.9 沒有偵測到需要人工處理的新候選；仍會以 Final Gate 驗證最終正文。</div>';return;}
  const displayPlan=[...plan].sort((a,b)=>((a.action==="pending")?0:1)-((b.action==="pending")?0:1)||a.start-b.start);for(const c of displayPlan){const ctx=around(c.start,c.end,74),div=document.createElement("div");div.className="candidate"+(c.action!=="pending"?" resolved":"")+(c.inheritedFrom?" inherited":"");const badgeClass=c.action!=="pending"?"done":(c.suggestion&&c.confidence==="strong"?"strong":"");
-   div.innerHTML=`<div class="candidate-head"><div class="candidate-title">${esc(typeLabel(c))}</div><span class="badge ${badgeClass}">${esc(actionLabel(c))}</span></div><div class="raw">${esc(c.text)}</div>${c.suggestion?`<div class="suggestion"><b>建議：</b>${esc(c.text)} → <b>${esc(c.suggestion)}</b><br><span class="mini">${esc(c.evidence||"")}</span></div>`:""}${c.inheritedFrom?`<div class="rule"><b>承接：</b>${esc(c.inheritedFrom)} 已完成的決策，v3.8 不要求你重做。</div>`:""}${c.previousKeepFrom?`<div class="rule amber"><b>重新確認：</b>${esc(c.previousKeepFrom)} 曾選「保留正文」，但 v3.8 判定此項屬 Final Gate／強證據候選，因此不沿用舊保留。</div>`:""}<div class="reason">偵測原因：${esc((c.reasons||[]).join("；"))}</div><div class="context">前後文：…${esc(ctx.before.slice(-58))}<mark>${esc(c.text)}</mark>${esc(ctx.after.slice(0,58))}…</div><div class="actions">${c.suggestion?'<button class="suggest useSuggestion">採用建議</button>':''}<button class="secondary keepBtn">保留正文</button><button class="secondary manualBtn">人工校正</button><button class="secondary chartBtn">圖表／附註</button><button class="danger excludeBtn">排除片段</button><button class="secondary resetBtn">復原未確認</button></div><div class="manualBox ${c.action==="correct"?"show":""}"><textarea placeholder="輸入完整替換文字；v3.9 不會自動預填一般語意建議"></textarea></div>`;
+   div.innerHTML=`<div class="candidate-head"><div class="candidate-title">${esc(typeLabel(c))}</div><span class="badge ${badgeClass}">${esc(actionLabel(c))}</span></div><div class="raw">${esc(c.text)}</div>${c.suggestion?`<div class="suggestion"><b>建議：</b>${esc(c.text)} → <b>${esc(c.suggestion)}</b><br><span class="mini">${esc(c.evidence||"")}</span></div>`:""}${c.inheritedFrom?`<div class="rule"><b>承接：</b>${esc(c.inheritedFrom)} 已完成的決策，v3.9 不要求你重做。</div>`:""}${c.previousKeepFrom?`<div class="rule amber"><b>重新確認：</b>${esc(c.previousKeepFrom)} 曾選「保留正文」，但 v3.9 判定此項屬 Final Gate／強證據候選，因此不沿用舊保留。</div>`:""}<div class="reason">偵測原因：${esc((c.reasons||[]).join("；"))}</div><div class="context">前後文：…${esc(ctx.before.slice(-58))}<mark>${esc(c.text)}</mark>${esc(ctx.after.slice(0,58))}…</div><div class="actions">${c.suggestion?'<button class="suggest useSuggestion">採用建議</button>':''}<button class="secondary keepBtn">保留正文</button><button class="secondary manualBtn">人工校正</button><button class="secondary chartBtn">圖表／附註</button><button class="danger excludeBtn">排除片段</button><button class="secondary resetBtn">復原未確認</button></div><div class="manualBox ${c.action==="correct"?"show":""}"><textarea placeholder="輸入完整替換文字；v3.9 不會自動預填一般語意建議"></textarea></div>`;
    wrap.appendChild(div);const ta=div.querySelector("textarea");ta.value=c.replacement||"";
    const set=async(action,replacement)=>{c.action=action;c.inheritedFrom="";if(replacement!==undefined)c.replacement=replacement;if(action!=="correct")c.replacement="";await saveDraft();renderCandidates();renderQuality();};
    const sug=div.querySelector(".useSuggestion");if(sug)sug.onclick=()=>set("correct",c.suggestion);div.querySelector(".keepBtn").onclick=()=>set("keep","");div.querySelector(".chartBtn").onclick=()=>set("chart","");div.querySelector(".excludeBtn").onclick=()=>{const risky=count(c.text,/[\u3400-\u9fff]/g)>=8||c.text.length>=24;if(risky&&!confirm("這個候選包含較長正文。確定要整段排除嗎？\n\n"+c.text.slice(0,120)))return;set("exclude","");};div.querySelector(".resetBtn").onclick=()=>set("pending","");
@@ -382,25 +405,17 @@ function renderCandidates(){
    ta.oninput=async()=>{c.action="correct";c.inheritedFrom="";c.replacement=ta.value;div.classList.add("resolved");const badge=div.querySelector(".badge");if(badge){badge.className="badge done";badge.textContent=String(ta.value||"").trim()?"已套用校正":"需判斷";}await saveDraft();renderQuality();};
  }
 }
-function inferGateRepair(text,issue){
- if(!issue)return null;
- if(String(issue.msg||"").includes("沒有對應開頭")&&text[issue.pos]==="」"){
-   let start=text.lastIndexOf("\n",Math.max(0,issue.pos-1))+1,end=text.indexOf("\n",issue.pos+1);if(end<0)end=text.length;
-   const from=text.slice(start,end),lead=(from.match(/^\s*/)||[""])[0],rel=issue.pos-start;
-   if(rel>=lead.length&&!from.slice(lead.length,rel).includes("「")){return{from,to:lead+"「"+from.slice(lead.length),reason:"Final Gate：同段只有關閉引號，建議在段首補中文開引號"};}
+function renderGateRepairCards(gate,text){
+ const card=$("gateRepairCard"),wrap=$("gateRepairList");
+ if(!gate||!gate.count){card.style.display="none";wrap.innerHTML="";return;}
+ card.style.display="block";wrap.innerHTML="";
+ for(const issue of gate.issues){
+   const pos=issue.pos||0,start=Math.max(0,pos-90),end=Math.min(text.length,pos+120);
+   const div=document.createElement("div");div.className="candidate";
+   const context=text.slice(start,end);
+   div.innerHTML=`<div class="candidate-head"><div class="candidate-title">Final Gate 殘留</div><span class="badge">需人工判斷</span></div><div class="reason">${esc(issue.msg||"Final Gate 結構殘留")}</div><div class="raw">${esc(context)}</div><div class="mini">這是最終正規化後的實際文字；若仍出現於此區，代表目前沒有足夠證據安全自動修改。請把這張卡截圖給我，不需要再往上找舊候選。</div>`;
+   wrap.appendChild(div);
  }
- return null;
-}
-function renderGateRepairs(final,gate){
- const sec=$("gateRepairSection"),wrap=$("gateRepairList");if(!sec||!wrap)return;wrap.innerHTML="";
- if(!didAnalyze||!gate.count){sec.style.display="none";return;}sec.style.display="block";
- gate.issues.forEach((issue,i)=>{const proposal=inferGateRepair(final.text,issue),div=document.createElement("div");div.className="candidate";
-   const pos=Math.max(0,issue.pos||0),lineStart=final.text.lastIndexOf("\n",Math.max(0,pos-1))+1,lineEnd0=final.text.indexOf("\n",pos+1),lineEnd=lineEnd0<0?final.text.length:lineEnd0,fromLine=final.text.slice(lineStart,lineEnd),ctx=final.text.slice(Math.max(0,pos-70),Math.min(final.text.length,pos+90)).replace(/\n{2,}/g,"\n");
-   div.innerHTML=`<div class="candidate-head"><div class="candidate-title">Final Gate #${i+1}</div><span class="badge ${proposal?"strong":""}">${proposal?"有安全建議":"需人工"}</span></div><div class="reason">${esc(issue.msg||"Final Gate 殘留")}</div><div class="raw">${esc(ctx)}</div>${proposal?`<div class="suggestion"><b>建議整段：</b>${esc(proposal.to)}</div>`:""}<textarea class="gateTa" placeholder="直接輸入這一整行的正確文字"></textarea><div class="actions">${proposal?'<button class="suggest gateUse">採用安全建議</button>':''}<button class="secondary gateApply">套用人工修復</button></div>`;
-   wrap.appendChild(div);const ta=div.querySelector(".gateTa");ta.value=proposal?proposal.to:fromLine;
-   const applyRepair=async(to)=>{const from=proposal?proposal.from:fromLine,replacement=String(to||"").trim();if(!replacement){alert("請先輸入修正後文字。");return;}const item={from,to:replacement,reason:(proposal&&proposal.reason)||"Final Gate 直接人工修復"},idx=finalManualRepairs.findIndex(x=>x.from===from);if(idx>=0)finalManualRepairs[idx]=item;else finalManualRepairs.push(item);await saveDraft();renderQuality();};
-   const use=div.querySelector(".gateUse");if(use)use.onclick=()=>applyRepair(proposal.to);div.querySelector(".gateApply").onclick=()=>applyRepair(ta.value);
- });
 }
 function renderQuality(){
  const final=finalizeOutput(),pending=unresolvedCount(),blankManual=plan.filter(c=>c.action==="correct"&&!String(c.replacement||"").trim()).length,plainPending=plan.filter(c=>c.action==="pending").length,strong=plan.filter(c=>c.suggestion&&c.confidence==="strong").length,gate=scanFinalGate(final.text),ok=didAnalyze&&pending===0&&final.failures.length===0&&final.conflicts===0&&gate.count===0&&final.text.trim().length>0;
@@ -408,15 +423,14 @@ function renderQuality(){
  $("sourceChars").textContent=String(sourceText.length);$("flagCount").textContent=didAnalyze?String(plan.length):"—";$("suggestCount").textContent=didAnalyze?String(strong):"—";$("pendingCount").textContent=didAnalyze?String(pending):"—";$("passBtn").disabled=!ok;
  const gateHtml=gate.count?`<br><b>Final Gate 殘留 ${gate.count}：</b><br>${gate.issues.slice(0,8).map(x=>"• "+esc(x.msg)+(x.sample?`：${esc(x.sample)}`:"")).join("<br>")}${gate.count>8?"<br>…其餘請繼續處理。":""}`:"<br>Final Gate：0 個結構／回歸殘留";
  const autoHtml=final.autoFixes.length?`<br>本輪最終正規化自動修復 ${final.autoFixes.length} 處。`:"";
- const q=$("quality");q.className="status "+(ok?"good":"warn");q.innerHTML=didAnalyze?`${ok?"✅":"⚠️"} v3.9 品質閘門：一般待判斷 ${plainPending}｜待輸入人工校正 ${blankManual}｜真正套用失敗 ${final.failures.length}｜重疊衝突 ${final.conflicts}｜Final Gate ${gate.count}<br>正文 ${final.text.length} 字元｜人工/候選校正 ${final.corrections.length}｜安全自動正規化 ${final.autoFixes.length}｜圖表/附註 ${final.chart.length}｜排除 ${final.excluded.length}<br>承接舊決策：恢復 ${carryStats.restored}｜匯入既有編輯 ${carryStats.imported}｜避免重複詢問 ${carryStats.suppressed}｜舊保留重新確認 ${carryStats.rechecked}｜一鍵安全採用 ${carryStats.autoApplied}${autoHtml}${gateHtml}${ok?"<br><b>可標記 Phase 3-C-D v3.9 PASS，然後重建 Phase 3-D。</b>":"<br><b>目前不可 PASS：</b>Final Gate 若仍有殘留，請直接使用「Final Gate 直接修復」卡片；不用再回頭找舊候選。"}`:"尚未分析。";
- renderGateRepairs(final,gate);
- $("finalPreview").textContent=didAnalyze?final.text:sourceText;
+ const q=$("quality");q.className="status "+(ok?"good":"warn");q.innerHTML=didAnalyze?`${ok?"✅":"⚠️"} v3.9 品質閘門：一般待判斷 ${plainPending}｜待輸入人工校正 ${blankManual}｜真正套用失敗 ${final.failures.length}｜重疊衝突 ${final.conflicts}｜Final Gate ${gate.count}<br>正文 ${final.text.length} 字元｜人工/候選校正 ${final.corrections.length}｜安全自動正規化 ${final.autoFixes.length}｜圖表/附註 ${final.chart.length}｜排除 ${final.excluded.length}<br>承接舊決策：恢復 ${carryStats.restored}｜匯入既有編輯 ${carryStats.imported}｜避免重複詢問 ${carryStats.suppressed}｜舊保留重新確認 ${carryStats.rechecked}｜一鍵安全採用 ${carryStats.autoApplied}${autoHtml}${gateHtml}${ok?"<br><b>可標記 Phase 3-C-D v3.9 PASS，然後重建 Phase 3-D。</b>":"<br><b>目前不可 PASS：</b>只剩有歧義的項目需要人工確認；確定性修復已自動處理。"}`:"尚未分析。";
+ $("finalPreview").textContent=didAnalyze?final.text:sourceText;renderGateRepairCards(gate,final.text);
 }
 
 
 async function runAudit(auto=true){
- carryStats={restored:0,imported:0,suppressed:0,rechecked:0,autoApplied:0};autoFixes=[];finalManualRepairs=[];plan=detectAll(sourceText);
- const v38=await getSetting(V38_DRAFT_KEY);applyDraftCarry(v38,"v3.8 草稿");
+ carryStats={restored:0,imported:0,suppressed:0,rechecked:0,autoApplied:0};autoFixes=[];plan=detectAll(sourceText);
+ const v38=await getSetting(V38_DRAFT_KEY);applyDraftCarry(v38,"v3.9 草稿");
  const v37=await getSetting(V37_DRAFT_KEY);applyDraftCarry(v37,"v3.7 草稿");
  const v36=await getSetting(V36_DRAFT_KEY);applyDraftCarry(v36,"v3.6 草稿");
  const v35=await getSetting(V35_DRAFT_KEY);applyDraftCarry(v35,"v3.5 草稿");
@@ -439,7 +453,7 @@ async function runOneClickComplete(){
    await saveAndPass();
    return;
  }
- $("status").className="status warn";$("status").innerHTML=`⚠️ v3.9 已完成所有可證明安全的自動修復，但仍有真正需要你判斷的項目。<br>待處理 ${pending}｜Final Gate ${gate.count}。沒有達到零殘留，因此沒有寫回 PASS；頁面已提供 Final Gate 直接修復區。`;
+ $("status").className="status warn";$("status").innerHTML=`⚠️ v3.9 已完成所有可證明安全的自動修復，但仍有真正需要你判斷的項目。<br>待處理 ${pending}｜Final Gate ${gate.count}。沒有達到零殘留，因此沒有寫回 PASS。`;
  const first=[...document.querySelectorAll(".candidate")].find(x=>!x.classList.contains("resolved"));
  if(first)first.scrollIntoView({behavior:"smooth",block:"start"});else $("quality").scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -448,12 +462,12 @@ async function saveAndPass(){
  if(!didAnalyze)return;const final=finalizeOutput(),pending=unresolvedCount(),gate=scanFinalGate(final.text);if(pending||final.failures.length||final.conflicts||gate.count||!final.text.trim()){alert(`v3.9 品質閘門尚未通過。待判斷 ${pending}；Final Gate 殘留 ${gate.count}。請先修正後再 PASS。`);return;}
  const stamp=Date.now(),oldChart=Array.isArray(state.chartItems)?state.chartItems:[],oldExcluded=Array.isArray(state.excludedItems)?state.excludedItems:[],oldCorrections=Array.isArray(state.appliedCorrections)?state.appliedCorrections:[];
  const newChart=final.chart.map((x,i)=>({id:`v39-chart-${stamp}-${i}`,displayNumber:null,text:x.text,reason:x.reason,source:x.source}));const newExcluded=final.excluded.map((x,i)=>({id:`v39-exclude-${stamp}-${i}`,displayNumber:null,text:x.text,reason:x.reason,source:x.source}));const newCorrections=final.allCorrections.map((x,i)=>({id:`v39-correct-${stamp}-${i}`,from:x.from,to:x.to,reason:x.reason,source:x.source}));
- state.correctedText=final.text;state.chartItems=[...oldChart,...newChart];state.excludedItems=[...oldExcluded,...newExcluded];state.appliedCorrections=[...oldCorrections,...newCorrections];state.correctionFailures=[];state.pendingCount=0;state.updatedAt=stamp;state.finalSemanticAuditV39={version:"3.9",mode:"actionable-final-gate-one-click-safe-loop",analyzedAt:stamp,sourceFingerprint,sourceChars:sourceText.length,finalChars:final.text.length,flaggedCount:plan.length,strongSuggestionCount:plan.filter(c=>c.suggestion&&c.confidence==="strong").length,keptCount:plan.filter(c=>c.action==="keep").length,correctedCount:final.allCorrections.length,chartCount:final.chart.length,excludedCount:final.excluded.length,pendingCount:0,carryStats:{...carryStats},qualityGate:{pending:0,correctionFailures:0,overlapConflicts:0,finalGateResiduals:0}};
- await putSetting(STATE_KEY,state);await putSetting(REVIEW_KEY,{status:"pass",passedAt:stamp,version:"phase3cd-v3.9-actionable-final-gate-one-click-audit",correctedChars:final.text.length,chartCount:state.chartItems.length,correctionCount:state.appliedCorrections.length,excludedCount:state.excludedItems.length,pendingCount:0,correctionFailureCount:0,semanticResidualFlaggedCount:plan.length,semanticResidualPendingCount:0});await deleteSetting(DRAFT_KEY);await deleteSetting(PHASE3D_STATE_KEY);await deleteSetting(PHASE3D_REVIEW_KEY);await deleteSetting(PHASE6_STATE_KEY);await deleteSetting(PHASE6_REVIEW_KEY);
+ state.correctedText=final.text;state.chartItems=[...oldChart,...newChart];state.excludedItems=[...oldExcluded,...newExcluded];state.appliedCorrections=[...oldCorrections,...newCorrections];state.correctionFailures=[];state.pendingCount=0;state.updatedAt=stamp;state.finalSemanticAuditV39={version:"3.9",mode:"zero-residual-one-click-safe-loop",analyzedAt:stamp,sourceFingerprint,sourceChars:sourceText.length,finalChars:final.text.length,flaggedCount:plan.length,strongSuggestionCount:plan.filter(c=>c.suggestion&&c.confidence==="strong").length,keptCount:plan.filter(c=>c.action==="keep").length,correctedCount:final.allCorrections.length,chartCount:final.chart.length,excludedCount:final.excluded.length,pendingCount:0,carryStats:{...carryStats},qualityGate:{pending:0,correctionFailures:0,overlapConflicts:0,finalGateResiduals:0}};
+ await putSetting(STATE_KEY,state);await putSetting(REVIEW_KEY,{status:"pass",passedAt:stamp,version:"phase3cd-v3.9-actionable-zero-residual-one-click-audit",correctedChars:final.text.length,chartCount:state.chartItems.length,correctionCount:state.appliedCorrections.length,excludedCount:state.excludedItems.length,pendingCount:0,correctionFailureCount:0,semanticResidualFlaggedCount:plan.length,semanticResidualPendingCount:0});await deleteSetting(DRAFT_KEY);await deleteSetting(PHASE3D_STATE_KEY);await deleteSetting(PHASE3D_REVIEW_KEY);await deleteSetting(PHASE6_STATE_KEY);await deleteSetting(PHASE6_REVIEW_KEY);
  sourceText=final.text;sourceFingerprint=hash32(sourceText);$("status").className="status good";$("status").innerHTML=`✅ Phase 3-C-D v3.9 PASS。<br>最終正文 ${final.text.length} 字元｜校正 ${final.allCorrections.length}｜排除 ${final.excluded.length}｜圖表/附註 ${final.chart.length}。<br>舊 Phase 3-D / Phase 6 已安全標記失效，請重新建立 Phase 3-D。`;$("phase3dLink").classList.remove("disabled");$("analyzeBtn").disabled=true;$("passBtn").disabled=true;window.scrollTo({top:0,behavior:"smooth"});
 }
 function downloadBackup(){if(!state){alert("尚未讀取 Phase 3-C-D 工作區。");return;}const payload={schema:"phase3cd-v3.9-backup-v1",exportedAt:new Date().toISOString(),review,state};const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`phase3cd-v3.9-backup-${new Date().toISOString().replace(/[:.]/g,"-")}.json`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);}
-async function init(){try{db=await openDb();state=await getSetting(STATE_KEY);review=await getSetting(REVIEW_KEY);if(!state||!String(state.correctedText||"").trim()){$("status").className="status warn";$("status").innerHTML="⚠️ 找不到可用的 Phase 3-C-D correctedText。請先完成 Phase 3-C-D 前一版 PASS。";return;}if(!review||review.status!=="pass"){$("status").className="status warn";$("status").innerHTML="⚠️ correctedText 存在，但目前 Phase 3-C-D 尚未 PASS。請先完成前一層驗收。";return;}sourceText=String(state.correctedText);sourceFingerprint=hash32(sourceText);$("sourceChars").textContent=String(sourceText.length);$("finalPreview").textContent=sourceText;$("analyzeBtn").disabled=false;$("status").className="status good";$("status").innerHTML=`✅ 已讀取 Phase 3-C-D PASS。<br>目前 correctedText：${sourceText.length} 字元｜來源指紋：${sourceFingerprint}。<br>按下 v3.9「一鍵完成」會先在草稿內安全修復；只有五項品質指標全為 0 時，才會在同一次操作中 PASS 寫回。`;const v38=await getSetting(V38_DRAFT_KEY),v37=await getSetting(V37_DRAFT_KEY),v36=await getSetting(V36_DRAFT_KEY),v35=await getSetting(V35_DRAFT_KEY),v34=await getSetting(V34_DRAFT_KEY),v33=await getSetting(V33_DRAFT_KEY),v32=await getSetting(V32_DRAFT_KEY),current=await getSetting(DRAFT_KEY);if(validDraft(v38))$("status").innerHTML+=`<br>偵測到同一版正文的 v3.8 草稿，會承接目前已完成的決策。`;if(validDraft(v37))$("status").innerHTML+=`<br>偵測到同一版正文的 v3.7 草稿，會承接目前已完成的決策。`;if(validDraft(v36))$("status").innerHTML+=`<br>偵測到同一版正文的 v3.6 草稿，會承接目前已完成的決策。`;if(validDraft(v35))$("status").innerHTML+=`<br>偵測到同一版正文的 v3.5 草稿，掃描時會承接已完成編輯；舊版「保留正文」不會遮住新版安全候選。`;if(validDraft(v34))$("status").innerHTML+=`<br>偵測到同一版正文的 v3.4 草稿，掃描時會承接你已完成的決策。`;if(validDraft(v33))$("status").innerHTML+=`<br>偵測到同一版正文的 v3.3 草稿，掃描時會承接你已完成的決策。`;if(validDraft(v32))$("status").innerHTML+=`<br>偵測到 v3.2 草稿，會作為較舊決策補充承接。`;if(validDraft(current))$("status").innerHTML+=`<br>偵測到 v3.9 草稿，掃描後會自動恢復。`; }catch(e){$("status").className="status bad";$("status").textContent="❌ "+String(e&&e.message?e.message:e);}}
+async function init(){try{db=await openDb();state=await getSetting(STATE_KEY);review=await getSetting(REVIEW_KEY);if(!state||!String(state.correctedText||"").trim()){$("status").className="status warn";$("status").innerHTML="⚠️ 找不到可用的 Phase 3-C-D correctedText。請先完成 Phase 3-C-D 前一版 PASS。";return;}if(!review||review.status!=="pass"){$("status").className="status warn";$("status").innerHTML="⚠️ correctedText 存在，但目前 Phase 3-C-D 尚未 PASS。請先完成前一層驗收。";return;}sourceText=String(state.correctedText);sourceFingerprint=hash32(sourceText);$("sourceChars").textContent=String(sourceText.length);$("finalPreview").textContent=sourceText;$("analyzeBtn").disabled=false;$("status").className="status good";$("status").innerHTML=`✅ 已讀取 Phase 3-C-D PASS。<br>目前 correctedText：${sourceText.length} 字元｜來源指紋：${sourceFingerprint}。<br>按下 v3.8「一鍵完成」會先在草稿內安全修復；只有五項品質指標全為 0 時，才會在同一次操作中 PASS 寫回。`;const v38=await getSetting(V38_DRAFT_KEY),v37=await getSetting(V37_DRAFT_KEY),v36=await getSetting(V36_DRAFT_KEY),v35=await getSetting(V35_DRAFT_KEY),v34=await getSetting(V34_DRAFT_KEY),v33=await getSetting(V33_DRAFT_KEY),v32=await getSetting(V32_DRAFT_KEY),current=await getSetting(DRAFT_KEY);if(validDraft(v38))$("status").innerHTML+=`<br>偵測到同一版正文的 v3.8 草稿，會承接目前已完成的決策。`;if(validDraft(v37))$("status").innerHTML+=`<br>偵測到同一版正文的 v3.7 草稿，會承接目前已完成的決策。`;if(validDraft(v36))$("status").innerHTML+=`<br>偵測到同一版正文的 v3.6 草稿，會承接目前已完成的決策。`;if(validDraft(v35))$("status").innerHTML+=`<br>偵測到同一版正文的 v3.5 草稿，掃描時會承接已完成編輯；舊版「保留正文」不會遮住新版安全候選。`;if(validDraft(v34))$("status").innerHTML+=`<br>偵測到同一版正文的 v3.4 草稿，掃描時會承接你已完成的決策。`;if(validDraft(v33))$("status").innerHTML+=`<br>偵測到同一版正文的 v3.3 草稿，掃描時會承接你已完成的決策。`;if(validDraft(v32))$("status").innerHTML+=`<br>偵測到 v3.2 草稿，會作為較舊決策補充承接。`;if(validDraft(current))$("status").innerHTML+=`<br>偵測到 v3.9 草稿，掃描後會自動恢復。`; }catch(e){$("status").className="status bad";$("status").textContent="❌ "+String(e&&e.message?e.message:e);}}
 init();
 </script>
 </body>
