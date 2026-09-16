@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<title>Screenshot Report · Phase 3-C-D v3.16 OCR Lexical & Structure Final Gate</title>
+<style>
+:root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--muted:#6e6e73;--green:#2f7d4a;--green-bg:#e9f5ed;--amber:#8a5b00;--amber-bg:#fff3d6;--blue:#3478f6;--blue-bg:#edf3ff;--line:#e5e5ea;--soft:#f2f2f7;--red:#a52a20;--red-bg:#ffe9e5;--slate:#557083}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:780px;margin:auto;padding:20px 14px 56px}.card{background:var(--card);border-radius:22px;padding:20px;margin-bottom:16px;box-shadow:0 4px 18px rgba(0,0,0,.055)}
+.eyebrow{font-size:13px;font-weight:900;letter-spacing:.045em;color:#566473}h1{font-size:31px;line-height:1.16;margin:8px 0 10px}h2{font-size:23px;margin:0 0 12px}p{color:var(--muted);line-height:1.65;margin:8px 0}
+.status{border-radius:15px;padding:15px;line-height:1.6;margin:14px 0;background:var(--soft)}.status.good{background:var(--green-bg);color:#20663c}.status.warn{background:var(--amber-bg);color:#7c5400}.status.bad{background:var(--red-bg);color:var(--red)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric{background:var(--soft);padding:14px;border-radius:14px}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;font-size:27px;margin-top:4px}
+button,a.btn{display:block;width:100%;border:0;border-radius:15px;padding:16px;margin-top:11px;font:inherit;font-size:17px;font-weight:850;text-align:center;text-decoration:none;-webkit-tap-highlight-color:transparent}.primary{background:var(--blue);color:#fff}.pass{background:var(--green);color:#fff}.secondary{background:#e9e9ee;color:var(--text)}.safe{background:var(--slate);color:#fff}button:disabled,a.disabled{opacity:.38;pointer-events:none}
+.rule{padding:13px;border-radius:13px;background:var(--green-bg);color:#28683f;line-height:1.58;margin-top:10px}.rule.amber{background:var(--amber-bg);color:#7c5400}.rule.blue{background:var(--blue-bg);color:#284f93}.note{font-size:13px;line-height:1.65;color:var(--muted);margin-top:12px}
+.issue{border:1px solid #e7c97a;border-radius:17px;padding:15px;margin-top:14px;background:#fffdf7}.issue.blocker{border-color:#e4a19a;background:#fff9f8}.issue.structure{border-color:#b8c8ee;background:#fbfcff}.issue .title{font-weight:900}.raw{background:var(--soft);padding:12px;border-radius:12px;margin:11px 0;line-height:1.58;white-space:pre-wrap;overflow-wrap:anywhere}.suggestion{background:var(--blue-bg);color:#244d91;padding:12px;border-radius:12px;margin:9px 0;line-height:1.55;white-space:pre-wrap}.context{font-size:13px;line-height:1.55;color:var(--muted);padding:6px 0}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.actions button{margin:0;padding:12px;font-size:15px}.actions.one{grid-template-columns:1fr}
+textarea{width:100%;font:inherit;border:1px solid #c7c7cc;border-radius:12px;padding:12px;background:#fff;color:var(--text);min-height:110px;resize:vertical;margin-top:9px}.preview{white-space:pre-wrap;overflow-wrap:anywhere;max-height:560px;overflow:auto;padding:14px;background:#f7f7f9;border:1px solid var(--line);border-radius:13px;line-height:1.65}.tag{display:inline-block;padding:4px 8px;border-radius:999px;background:#edf3ff;color:#31579a;font-size:12px;font-weight:800;margin-right:6px}.tag.red{background:var(--red-bg);color:var(--red)}.tag.green{background:var(--green-bg);color:#20663c}
+@media(max-width:420px){h1{font-size:28px}.card{padding:18px}.actions{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main>
+<section class="card">
+<div class="eyebrow">SCREENSHOT REPORT · PHASE 3-C-D v3.16</div>
+<h1>OCR Lexical & Structure Final Gate</h1>
+<p>v3.16 接續 v3.15，專門補上「Gate 0 仍漏 OCR 殘字」的缺口。只自動修可唯一還原的 OCR／斷行；疑似子標題只做結構標記；整句嚴重污染或截斷一定停下來人工確認。</p>
+<div id="status" class="status">正在讀取 v3.15 工作區…</div>
+<div class="grid">
+<div class="metric"><span>目前正文</span><strong id="chars">—</strong></div>
+<div class="metric"><span>安全修復</span><strong id="fixes">—</strong></div>
+<div class="metric"><span>人工阻擋</span><strong id="issues">—</strong></div>
+<div class="metric"><span>結構待確認</span><strong id="structures">—</strong></div>
+<div class="metric"><span>殘留 Gate</span><strong id="residuals">—</strong></div>
+<div class="metric"><span>已確認子標題</span><strong id="subheads">—</strong></div>
+</div>
+<button id="runBtn" class="primary" onclick="runAudit()" disabled>一鍵完成 v3.16（安全修復＋OCR 殘留＋結構 Gate）</button>
+<button id="passBtn" class="pass" onclick="saveAndPass()" disabled>✓ 全部 Gate 0，標記 Phase 3-C-D v3.16 PASS</button>
+<button class="safe" onclick="downloadBackup()">下載目前 Phase 3-C-D v3.16 備份 JSON</button>
+<div class="note">v3.16 不重跑 OCR、不改 Raw OCR。PASS 後會使既有 Phase 3-D／Phase 6 成品失效，必須由新版 Phase 3-D 重新建立。</div>
+</section>
+
+<section class="card">
+<h2>v3.16 品質規則</h2>
+<div class="rule"><b>A｜可唯一還原才自動修：</b>AI/Al 語境、晶哺／晶乒／晶戶、蔡難、恰違、Nividia、專＋長 o、事＋宜，以及本批確認的明顯版面斷行。</div>
+<div class="rule blue"><b>B｜子標題不改字：</b>只記錄「subheading」結構。沒有問號不等於病句，禁止為了流暢度自行補標點。</div>
+<div class="rule amber"><b>C｜真正不確定一定阻擋：</b>整句重度 OCR 污染、截斷句、缺字句一定要求回原截圖確認；不允許靠猜測 PASS。</div>
+<div class="rule"><b>D｜PASS 七條件：</b>安全修復殘留 0、OCR 詞彙殘留 0、截斷句 0、人工歧義 0、未確認結構 0、引號殘留 0、品牌拼字殘留 0。</div>
+</section>
+
+<section class="card"><h2>1. 必須人工確認的 OCR 阻擋</h2><div id="issueList"><div class="status">尚未執行。</div></div></section>
+<section class="card"><h2>2. 結構候選</h2><div id="structureList"><div class="status">尚未執行。</div></div></section>
+<section class="card"><h2>3. 最終輸出預覽</h2><div id="quality" class="status">尚未執行。</div><div id="preview" class="preview">尚無內容。</div></section>
+</main>
+<script>
+const DB_NAME="ScreenshotReportDB",DB_VERSION=2,SETTINGS_STORE="settings";
+const STATE_KEY="phase3cCorrectionTriage:v1",REVIEW_KEY="phase3cCorrectionTriageReview:v1",DRAFT_KEY="phase3cdSemanticResidualAudit:v16";
+const PHASE3D_STATE_KEY="phase3dReport:v1",PHASE3D_REVIEW_KEY="phase3dReportReview:v1",PHASE6_STATE_KEY="phase6Publication:v1",PHASE6_REVIEW_KEY="phase6PublicationReview:v1";
+let db=null,state=null,review=null,sourceText="",finalText="",repairs=[],manualIssues=[],structureCandidates=[],structureDecisions={},manualKeeps=new Set(),didRun=false;
+const $=id=>document.getElementById(id);
+function openDb(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB_NAME,DB_VERSION);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains(SETTINGS_STORE))d.createObjectStore(SETTINGS_STORE,{keyPath:"key"});};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+function getSetting(key){return new Promise((resolve,reject)=>{const r=db.transaction(SETTINGS_STORE,"readonly").objectStore(SETTINGS_STORE).get(key);r.onsuccess=()=>resolve(r.result&&"value" in r.result?r.result.value:null);r.onerror=()=>reject(r.error);});}
+function putSetting(key,value){return new Promise((resolve,reject)=>{const tx=db.transaction(SETTINGS_STORE,"readwrite");tx.objectStore(SETTINGS_STORE).put({key,value,updatedAt:Date.now()});tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
+function deleteSetting(key){return new Promise((resolve,reject)=>{const tx=db.transaction(SETTINGS_STORE,"readwrite");tx.objectStore(SETTINGS_STORE).delete(key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
+function hash32(s){let h=2166136261>>>0;for(let i=0;i<String(s).length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h.toString(16).padStart(8,"0");}
+function esc(s){return String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));}
+function addRepair(from,to,reason){if(from===to)return;repairs.push({id:`v316-correct-${Date.now()}-${repairs.length}`,from,to,reason,source:"phase3cd-v3.16-ocr-lexical-structure-final-gate"});}
+function replaceSafe(text,re,repl,reason){return text.replace(re,(...args)=>{const whole=args[0];const next=typeof repl==="function"?repl(...args):repl;if(next!==whole)addRepair(whole,next,reason);return next;});}
+function normalizeSafe(text){let out=String(text||"");
+  // A1. 只在明確 AI 語境修正 Al→AI
+  out=replaceSafe(out,/\bAl(?=\s*(?:方面|領域|晶片|資料中心|發展前景))/g,"AI","AI 語境品牌／縮寫 OCR：Al→AI");
+  // A2. 本批已驗證半導體 OCR 字形
+  out=replaceSafe(out,/傳統客製化晶哺/g,"傳統客製化晶片","半導體領域 OCR：晶哺→晶片");
+  out=replaceSafe(out,/ASIC\s*晶乒/g,"ASIC 晶片","半導體領域 OCR：晶乒→晶片");
+  out=replaceSafe(out,/ASIC\s*晶戶/g,"ASIC 晶片","半導體領域 OCR：晶戶→晶片");
+  out=replaceSafe(out,/幾千顆晶戶/g,"幾千顆晶片","半導體領域 OCR：晶戶→晶片");
+  out=replaceSafe(out,/網路交換晶戶/g,"網路交換晶片","半導體領域 OCR：晶戶→晶片");
+  out=replaceSafe(out,/非常蔡難/g,"非常艱難","中文 OCR 字形：蔡難→艱難");
+  out=replaceSafe(out,/這恰違是\s*Nvidia\s*所需要的/g,"這恰恰是 Nvidia 所需要的","句法＋OCR：恰違→恰恰");
+  out=replaceSafe(out,/\bNividia\b/g,"Nvidia","品牌拼字修復：Nividia→Nvidia");
+  // A3. 本批明確斷行／殘尾
+  out=replaceSafe(out,/一整權\s*\n+\s*買來就能用/g,"一整櫃買來就能用","OCR 字形＋版面斷行：一整權→一整櫃");
+  out=replaceSafe(out,/自行研發的\s+AI\s*\n+\s*晶片能/g,"自行研發的 AI 晶片能","只移除 OCR 版面斷行");
+  out=replaceSafe(out,/幾十\s*\n+\s*顆/g,"幾十顆","只移除 OCR 版面斷行");
+  out=replaceSafe(out,/散熱水\s*\n+\s*管/g,"散熱水管","只移除 OCR 版面斷行");
+  out=replaceSafe(out,/頂級\s*\n+\s*晶片交給客戶/g,"頂級晶片交給客戶","只移除 OCR 版面斷行");
+  out=replaceSafe(out,/代工事\s*\n+\s*宜/g,"代工事宜","只移除 OCR 版面斷行：事＋宜");
+  out=replaceSafe(out,/聯發科的專\s*\n+\s*長\s*o(?=\s|\n|$)/g,"聯發科的專長。","OCR 斷行＋句尾殘字：專／長 o→專長。");
+  // A4. 延續 v3.15 以前已驗證規則，避免回歸
+  out=replaceSafe(out,/也要人確保/g,"也要確保","句法殘字：移除多餘『人』");
+  out=replaceSafe(out,/試圖證明\s*!\s*開放架構/g,"試圖證明，開放架構","OCR 半形驚嘆號誤置");
+  out=replaceSafe(out,/\bGooole\b/g,"Google","品牌拼字修復");
+  out=replaceSafe(out,/希亡/g,"希望","已驗證 OCR 字形修復");
+  out=replaceSafe(out,/不搶風採/g,"不搶風采","已驗證 OCR 字形修復");
+  out=replaceSafe(out,/生態系統1/g,"生態系統","移除 OCR 尾碼");
+  out=replaceSafe(out,/晶上月|晶啼|晶刁|晶捕|晶嘔|晶丘|晶月/g,"晶片","半導體領域 OCR 修復");
+  return out;
+}
+function issueSignature(x){return hash32(`${x.kind}|${x.raw}`);}
+function contextAround(text,needle){const i=text.indexOf(needle);if(i<0)return needle;return text.slice(Math.max(0,i-90),Math.min(text.length,i+needle.length+110));}
+function findManualIssues(text){const out=[];
+  const paras=String(text).split(/\n{2,}/).map(x=>x.trim()).filter(Boolean);
+  for(const p of paras){
+    if(/安奸立|元主徵息|申片到網中/.test(p))out.push({kind:"heavy-ocr",title:"重度 OCR 污染：博通 CEO 段落",raw:p,reason:"至少含『安奸立／元主徵息／申片／網中』等不可安全猜回的字詞，必須對原圖。"});
+    if(/具正出買|安容在伺服開峙|貫體成品/.test(p))out.push({kind:"heavy-ocr",title:"重度 OCR 污染：聯發科實體成品段落",raw:p,reason:"至少含『具正出買／安容／伺服開峙／貫體』，完整原句無法由現有正文唯一還原。"});
+    if(/資料傳輸緩慢且產生大量熱和\s*$/.test(p))out.push({kind:"truncated",title:"截斷句：資料傳輸緩慢且產生大量熱和…",raw:p,reason:"句子停在連接詞『和』，表示後半句遺失或分段失敗，必須回原圖補齊。"});
+  }
+  return out.filter(x=>!manualKeeps.has(issueSignature(x)));
+}
+function structureSpecs(){return[
+ {text:"客戶為什麼會願意用客製化",label:"已由你確認的子標題",preverified:true},
+ {text:"為什麼聯發科需要Nvidia",label:"疑似子標題：為什麼聯發科需要 Nvidia"},
+ {text:"聯發科的三條業務線",label:"疑似子標題：聯發科的三條業務線"},
+ {text:"金融工具的密碼",label:"疑似子標題：金融工具的密碼"},
+ {text:"真正的目標",label:"疑似子標題：真正的目標"}
+];}
+function findStructures(text){return structureSpecs().filter(s=>text.includes(s.text)).map(s=>({...s,context:contextAround(text,s.text)}));}
+function scanQuotes(text){let bal=0,extraRight=0;for(const ch of text){if(ch==="「")bal++;else if(ch==="」"){if(bal>0)bal--;else extraRight++;}}return bal+extraRight;}
+function residualAudit(text){const s=String(text||"");const hits=[];const tests=[
+ ["safeRepairResiduals",/一整權|傳統客製化晶哺|非常蔡難|這恰違|晶乒|晶戶|長\s*o|代工事\s*\n+\s*宜/g],
+ ["ocrLexicalResiduals",/安奸立|元主徵息|申片到網中|具正出買|安容在伺服開峙|貫體成品/g],
+ ["truncatedSentenceResiduals",/資料傳輸緩慢且產生大量熱和\s*(?:\n{2,}|$)/g],
+ ["brandTypos",/\bNividia\b|\bAl(?=\s*(?:方面|領域|晶片|發展前景))/g]
+ ];
+ for(const [kind,re] of tests){re.lastIndex=0;let m;while((m=re.exec(s))){hits.push({kind,text:m[0],pos:m.index});if(!m[0].length)re.lastIndex++;}}
+ const quoteResiduals=scanQuotes(s);if(quoteResiduals)hits.push({kind:"quoteResiduals",text:`中文引號不平衡 ${quoteResiduals}`,pos:0});
+ return hits;
+}
+function unresolvedStructures(){return structureCandidates.filter(s=>!s.preverified&&!structureDecisions[s.text]);}
+function confirmedSubheadings(){return structureCandidates.filter(s=>s.preverified||structureDecisions[s.text]==="subheading").map(s=>s.text);}
+function allGateZero(){return didRun&&manualIssues.length===0&&unresolvedStructures().length===0&&residualAudit(finalText).length===0;}
+function render(){
+  const hasSource=!!(state&&String(state.correctedText||"").trim());
+  $("runBtn").disabled=!hasSource;
+  if(!hasSource){$("status").className="status warn";$("status").textContent="⚠️ 找不到 Phase 3-C-D correctedText。請先完成 v3.15。";return;}
+  $("chars").textContent=String((didRun?finalText:state.correctedText).length);
+  $("fixes").textContent=didRun?String(repairs.length):"—";
+  $("issues").textContent=didRun?String(manualIssues.length):"—";
+  $("structures").textContent=didRun?String(unresolvedStructures().length):"—";
+  const residuals=didRun?residualAudit(finalText):[];
+  $("residuals").textContent=didRun?String(residuals.length):"—";
+  $("subheads").textContent=didRun?String(confirmedSubheadings().length):"—";
+  if(!didRun){$("status").className="status";$("status").textContent="已讀取 correctedText；尚未執行 v3.16。";$("passBtn").disabled=true;return;}
+  const ok=allGateZero();
+  $("status").className=ok?"status good":"status warn";
+  $("status").innerHTML=ok?`✅ v3.16 全部 Gate 0，可 PASS。<br>安全修復 ${repairs.length}｜人工阻擋 0｜結構待確認 0｜殘留 0`:`⚠️ v3.16 尚未完成。<br>人工阻擋 ${manualIssues.length}｜結構待確認 ${unresolvedStructures().length}｜殘留 ${residuals.length}`;
+  $("passBtn").disabled=!ok;
+  renderIssues();renderStructures();
+  $("preview").textContent=finalText;
+  $("quality").className=ok?"status good":"status warn";
+  $("quality").innerHTML=ok?`✅ Final OCR & Structure Gate 0｜正文 ${finalText.length} 字元｜已確認子標題 ${confirmedSubheadings().length}`:`尚未歸零：人工 ${manualIssues.length}｜結構 ${unresolvedStructures().length}｜殘留 ${residuals.length}`;
+}
+function renderIssues(){const w=$("issueList");w.innerHTML="";if(!manualIssues.length){w.innerHTML='<div class="status good">✅ 沒有未處理的人工 OCR 阻擋。</div>';return;}manualIssues.forEach((x,i)=>{const d=document.createElement("div");d.className="issue blocker";d.innerHTML=`<div><span class="tag red">BLOCKING</span><span class="tag">回原圖確認</span></div><div class="title" style="margin-top:8px">${esc(x.title)}</div><div class="context">${esc(x.reason)}</div><div class="raw">${esc(x.raw)}</div><textarea id="manual-${i}">${esc(x.raw)}</textarea><div class="actions one"><button class="primary" onclick="applyManual(${i})">套用原圖人工校正</button></div>`;w.appendChild(d);});}
+function renderStructures(){const w=$("structureList");w.innerHTML="";if(!structureCandidates.length){w.innerHTML='<div class="status">本篇沒有偵測到結構候選。</div>';return;}structureCandidates.forEach((x,i)=>{const decision=x.preverified?"subheading":structureDecisions[x.text];const d=document.createElement("div");d.className="issue structure";d.innerHTML=`<div><span class="tag ${decision?'green':''}">${x.preverified?'已驗證':decision==='subheading'?'子標題':decision==='paragraph'?'保留正文':'待確認'}</span></div><div class="title" style="margin-top:8px">${esc(x.label)}</div><div class="raw">${esc(x.text)}</div><div class="context">${esc(x.context)}</div>${x.preverified?'<div class="status good">沿用你先前對原始版面的人工確認：此行是子標題，不補問號、不改文字。</div>':`<div class="actions"><button class="primary" onclick="setStructure(${i},'subheading')">確認為子標題</button><button class="secondary" onclick="setStructure(${i},'paragraph')">保留正文</button></div>`}`;w.appendChild(d);});}
+async function runAudit(){repairs=[];manualKeeps=new Set();structureDecisions={};sourceText=String(state.correctedText||"");finalText=normalizeSafe(sourceText);manualIssues=findManualIssues(finalText);structureCandidates=findStructures(finalText);didRun=true;await saveDraft();render();}
+async function applyManual(i){const issue=manualIssues[i],ta=$("manual-"+i);if(!issue||!ta)return;const next=ta.value.trim();if(!next){alert("人工校正不能是空白。若原圖確認應刪除整段，請在文字框輸入你確認後的完整結果。");return;}const before=finalText;if(!before.includes(issue.raw)){alert("目前正文已變更，找不到原片段；請重新執行 v3.16。");return;}finalText=before.replace(issue.raw,next);addRepair(issue.raw,next,"v3.16 人工依原圖校正");manualIssues=findManualIssues(finalText);await saveDraft();render();}
+async function keepManual(i){const issue=manualIssues[i];if(!issue)return;if(!confirm("只有你已回原截圖確認這段確實應保留原文時才使用。確定嗎？"))return;manualKeeps.add(issueSignature(issue));manualIssues=findManualIssues(finalText);await saveDraft();render();}
+async function setStructure(i,decision){const s=structureCandidates[i];if(!s)return;structureDecisions[s.text]=decision;await saveDraft();render();}
+async function saveDraft(){await putSetting(DRAFT_KEY,{version:"3.16",sourceHash:hash32(sourceText),finalText,repairs,manualKeeps:[...manualKeeps],structureDecisions,updatedAt:Date.now()});}
+async function saveAndPass(){if(!allGateZero()){alert("v3.16 尚未全部 Gate 0。請先完成所有人工 OCR 與結構確認。");return;}
+  const residuals=residualAudit(finalText);if(residuals.length){alert("仍有 OCR／結構殘留，不能 PASS。");return;}
+  const now=Date.now();
+  const added=repairs.map((r,i)=>({...r,id:r.id||`v316-${now}-${i}`}));
+  state.correctedText=finalText;
+  state.appliedCorrections=[...(Array.isArray(state.appliedCorrections)?state.appliedCorrections:[]),...added];
+  state.structuralAnnotationsV316={version:"3.16",subheadings:confirmedSubheadings(),paragraphKeeps:Object.entries(structureDecisions).filter(([,v])=>v==="paragraph").map(([k])=>k),source:"user-verified-layout-plus-v3.16",updatedAt:now};
+  state.finalSemanticAuditV316={version:"3.16",safeRepairResiduals:0,ocrLexicalResiduals:0,truncatedSentenceResiduals:0,manualAmbiguities:0,unconfirmedStructureCandidates:0,quoteResiduals:0,brandTypos:0,safeRepairsApplied:repairs.length,verifiedSubheadings:confirmedSubheadings().length,finalChars:finalText.length,contentHash:hash32(finalText),passedAt:now};
+  review={status:"pass",phase:"phase3cd",version:"phase3cd-v3.16-ocr-lexical-structure-final-gate",passedAt:now,contentHash:hash32(finalText),gate:{safeRepairResiduals:0,ocrLexicalResiduals:0,truncatedSentenceResiduals:0,manualAmbiguities:0,unconfirmedStructureCandidates:0,quoteResiduals:0,brandTypos:0}};
+  await putSetting(STATE_KEY,state);await putSetting(REVIEW_KEY,review);
+  for(const key of [PHASE3D_STATE_KEY,PHASE3D_REVIEW_KEY,PHASE6_STATE_KEY,PHASE6_REVIEW_KEY]){try{await deleteSetting(key);}catch(e){}}
+  await putSetting(DRAFT_KEY,{version:"3.16",passed:true,passedAt:now,finalText,repairs,structureDecisions,contentHash:hash32(finalText)});
+  $("status").className="status good";$("status").innerHTML=`✅ Phase 3-C-D v3.16 已 PASS。<br>七項 Gate 全 0｜正文 ${finalText.length} 字元｜子標題 ${confirmedSubheadings().length}<br>已使舊 Phase 3-D／Phase 6 成品失效，下一步需新版 Phase 3-D 重建。`;
+  $("passBtn").disabled=true;alert("Phase 3-C-D v3.16 PASS 已寫入。下一步請使用新版 Phase 3-D 重建正式報告。");
+}
+function downloadBackup(){
+  if(!state){alert("尚無可下載狀態。");return;}
+  const exportState={...state};
+  exportState.correctedText=didRun?finalText:state.correctedText;
+  if(didRun){
+    exportState.structuralAnnotationsV316={version:"3.16",subheadings:confirmedSubheadings(),paragraphKeeps:Object.entries(structureDecisions).filter(([,v])=>v==="paragraph").map(([k])=>k)};
+  }
+  const payload={schema:"screenshot-report-phase3cd-v3.16-backup",exportedAt:Date.now(),state:exportState,review,draft:didRun?{repairs,manualKeeps:[...manualKeeps],structureDecisions}:null};
+  const b=new Blob([JSON.stringify(payload,null,2)],{type:"application/json;charset=utf-8"}),a=document.createElement("a");
+  a.href=URL.createObjectURL(b);a.download=`phase3cd-v3.16-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+}
+async function load(){db=await openDb();state=await getSetting(STATE_KEY);review=await getSetting(REVIEW_KEY);const draft=await getSetting(DRAFT_KEY);if(state&&state.correctedText){sourceText=String(state.correctedText);finalText=sourceText;if(draft&&draft.version==="3.16"&&draft.sourceHash===hash32(sourceText)&&draft.finalText){finalText=draft.finalText;repairs=Array.isArray(draft.repairs)?draft.repairs:[];manualKeeps=new Set(Array.isArray(draft.manualKeeps)?draft.manualKeeps:[]);structureDecisions=draft.structureDecisions||{};manualIssues=findManualIssues(finalText);structureCandidates=findStructures(finalText);didRun=true;}}render();}
+load().catch(e=>{$("status").className="status bad";$("status").textContent="❌ "+String(e&&e.message?e.message:e);});
+</script></body></html>
