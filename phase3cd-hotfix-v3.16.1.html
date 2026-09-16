@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<title>Screenshot Report｜Phase 3-C-D Hotfix v3.16.1</title>
+<style>
+:root{
+  --bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--muted:#6e6e73;
+  --green:#2f7d4a;--green-bg:#e9f5ed;--amber:#8a5b00;--amber-bg:#fff3d6;
+  --blue:#3478f6;--blue-bg:#edf3ff;--red:#a52a20;--red-bg:#ffe9e5;
+  --line:#e5e5ea;--soft:#f2f2f7;--slate:#557083;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  -webkit-font-smoothing:antialiased
+}
+main{max-width:760px;margin:auto;padding:20px 14px 56px}
+.card{background:var(--card);border-radius:22px;padding:20px;margin-bottom:16px;box-shadow:0 4px 18px rgba(0,0,0,.055)}
+.eyebrow{font-size:13px;font-weight:900;letter-spacing:.04em;color:#566473}
+h1{font-size:30px;line-height:1.16;margin:8px 0 10px}
+h2{font-size:22px;margin:0 0 12px}
+p{color:var(--muted);line-height:1.65;margin:8px 0}
+.status{border-radius:15px;padding:15px;line-height:1.6;margin:14px 0;background:var(--soft)}
+.good{background:var(--green-bg);color:#20663c}
+.warn{background:var(--amber-bg);color:#7c5400}
+.bad{background:var(--red-bg);color:var(--red)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.metric{background:var(--soft);padding:14px;border-radius:14px}
+.metric span{display:block;color:var(--muted);font-size:12px}
+.metric strong{display:block;font-size:26px;margin-top:4px;overflow-wrap:anywhere}
+.rule{padding:13px;border-radius:13px;line-height:1.6;margin-top:10px;background:var(--blue-bg);color:#284f93}
+.rule.green{background:var(--green-bg);color:#28683f}
+.rule.amber{background:var(--amber-bg);color:#7c5400}
+.raw{background:#f7f7f9;border:1px solid var(--line);padding:13px;border-radius:13px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+.arrow{text-align:center;font-size:24px;color:#8a8a8f;padding:4px 0}
+button,a.btn{
+  display:block;width:100%;border:0;border-radius:15px;padding:16px;margin-top:11px;
+  font:inherit;font-size:17px;font-weight:850;text-align:center;text-decoration:none;
+  -webkit-tap-highlight-color:transparent
+}
+.primary{background:var(--blue);color:#fff}
+.success{background:var(--green);color:#fff}
+.secondary{background:#e9e9ee;color:var(--text)}
+.safe{background:var(--slate);color:#fff}
+button:disabled,a.disabled{opacity:.38;pointer-events:none}
+.small{font-size:13px;line-height:1.6;color:var(--muted)}
+.tag{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef2ff;color:#4752a3;font-size:12px;font-weight:800;margin-right:6px}
+@media(max-width:420px){h1{font-size:28px}.card{padding:18px}}
+</style>
+</head>
+<body>
+<main>
+
+<section class="card">
+  <div class="eyebrow">SCREENSHOT REPORT · PHASE 3-C-D HOTFIX v3.16.1</div>
+  <h1>已確認句尾符號 Hotfix</h1>
+  <p>只處理你已回原圖確認的單一 OCR 漏網：<b>Broadcom 段落句尾的「°」應為「。」</b>。不重跑 OCR、不改其他正文、不改 5 個已確認子標題。</p>
+
+  <div id="status" class="status">正在讀取本機 Phase 3-C-D v3.16 PASS…</div>
+
+  <div class="grid">
+    <div class="metric"><span>目前正文</span><strong id="chars">—</strong></div>
+    <div class="metric"><span>已確認子標題</span><strong id="subs">—</strong></div>
+    <div class="metric"><span>全文「°」殘留</span><strong id="degreeCount">—</strong></div>
+    <div class="metric"><span>Hotfix 狀態</span><strong id="hotfixState">—</strong></div>
+  </div>
+
+  <button id="applyBtn" class="primary" disabled>一鍵套用已確認 Hotfix</button>
+  <button id="backupBtn" class="safe" disabled>下載 Hotfix 前備份 JSON</button>
+  <a id="nextBtn" class="btn success disabled" href="./phase3d-v2.3.1.html">前往 Phase 3-D v2.3.1 重建正式報告</a>
+
+  <div class="small" style="margin-top:12px">
+    套用成功後會自動使既有 Phase 3-D／Phase 6 成品失效；請回 v2.3.1 重新建立正式報告。
+  </div>
+</section>
+
+<section class="card">
+  <h2>本次唯一修正</h2>
+  <div class="tag">原圖已人工確認</div>
+  <div class="raw" style="margin-top:10px">Nvidia的合作夥伴名單中有 Intel、 Marvell 和聯發科，但沒有博通 (Broadcom) °</div>
+  <div class="arrow">↓</div>
+  <div class="raw">Nvidia的合作夥伴名單中有 Intel、 Marvell 和聯發科，但沒有博通 (Broadcom)。</div>
+
+  <div class="rule green">
+    <b>安全條件：</b>只有在全文恰好存在 1 個「°」，且它正好位於上述 Broadcom 句尾時才會自動修正。若全文還有其他「°」，本頁會阻擋，不會猜。
+  </div>
+</section>
+
+<section class="card">
+  <h2>Hotfix 後 Gate</h2>
+  <div id="gateStatus" class="status">尚未檢查。</div>
+  <div class="rule amber">
+    <b>新增永久檢查：</b>Hotfix 完成後，正文不得再含孤立 degree sign「°」。本頁會把這次修正寫入 appliedCorrections 與 hotfixV3161 稽核紀錄，並更新正文 content hash。
+  </div>
+</section>
+
+</main>
+
+<script>
+const DB_NAME="ScreenshotReportDB", DB_VERSION=2, SETTINGS_STORE="settings";
+const STATE_KEY="phase3cCorrectionTriage:v1";
+const REVIEW_KEY="phase3cCorrectionTriageReview:v1";
+const PHASE3D_STATE_KEY="phase3dReport:v1";
+const PHASE3D_REVIEW_KEY="phase3dReportReview:v1";
+const PHASE6_STATE_KEY="phase6Publication:v1";
+const PHASE6_REVIEW_KEY="phase6PublicationReview:v1";
+
+const SOURCE_FRAGMENT="但沒有博通 (Broadcom) °";
+const TARGET_FRAGMENT="但沒有博通 (Broadcom)。";
+const HOTFIX_VERSION="phase3cd-hotfix-v3.16.1-broadcom-degree-sign";
+
+let db=null, state=null, review=null;
+
+const $=id=>document.getElementById(id);
+
+function hash32(s){
+  let h=2166136261>>>0;
+  for(let i=0;i<String(s).length;i++){
+    h^=s.charCodeAt(i);
+    h=Math.imul(h,16777619)>>>0;
+  }
+  return h.toString(16).padStart(8,"0");
+}
+function countOccurrences(text, needle){
+  if(!needle) return 0;
+  let c=0,pos=0;
+  while((pos=String(text).indexOf(needle,pos))!==-1){c++;pos+=needle.length;}
+  return c;
+}
+function countDegree(text){
+  return (String(text||"").match(/°/g)||[]).length;
+}
+function openDb(){
+  return new Promise((resolve,reject)=>{
+    const r=indexedDB.open(DB_NAME,DB_VERSION);
+    r.onupgradeneeded=()=>{
+      const d=r.result;
+      if(!d.objectStoreNames.contains(SETTINGS_STORE)) d.createObjectStore(SETTINGS_STORE,{keyPath:"key"});
+    };
+    r.onsuccess=()=>resolve(r.result);
+    r.onerror=()=>reject(r.error);
+  });
+}
+function getSetting(key){
+  return new Promise((resolve,reject)=>{
+    const r=db.transaction(SETTINGS_STORE,"readonly").objectStore(SETTINGS_STORE).get(key);
+    r.onsuccess=()=>resolve(r.result&&"value" in r.result?r.result.value:null);
+    r.onerror=()=>reject(r.error);
+  });
+}
+function putSetting(key,value){
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(SETTINGS_STORE,"readwrite");
+    tx.objectStore(SETTINGS_STORE).put({key,value,updatedAt:Date.now()});
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>reject(tx.error);
+  });
+}
+function deleteSetting(key){
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(SETTINGS_STORE,"readwrite");
+    tx.objectStore(SETTINGS_STORE).delete(key);
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>reject(tx.error);
+  });
+}
+
+function sourceLooksValid(){
+  if(!state || !review) return false;
+  if(review.status!=="pass") return false;
+  if(review.version!=="phase3cd-v3.16-ocr-lexical-structure-final-gate") return false;
+  if(!String(state.correctedText||"").trim()) return false;
+  const audit=state.finalSemanticAuditV316;
+  if(!(audit && audit.version==="3.16")) return false;
+  const zeroKeys=[
+    "safeRepairResiduals","ocrLexicalResiduals","truncatedSentenceResiduals",
+    "manualAmbiguities","unconfirmedStructureCandidates","quoteResiduals","brandTypos"
+  ];
+  if(!zeroKeys.every(k=>Number(audit[k]||0)===0)) return false;
+  if(review.contentHash && review.contentHash!==hash32(state.correctedText)) return false;
+  return true;
+}
+
+function subheadingCount(){
+  const a=state && state.structuralAnnotationsV316;
+  return Array.isArray(a&&a.subheadings) ? a.subheadings.length : 0;
+}
+
+function isAlreadyFixed(){
+  const text=String(state&&state.correctedText||"");
+  return countOccurrences(text,SOURCE_FRAGMENT)===0 &&
+         countOccurrences(text,TARGET_FRAGMENT)===1 &&
+         countDegree(text)===0 &&
+         state && state.hotfixV3161 && state.hotfixV3161.version===HOTFIX_VERSION;
+}
+
+function canApply(){
+  const text=String(state&&state.correctedText||"");
+  return sourceLooksValid() &&
+         countOccurrences(text,SOURCE_FRAGMENT)===1 &&
+         countOccurrences(text,TARGET_FRAGMENT)===0 &&
+         countDegree(text)===1 &&
+         subheadingCount()===5;
+}
+
+function render(){
+  const text=String(state&&state.correctedText||"");
+  const deg=countDegree(text);
+  const src=countOccurrences(text,SOURCE_FRAGMENT);
+  const dst=countOccurrences(text,TARGET_FRAGMENT);
+
+  $("chars").textContent=state?String(text.length):"—";
+  $("subs").textContent=state?String(subheadingCount()):"—";
+  $("degreeCount").textContent=state?String(deg):"—";
+
+  $("backupBtn").disabled=!state;
+  $("applyBtn").disabled=!canApply();
+
+  if(isAlreadyFixed()){
+    $("hotfixState").textContent="完成";
+    $("status").className="status good";
+    $("status").innerHTML=`✅ Hotfix v3.16.1 已完成。<br>正文 ${text.length} 字元｜子標題 ${subheadingCount()}｜「°」殘留 0`;
+    $("gateStatus").className="status good";
+    $("gateStatus").innerHTML="✅ Hotfix Gate 0：Broadcom 句尾已為「。」；全文沒有孤立「°」。";
+    $("nextBtn").classList.remove("disabled");
+    $("applyBtn").disabled=true;
+    return;
+  }
+
+  $("nextBtn").classList.add("disabled");
+
+  if(!state){
+    $("hotfixState").textContent="無來源";
+    $("status").className="status warn";
+    $("status").textContent="⚠️ 找不到 Phase 3-C-D 狀態。請在原本同一台 iPhone／Safari 開啟。";
+    $("gateStatus").className="status warn";
+    $("gateStatus").textContent="尚無可檢查正文。";
+    return;
+  }
+
+  if(!sourceLooksValid()){
+    $("hotfixState").textContent="阻擋";
+    $("status").className="status bad";
+    $("status").textContent="❌ 目前來源不是有效的 Phase 3-C-D v3.16 PASS，或 content hash 已不一致。請不要套用。";
+    $("gateStatus").className="status bad";
+    $("gateStatus").textContent="來源契約未通過。";
+    return;
+  }
+
+  if(subheadingCount()!==5){
+    $("hotfixState").textContent="阻擋";
+    $("status").className="status warn";
+    $("status").textContent=`⚠️ v3.16 PASS 已讀取，但已確認子標題不是 5（目前 ${subheadingCount()}）。為避免改到錯誤狀態，本頁停止。`;
+    $("gateStatus").className="status warn";
+    $("gateStatus").textContent="結構契約不一致。";
+    return;
+  }
+
+  if(src===1 && deg===1 && dst===0){
+    $("hotfixState").textContent="可套用";
+    $("status").className="status good";
+    $("status").innerHTML=`✅ 已讀取有效 v3.16 PASS。<br>找到唯一已確認 OCR 漏網，可安全套用 Hotfix。`;
+    $("gateStatus").className="status warn";
+    $("gateStatus").innerHTML='⚠️ Hotfix 前仍有 1 個「°」；套用後必須歸零。';
+    return;
+  }
+
+  $("hotfixState").textContent="阻擋";
+  $("status").className="status warn";
+  $("status").innerHTML=`⚠️ 安全條件不吻合，沒有自動修改。<br>Broadcom 原片段 ${src} 次｜修正版片段 ${dst} 次｜全文「°」 ${deg} 個`;
+  $("gateStatus").className="status warn";
+  $("gateStatus").textContent="請先不要繼續；本頁只處理唯一且已人工確認的 Broadcom 句尾。";
+}
+
+async function applyHotfix(){
+  if(!canApply()){
+    alert("安全條件不吻合，未修改任何內容。");
+    render();
+    return;
+  }
+
+  const before=String(state.correctedText);
+  const oldHash=hash32(before);
+  const after=before.replace(SOURCE_FRAGMENT,TARGET_FRAGMENT);
+
+  if(countDegree(after)!==0){
+    alert("修正後仍偵測到「°」，已停止，未寫入。");
+    return;
+  }
+  if(after.length!==before.length){
+    alert("Hotfix 不應改變正文字元數；安全檢查失敗，未寫入。");
+    return;
+  }
+
+  const now=Date.now();
+  const newHash=hash32(after);
+  const correction={
+    id:`v3161-hotfix-${now}`,
+    from:SOURCE_FRAGMENT,
+    to:TARGET_FRAGMENT,
+    reason:"原圖人工確認：Broadcom 句尾 degree sign「°」為 OCR 誤判，應為中文句號「。」",
+    source:HOTFIX_VERSION
+  };
+
+  state.correctedText=after;
+  state.appliedCorrections=[
+    ...(Array.isArray(state.appliedCorrections)?state.appliedCorrections:[]),
+    correction
+  ];
+
+  state.finalSemanticAuditV316={
+    ...(state.finalSemanticAuditV316||{}),
+    version:"3.16",
+    finalChars:after.length,
+    contentHash:newHash,
+    passedAt:now,
+    punctuationResiduals:0,
+    degreeSignResiduals:0,
+    hotfixVersion:"3.16.1"
+  };
+
+  state.hotfixV3161={
+    version:HOTFIX_VERSION,
+    appliedAt:now,
+    userVerifiedAgainstOriginal:true,
+    from:SOURCE_FRAGMENT,
+    to:TARGET_FRAGMENT,
+    previousContentHash:oldHash,
+    contentHash:newHash,
+    finalChars:after.length,
+    degreeSignResiduals:0
+  };
+
+  review={
+    ...(review||{}),
+    status:"pass",
+    phase:"phase3cd",
+    version:"phase3cd-v3.16-ocr-lexical-structure-final-gate",
+    passedAt:now,
+    contentHash:newHash,
+    hotfixVersion:"3.16.1",
+    hotfixAppliedAt:now,
+    hotfixDegreeSignResiduals:0
+  };
+
+  await putSetting(STATE_KEY,state);
+  await putSetting(REVIEW_KEY,review);
+
+  for(const key of [PHASE3D_STATE_KEY,PHASE3D_REVIEW_KEY,PHASE6_STATE_KEY,PHASE6_REVIEW_KEY]){
+    try{await deleteSetting(key);}catch(e){}
+  }
+
+  render();
+  alert("Hotfix v3.16.1 已套用。舊 Phase 3-D／Phase 6 已失效；下一步請前往 Phase 3-D v2.3.1 重建正式報告。");
+}
+
+function downloadBackup(){
+  if(!state){alert("尚無可下載狀態。");return;}
+  const payload={
+    schema:"screenshot-report-phase3cd-hotfix-v3.16.1-backup",
+    exportedAt:Date.now(),
+    state,
+    review
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json;charset=utf-8"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`phase3cd-hotfix-v3.16.1-backup-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+}
+
+async function load(){
+  db=await openDb();
+  state=await getSetting(STATE_KEY);
+  review=await getSetting(REVIEW_KEY);
+  render();
+}
+
+$("applyBtn").addEventListener("click",()=>applyHotfix().catch(e=>{
+  $("status").className="status bad";
+  $("status").textContent="❌ "+String(e&&e.message?e.message:e);
+}));
+$("backupBtn").addEventListener("click",downloadBackup);
+
+load().catch(e=>{
+  $("status").className="status bad";
+  $("status").textContent="❌ "+String(e&&e.message?e.message:e);
+});
+</script>
+</body>
+</html>
