@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Screenshot Report · Autopilot v1</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;color:#17181a;background:#f3f4f6}
+*{box-sizing:border-box} body{margin:0;padding:18px}
+.wrap{max-width:860px;margin:0 auto}.card{background:#fff;border-radius:24px;padding:22px;margin:16px 0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.eyebrow{font-weight:800;color:#59636f;letter-spacing:.04em}.title{font-size:40px;line-height:1.05;margin:10px 0 16px;font-weight:900}
+.lead{font-size:19px;line-height:1.55;color:#555b63}.status{border-radius:18px;padding:16px 18px;font-size:18px;line-height:1.5;background:#eef2f7}
+.good{background:#e9f7ec;color:#27663a}.warn{background:#fff4d8;color:#815715}.bad{background:#fdebea;color:#8c302a}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.metric{padding:16px;background:#f4f5f7;border-radius:18px}
+.metric b{display:block;font-size:28px;margin-top:4px}.btn{width:100%;border:0;border-radius:18px;padding:17px 16px;font-size:19px;font-weight:800;margin:8px 0;cursor:pointer}
+.primary{background:#3478f6;color:#fff}.secondary{background:#60778b;color:#fff}.danger{background:#f04d3d;color:#fff}.btn:disabled{opacity:.4;cursor:not-allowed}
+.rule{background:#eef5ff;color:#2e5392;padding:15px 17px;border-radius:16px;font-size:17px;line-height:1.55;margin:10px 0}
+.log{background:#111820;color:#d7e4ef;border-radius:18px;padding:14px;max-height:320px;overflow:auto;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap}
+iframe{width:100%;height:62vh;border:1px solid #d5d9de;border-radius:18px;background:#fff}
+details summary{font-weight:800;font-size:18px;cursor:pointer}.small{font-size:14px;color:#6c737d;line-height:1.45}
+.check{display:flex;gap:12px;align-items:flex-start;font-size:17px;line-height:1.45;margin:12px 0}.check input{width:22px;height:22px;flex:none}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em}
+@media(max-width:600px){body{padding:10px}.card{padding:18px}.title{font-size:34px}.grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="eyebrow">SCREENSHOT REPORT · AUTOPILOT v1.1</div>
+    <div class="title">自動流程控制器</div>
+    <div class="lead">
+      一次載入文章截圖後，由此頁自動檢查目前文章張數、舊狀態污染、接縫計畫、OCR 語言與批次完成度。
+      可機械驗證的步驟自動繼續；只有真正需要人判斷的歧義才停止。v1.1 修正已完成階段被誤重跑造成等待逾時的問題。
+    </div>
+    <div id="status" class="status">正在載入主程式…</div>
+  </div>
+
+  <div class="card">
+    <h2>自動化原則</h2>
+    <div class="rule"><b>不會自動做：</b>清除截圖、刪除專案、覆寫人工確認、猜測嚴重 OCR 原文。</div>
+    <div class="rule"><b>會自動做：</b>重建 stale plan、關閉測試型高信心自動串接、檢查 N 張→N−1 接縫、確認 0 斷點、避免舊文章張數污染、驗證 OCR N/N 與 0 失敗。</div>
+    <label class="check"><input id="autoPass" type="checkbox" checked><span>允許自動按下「純機械條件已全部成立」的 PASS。含「我已人工檢查」語意的 PASS 永遠不會自動按。</span></label>
+    <label class="check"><input id="dryRun" type="checkbox"><span>只檢查、不點按鈕（Dry Run）。</span></label>
+    <button id="run" class="btn primary">▶ 開始／繼續 Autopilot</button>
+    <button id="stop" class="btn secondary">■ 停止</button>
+  </div>
+
+  <div class="card">
+    <h2>目前偵測</h2>
+    <div class="grid">
+      <div class="metric">文章截圖<b id="mShots">—</b></div>
+      <div class="metric">預期接縫<b id="mSeams">—</b></div>
+      <div class="metric">OCR 完成<b id="mOcr">—</b></div>
+      <div class="metric">人工阻擋<b id="mBlocks">—</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>執行記錄</h2>
+    <div id="log" class="log"></div>
+  </div>
+
+  <div class="card">
+    <details open>
+      <summary>受控主程式</summary>
+      <p class="small">此 iframe 與主站同網域時可直接操作同一份 IndexedDB。若你看到登入頁或空白頁，請確認本檔放在 screenshot-report repository 根目錄並由 GitHub Pages 開啟。</p>
+      <iframe id="app" src="./index.html?autopilot=1"></iframe>
+    </details>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const app = $("app");
+  let stopped = false, running = false;
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const now = () => new Date().toLocaleTimeString();
+  function log(msg){ $("log").textContent += `[${now()}] ${msg}\n`; $("log").scrollTop = $("log").scrollHeight; }
+  function setStatus(msg, cls=""){ $("status").className = "status "+cls; $("status").innerHTML = msg; }
+
+  function doc(){
+    try { return app.contentDocument || app.contentWindow.document; }
+    catch(e){ return null; }
+  }
+  function text(){ const d=doc(); return d ? (d.body?.innerText || "") : ""; }
+  function norm(s){ return String(s||"").replace(/\s+/g," ").trim(); }
+  function visible(el){
+    if(!el) return false;
+    const w=app.contentWindow;
+    const st=w.getComputedStyle(el);
+    return st.display!=="none" && st.visibility!=="hidden" && !el.disabled;
+  }
+  function controls(){
+    const d=doc(); if(!d) return [];
+    return [...d.querySelectorAll("button,a,[role=button],input[type=button],input[type=submit]")];
+  }
+  function findControl(parts){
+    const ps=(Array.isArray(parts)?parts:[parts]).map(norm);
+    return controls().find(el => visible(el) && ps.every(p => norm(el.innerText||el.value||el.textContent).includes(p)));
+  }
+  function findSection(title){
+    const d=doc(); if(!d) return null;
+    const nodes=[...d.querySelectorAll("section,article,div")];
+    const matches=nodes.filter(el => norm(el.innerText).includes(title));
+    matches.sort((a,b)=>norm(a.innerText).length-norm(b.innerText).length);
+    return matches[0]||null;
+  }
+  function sectionText(title){ const s=findSection(title); return s ? s.innerText : ""; }
+  function clickControl(parts){
+    const el=findControl(parts); if(!el) return false;
+    if($("dryRun").checked){ log(`DRY RUN：會點按「${norm(el.innerText||el.value)}」`); return true; }
+    el.scrollIntoView({block:"center"});
+    el.click();
+    log(`已點按：${norm(el.innerText||el.value)}`);
+    return true;
+  }
+  async function waitFor(fn, timeout=120000, step=700){
+    const t=Date.now();
+    while(Date.now()-t<timeout){
+      if(stopped) throw new Error("使用者停止");
+      try { const v=fn(); if(v) return v; } catch(e){}
+      await sleep(step);
+    }
+    throw new Error("等待逾時");
+  }
+  function matchNum(re, s=text()){ const m=s.match(re); return m ? Number(m[1]) : null; }
+  function detectShots(){
+    const s=text();
+    let n=matchNum(/目前共\s*(\d+)\s*張截圖/,s);
+    if(n==null) n=matchNum(/已從手機載入\s*(\d+)\s*張截圖/,s);
+    if(n==null) {
+      const m=s.match(/目前文章[^\n]*第\s*1\s*[~～\-–—]\s*(\d+)\s*張/);
+      if(m) n=Number(m[1]);
+    }
+    return n;
+  }
+  function updateMetrics(){
+    const s=text(), n=detectShots();
+    $("mShots").textContent=n??"—";
+    $("mSeams").textContent=n?Math.max(0,n-1):"—";
+    const om=s.match(/整篇\s*OCR\s*已完成\s*[：:]?\s*(\d+)\s*[\/／]\s*(\d+)\s*張/) ||
+             s.match(/總切片\s*(\d+)[\s\S]{0,120}?已完成\s*(\d+)/);
+    $("mOcr").textContent=om?`${om[1]}/${om[2]}`:"—";
+    const pending=matchNum(/待人工確認\s*(\d+)/,s);
+    $("mBlocks").textContent=pending??"—";
+  }
+
+  function findCheckboxByText(snippet){
+    const d=doc(); if(!d) return null;
+    const boxes=[...d.querySelectorAll('input[type="checkbox"]')];
+    for(const cb of boxes){
+      let p=cb.parentElement;
+      for(let i=0;i<4 && p;i++,p=p.parentElement){
+        if(norm(p.innerText).includes(snippet)) return cb;
+      }
+    }
+    return null;
+  }
+
+  async function phase2C(n){
+    const all=text();
+    const expected=Math.max(0,n-1);
+
+    // v1.1：優先使用整頁的「目前 Phase 2-C 統計」判斷，不再因 section 定位誤差重跑已完成分析。
+    const completeRe = new RegExp(`整批\\s*分析\\s*完成\\s*[：:]?\\s*${expected}\\s*[\\/／]\\s*${expected}\\s*組`);
+    const manualRe   = new RegExp(`已人工確認\\s*${expected}(?!\\d)`);
+    const pending0Re = /待人工確認\s*0(?!\d)/;
+    const rejected0Re= /完全重複\s*\/\s*已拒絕\s*0(?!\d)/;
+
+    if(completeRe.test(all) && manualRe.test(all) && pending0Re.test(all)){
+      log(`Phase 2-C 已驗證：${expected}/${expected} 組完成、人工確認 ${expected}、待確認 0。略過重跑。`);
+      return;
+    }
+
+    // 若已完成但仍有真正待人工項目，只停住，不破壞既有結果。
+    const cm=all.match(/整批\s*分析\s*完成\s*[：:]?\s*(\d+)\s*[\/／]\s*(\d+)\s*組/);
+    const pm=all.match(/待人工確認\s*(\d+)/);
+    if(cm && Number(cm[1])===expected && Number(cm[2])===expected && Number(pm?.[1]||0)>0){
+      throw new Error(`Phase 2-C 有 ${pm[1]} 組真正需要人工確認`);
+    }
+
+    // 只有未完成時才啟動分析。
+    if(!clickControl(["重新分析全部"]) && !clickControl(["依目前順序","重新開始"])) {
+      throw new Error("找不到 Phase 2-C 開始按鈕");
+    }
+    if($("dryRun").checked) return;
+
+    await waitFor(()=>{
+      const x=text();
+      return completeRe.test(x);
+    },300000,1000);
+
+    const aft=text();
+    const p=(aft.match(/待人工確認\s*(\d+)/)||[])[1];
+    if(Number(p||0)>0) throw new Error(`Phase 2-C 有 ${p} 組需要人工確認`);
+
+    log(`Phase 2-C 新分析完成：${expected}/${expected}。`);
+  }
+
+  async function phase2D(n){
+    const sec=sectionText("Phase 2-D");
+    if(!sec){ log("Phase 2-D 尚未出現，略過。"); return; }
+    const cb=findCheckboxByText("也允許 Phase 2-C");
+    if(cb && cb.checked && !$("dryRun").checked){ cb.click(); log("已關閉「高信心候選自動串接」測試功能。"); }
+    const good = new RegExp(`已串接接縫\\s*${n-1}`).test(sec) &&
+                 /待確認斷點\s*0/.test(sec) &&
+                 new RegExp(`虛擬切片\\s*${n}`).test(sec);
+    if(good){ log(`Phase 2-D 契約正確：1 鏈／${n-1} 接縫／0 斷點／${n} 切片。`); return; }
+    if(!clickControl(["建立","更新虛擬文件計畫"])) throw new Error("找不到 Phase 2-D 重建按鈕");
+    if(!$("dryRun").checked) await waitFor(()=>{
+      const x=sectionText("Phase 2-D");
+      return new RegExp(`已串接接縫\\s*${n-1}`).test(x) && /待確認斷點\s*0/.test(x) && new RegExp(`虛擬切片\\s*${n}`).test(x);
+    },60000);
+  }
+
+  async function phase2E(n){
+    const sec=sectionText("Phase 2-E");
+    if(!sec){ log("Phase 2-E 尚未出現，略過。"); return; }
+    const good = /1\s*條文件鏈/.test(sec) &&
+                 new RegExp(`${n-1}\\s*個已確認接縫`).test(sec) &&
+                 /0\s*斷點/.test(sec) &&
+                 new RegExp(`${n}\\s*切片`).test(sec);
+    if(good){ log("Phase 2-E 完整文章虛擬文件已正確建立。"); return; }
+    if(clickControl(["建立","更新文章工作區"])){
+      if(!$("dryRun").checked) await sleep(900);
+    }
+    const analyze=findControl(["分析這篇文章的所有接縫"]);
+    if(analyze && visible(analyze)){ if(!$("dryRun").checked) analyze.click(); log("已啟動 Phase 2-E 全接縫分析。"); }
+    if(!$("dryRun").checked) await waitFor(()=>{
+      const x=sectionText("Phase 2-E");
+      return /1\s*條文件鏈/.test(x) && new RegExp(`${n-1}\\s*個已確認接縫`).test(x) && /0\s*斷點/.test(x);
+    },180000);
+  }
+
+  function sectionHasHumanPass(title){
+    const s=findSection(title); if(!s) return false;
+    return [...s.querySelectorAll("button,a")].some(el=>/我已檢查|人工|閱讀驗收/.test(norm(el.innerText)));
+  }
+
+  async function phase3A(){
+    const sec=sectionText("Phase 3-A"); if(!sec) return;
+    if(/閱讀驗收已 PASS/.test(sec)){ log("Phase 3-A 已 PASS。"); return; }
+    if(clickControl(["建立","高畫質重建文章預覽"])) {
+      if(!$("dryRun").checked) await waitFor(()=>/Phase 3-A 已可建立閱讀預覽/.test(sectionText("Phase 3-A"))||/虛擬文章高度\s*\d+/.test(sectionText("Phase 3-A")),60000);
+    }
+    throw new Error("Phase 3-A 是視覺完整性驗收；v1 不會冒充「我已檢查全文」。需人工/AI 視覺審核一次。");
+  }
+
+  async function phase3B(){
+    const sec=sectionText("Phase 3-B"); if(!sec) return;
+    if(/Phase 3-B 已 PASS/.test(sec)){ log("Phase 3-B 已 PASS。"); return; }
+    if(clickControl(["建立","A4 分頁預覽"])){
+      if(!$("dryRun").checked) await waitFor(()=>/A4 頁數\s*[1-9]\d*/.test(sectionText("Phase 3-B")),60000);
+    }
+    throw new Error("Phase 3-B 是分頁視覺驗收；v1 不會自動聲稱 PDF 視覺正確。");
+  }
+
+  function pickLanguageSelect(){
+    const d=doc(); if(!d) return null;
+    const selects=[...d.querySelectorAll("select")];
+    return selects.find(sel=>[...sel.options].some(o=>/繁體中文/.test(o.textContent)) && [...sel.options].some(o=>/簡體中文/.test(o.textContent)))||null;
+  }
+
+  async function phase3CA(){
+    const sec=sectionText("Phase 3-C-A"); if(!sec) return;
+    if(/Phase 3-C-A 已 PASS/.test(text())){ log("Phase 3-C-A 已 PASS。"); return; }
+    const sel=pickLanguageSelect();
+    if(!sel) throw new Error("找不到 OCR 語言選單");
+    // v1 安全策略：若目前值不是繁體/簡體之一，不猜；若已選繁體，沿用。
+    const optText=sel.options[sel.selectedIndex]?.textContent||"";
+    if(!/繁體中文/.test(optText) && !/簡體中文/.test(optText)){
+      throw new Error("OCR 語言尚未確認；v1 不會在沒有雙模型結果時猜繁/簡體");
+    }
+    log(`Phase 3-C-A OCR 語言：${norm(optText)}`);
+    if(!/OCR 完成\s*[：:]\s*第\s*1\s*張/.test(sec)){
+      clickControl(["更新 OCR 輸入預覽"]);
+      if(!clickControl(["開始單一切片 OCR 測試"])) throw new Error("找不到單張 OCR 測試按鈕");
+      if(!$("dryRun").checked) await waitFor(()=>/OCR 完成\s*[：:]\s*第\s*1\s*張/.test(sectionText("Phase 3-C-A")),180000);
+    }
+    if($("autoPass").checked){
+      const b=findControl(["文字可用","Phase 3-C-A","PASS"]);
+      if(b){ if(!$("dryRun").checked) b.click(); log("Phase 3-C-A：OCR 可讀性機械條件已成立，已送出 PASS。"); await sleep(500); }
+    }
+  }
+
+  async function phase3CB(n){
+    const sec=sectionText("Phase 3-C-B"); if(!sec) return;
+    const doneMatch=sec.match(/整篇 OCR 已完成\s*[：:]\s*(\d+)\s*\/\s*(\d+)\s*張/);
+    const fail=(sec.match(/失敗\s*(\d+)/)||[])[1];
+    if(!(doneMatch && Number(doneMatch[1])===n && Number(doneMatch[2])===n && Number(fail||0)===0)){
+      clickControl(["建立","更新整篇 OCR 計畫"]);
+      await sleep(400);
+      if(!clickControl(["開始","繼續整篇 OCR"])) throw new Error("找不到整篇 OCR 開始按鈕");
+      if(!$("dryRun").checked) await waitFor(()=>{
+        const x=sectionText("Phase 3-C-B");
+        const m=x.match(/整篇 OCR 已完成\s*[：:]\s*(\d+)\s*\/\s*(\d+)\s*張/);
+        const f=(x.match(/失敗\s*(\d+)/)||[])[1];
+        return m && Number(m[1])===n && Number(m[2])===n && Number(f||0)===0;
+      },360000);
+    }
+    const x=sectionText("Phase 3-C-B");
+    log(`Phase 3-C-B OCR 已完成 ${n}/${n}，失敗 0。`);
+    if($("autoPass").checked){
+      // 兼容舊 UI「6 張皆完成」：只在實際統計 N/N 且失敗 0 時允許按。
+      const candidates=controls().filter(el=>visible(el) && /Phase 3-C-B/.test(norm(el.innerText)) && /PASS/.test(norm(el.innerText)));
+      const b=candidates[0];
+      if(b){
+        const old=norm(b.innerText);
+        if(/\d+\s*張皆完成/.test(old) && !old.includes(`${n} 張`)){
+          log(`偵測到舊硬編碼標籤「${old}」；實際 Gate 是 ${n}/${n}、失敗 0。`);
+          if(!$("dryRun").checked) b.innerText=`✓ ${n} 張皆完成，標記 Phase 3-C-B PASS`;
+        }
+        if(!$("dryRun").checked) b.click();
+        log("已送出 Phase 3-C-B PASS；正在驗證結果。");
+        if(!$("dryRun").checked) await sleep(700);
+      }
+    }
+  }
+
+  async function phase3CD(){
+    const all=text();
+    if(!/Phase\s*3[–—-]C[–—-]D/.test(all)){ log("Phase 3-C-D 尚未出現，略過。"); return; }
+
+    if(/目前\s*Phase\s*3[–—-]C[–—-]D\s*結果與來源或設定不一致/.test(all)){
+      if(!clickControl(["建立","更新 Phase 3-C-D","校正工作區"])){
+        // 某些版本按鈕沒有完整 Phase 名稱
+        if(!clickControl(["建立","更新","校正工作區"])) throw new Error("Phase 3-C-D 已過期，但找不到重建校正工作區按鈕");
+      }
+      if(!$("dryRun").checked){
+        await waitFor(()=>!/目前\s*Phase\s*3[–—-]C[–—-]D\s*結果與來源或設定不一致/.test(text()),90000,800);
+      }
+      log("Phase 3-C-D stale workspace 已自動重建。");
+    }
+
+    const x=text();
+    const pending=(x.match(/待人工確認\s*(\d+)/)||[])[1];
+    const manualFail=(x.match(/手動校正失敗\s*(\d+)/)||[])[1];
+    if(Number(pending||0)>0 || Number(manualFail||0)>0){
+      throw new Error(`Phase 3-C-D 需要人工判斷：待人工確認 ${pending||0}；手動校正失敗 ${manualFail||0}`);
+    }
+
+    // v1.1 到此採 fail-closed：不猜「校正／分流候選」與「全文補抓候選」的語意。
+    const cand=(x.match(/校正\s*\/\s*分流候選\s*(\d+)/)||[])[1];
+    const catchup=(x.match(/全文補抓候選\s*(\d+)/)||[])[1];
+    if(Number(cand||0)>0 || Number(catchup||0)>0){
+      throw new Error(`Phase 3-C-D 工作區已更新；目前校正／分流候選 ${cand||0}、全文補抓候選 ${catchup||0}。這些涉及正文語意，v1.1 安全停止，不自動猜。`);
+    }
+    log("Phase 3-C-D 無人工阻擋。");
+  }
+
+  async function run(){
+    if(running) return; running=true; stopped=false; $("run").disabled=true;
+    try{
+      setStatus("Autopilot 執行中…","warn");
+      await waitFor(()=>doc() && doc().readyState==="complete",30000);
+      await sleep(800);
+      updateMetrics();
+      const n=detectShots();
+      if(!n || n<1) throw new Error("找不到目前文章截圖張數；請先在主程式載入一篇文章");
+      log(`目前文章：${n} 張；預期相鄰接縫 ${Math.max(0,n-1)}。`);
+      await phase2C(n); updateMetrics();
+      await phase2D(n); updateMetrics();
+      await phase2E(n); updateMetrics();
+      // 已經 PASS 的視覺階段會直接略過；未 PASS 才停。
+      await phase3A();
+      await phase3B();
+      await phase3CA();
+      await phase3CB(n); updateMetrics();
+      await phase3CD(); updateMetrics();
+      setStatus(`✅ 已完成所有 v1 可安全自動化步驟。文章 ${n} 張；OCR ${n}/${n}。`,"good");
+      log("Autopilot v1.1 安全步驟完成。");
+    }catch(e){
+      const msg=e?.message||String(e);
+      if(msg==="使用者停止") setStatus("已停止。","warn");
+      else if(/人工|視覺|語言尚未確認/.test(msg)) setStatus(`⏸️ 需要一次人工／AI 判斷：${msg}`,"warn");
+      else setStatus(`⚠️ Autopilot 停止：${msg}`,"bad");
+      log(`停止：${msg}`);
+    }finally{
+      running=false; $("run").disabled=false;
+    }
+  }
+
+  $("run").addEventListener("click",run);
+  $("stop").addEventListener("click",()=>{stopped=true; log("使用者要求停止。");});
+  app.addEventListener("load",()=>{setStatus("✅ 主程式已載入。可以開始 Autopilot。","good"); updateMetrics();});
+  setInterval(updateMetrics,2500);
+})();
+</script>
+</body>
+</html>
