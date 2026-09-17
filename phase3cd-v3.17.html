@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<title>Screenshot Report｜Phase 3-C-D v3.17 Universal Final Gate</title>
+<style>
+:root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--muted:#6e6e73;--green:#2f7d4a;--green-bg:#e9f5ed;--amber:#8a5b00;--amber-bg:#fff3d6;--blue:#3478f6;--blue-bg:#edf3ff;--red:#a52a20;--red-bg:#ffe9e5;--line:#e5e5ea;--soft:#f2f2f7;--slate:#557083}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:780px;margin:auto;padding:20px 14px 56px}.card{background:var(--card);border-radius:22px;padding:20px;margin-bottom:16px;box-shadow:0 4px 18px rgba(0,0,0,.055)}
+.eyebrow{font-size:13px;font-weight:900;letter-spacing:.045em;color:#566473}h1{font-size:31px;line-height:1.16;margin:8px 0 10px}h2{font-size:23px;margin:0 0 12px}p{color:var(--muted);line-height:1.65;margin:8px 0}
+.status{border-radius:15px;padding:15px;line-height:1.6;margin:14px 0;background:var(--soft)}.good{background:var(--green-bg);color:#20663c}.warn{background:var(--amber-bg);color:#7c5400}.bad{background:var(--red-bg);color:var(--red)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric{background:var(--soft);padding:14px;border-radius:14px}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;font-size:27px;margin-top:4px}
+button,a.btn,.file-label{display:block;width:100%;border:0;border-radius:15px;padding:16px;margin-top:11px;font:inherit;font-size:17px;font-weight:850;text-align:center;text-decoration:none;-webkit-tap-highlight-color:transparent;cursor:pointer}.primary{background:var(--blue);color:#fff}.pass{background:var(--green);color:#fff}.secondary{background:#e9e9ee;color:var(--text)}.safe{background:var(--slate);color:#fff}button:disabled,a.disabled{opacity:.38;pointer-events:none}
+.rule{padding:13px;border-radius:13px;background:var(--green-bg);color:#28683f;line-height:1.58;margin-top:10px}.rule.amber{background:var(--amber-bg);color:#7c5400}.rule.blue{background:var(--blue-bg);color:#284f93}.note{font-size:13px;line-height:1.65;color:var(--muted);margin-top:12px}
+.issue{border:1px solid #e7c97a;border-radius:17px;padding:15px;margin-top:14px;background:#fffdf7}.issue.blocker{border-color:#e4a19a;background:#fff9f8}.issue.structure{border-color:#b8c8ee;background:#fbfcff}.issue .title{font-weight:900}.raw{background:var(--soft);padding:12px;border-radius:12px;margin:11px 0;line-height:1.58;white-space:pre-wrap;overflow-wrap:anywhere}.context{font-size:13px;line-height:1.55;color:var(--muted);padding:6px 0}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.actions button{margin:0;padding:12px;font-size:15px}
+textarea,input[type=text]{width:100%;font:inherit;border:1px solid #c7c7cc;border-radius:12px;padding:12px;background:#fff;color:var(--text);resize:vertical;margin-top:9px}textarea{min-height:110px}.preview{white-space:pre-wrap;overflow-wrap:anywhere;max-height:560px;overflow:auto;padding:14px;background:#f7f7f9;border:1px solid var(--line);border-radius:13px;line-height:1.65}.tag{display:inline-block;padding:4px 8px;border-radius:999px;background:#edf3ff;color:#31579a;font-size:12px;font-weight:800;margin-right:6px}.tag.red{background:var(--red-bg);color:var(--red)}.tag.green{background:var(--green-bg);color:#20663c}.hidden{display:none!important}
+@media(max-width:420px){h1{font-size:28px}.card{padding:18px}.actions{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main>
+<section class="card">
+<div class="eyebrow">SCREENSHOT REPORT · PHASE 3-C-D v3.17</div>
+<h1>Universal OCR & Structure Final Gate</h1>
+<p>把本次專案踩過的坑正式收斂成可重複使用的最終 Gate：安全修復只處理唯一可逆規則；孤立符號、截斷句、括號／引號失衡與重度 OCR 一律阻擋；子標題改用「使用者確認＋完整字串唯一錨點」，不再要求 OCR 先切成獨立行。</p>
+<div id="status" class="status">正在讀取 Phase 3-C 工作區…</div>
+<div class="grid">
+<div class="metric"><span>目前正文</span><strong id="chars">—</strong></div>
+<div class="metric"><span>安全修復</span><strong id="fixes">—</strong></div>
+<div class="metric"><span>人工阻擋</span><strong id="issues">—</strong></div>
+<div class="metric"><span>結構警告</span><strong id="structures">—</strong></div>
+<div class="metric"><span>殘留 Gate</span><strong id="residuals">—</strong></div>
+<div class="metric"><span>已確認子標題</span><strong id="subheads">—</strong></div>
+</div>
+<button id="runBtn" class="primary" disabled>一鍵執行 v3.17 最終 Gate</button>
+<button id="passBtn" class="pass" disabled>✓ 全部 Gate 0，標記 Phase 3-C-D v3.17 PASS</button>
+<button id="backupBtn" class="safe" disabled>下載 Phase 3-C-D v3.17 備份 JSON</button>
+<label class="file-label secondary" for="jsonImport">若換裝置：匯入 Phase 3-C-D 備份 JSON</label>
+<input id="jsonImport" class="hidden" type="file" accept="application/json,.json">
+<div class="note">PASS 會使既有 Phase 3-D／Phase 6 成品失效。v3.17 不會把「看起來像錯字」當成自動修復；不唯一就要求人工回原圖確認。</div>
+</section>
+
+<section class="card">
+<h2>v3.17 永久品質規則</h2>
+<div class="rule"><b>A｜安全修復白名單：</b>只處理已有充分上下文、且可唯一還原的歷史 OCR 型態；每一筆都寫入 appliedCorrections。</div>
+<div class="rule blue"><b>B｜通用符號 Gate：</b>孤立 degree sign「°」、replacement char「�」、OCR box／pipe 殘符、未配對中文引號／括號、明顯截斷句都不能默默通過。</div>
+<div class="rule amber"><b>C｜人工確認可保留：</b>若原圖真的含特殊符號或不完整句式，可按「原圖確認保留」。這不是自動忽略，而是留下人工稽核簽章。</div>
+<div class="rule"><b>D｜子標題唯一錨點：</b>已確認子標題不改字，只需在 correctedText 中完整、精確、唯一出現；不再要求它原本就是獨立行。</div>
+</section>
+
+<section class="card">
+<h2>1. 必須人工確認的阻擋</h2>
+<div id="issueList"><div class="status">尚未執行。</div></div>
+</section>
+
+<section class="card">
+<h2>2. 已確認子標題</h2>
+<div class="rule blue">把你從原圖確認為子標題的「原文字串」貼進下面欄位。系統只接受正文中精確且唯一出現的字串；重複或找不到都不會猜。</div>
+<input id="subheadingInput" type="text" placeholder="貼上原圖確認的子標題文字">
+<button id="addSubBtn" class="secondary">加入已確認子標題</button>
+<div id="structureList"></div>
+</section>
+
+<section class="card">
+<h2>3. 最終正文預覽</h2>
+<div id="quality" class="status">尚未執行。</div>
+<div id="preview" class="preview">尚無內容。</div>
+</section>
+</main>
+
+<script>
+const DB_NAME="ScreenshotReportDB",DB_VERSION=2,STORE="settings";
+const STATE_KEY="phase3cCorrectionTriage:v1",REVIEW_KEY="phase3cCorrectionTriageReview:v1",DRAFT_KEY="phase3cdFinalGate:v317";
+const PHASE3D_STATE_KEY="phase3dReport:v1",PHASE3D_REVIEW_KEY="phase3dReportReview:v1";
+const PHASE6_KEYS=["phase6Publication:v1","phase6PublicationReview:v1","phase6Publication:v2","phase6PublicationReview:v2","phase6Publication:v3","phase6PublicationReview:v3"];
+
+let db=null,state=null,review=null,sourceText="",finalText="",repairs=[],manualIssues=[],manualKeeps=new Set(),confirmedSubs=[],didRun=false,imported=false;
+const $=id=>document.getElementById(id);
+
+function hash32(s){let h=2166136261>>>0;for(let i=0;i<String(s).length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h.toString(16).padStart(8,"0");}
+function esc(s){return String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));}
+function normalizeLine(s){return String(s||"").replace(/\u00a0/g," ").trim();}
+function unique(arr){return [...new Set(arr.map(normalizeLine).filter(Boolean))];}
+function countExact(text,needle){let c=0,p=0;while((p=String(text).indexOf(needle,p))>=0){c++;p+=Math.max(1,needle.length);}return c;}
+function openDb(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB_NAME,DB_VERSION);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:"key"});};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+function getSetting(key){return new Promise((resolve,reject)=>{const r=db.transaction(STORE,"readonly").objectStore(STORE).get(key);r.onsuccess=()=>resolve(r.result&&"value" in r.result?r.result.value:null);r.onerror=()=>reject(r.error);});}
+function putSetting(key,value){return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,"readwrite");tx.objectStore(STORE).put({key,value,updatedAt:Date.now()});tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
+function deleteSetting(key){return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,"readwrite");tx.objectStore(STORE).delete(key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
+
+function addRepair(from,to,reason){if(from===to)return;repairs.push({id:`v317-${Date.now()}-${repairs.length}`,from,to,reason,source:"phase3cd-v3.17-universal-final-gate"});}
+function replaceSafe(text,re,repl,reason){return text.replace(re,(...args)=>{const whole=args[0],next=typeof repl==="function"?repl(...args):repl;if(next!==whole)addRepair(whole,next,reason);return next;});}
+function normalizeSafe(text){
+ let out=String(text||"");
+ out=replaceSafe(out,/\bAl(?=\s*(?:方面|領域|晶片|資料中心|發展前景))/g,"AI","AI 語境 OCR：Al→AI");
+ out=replaceSafe(out,/\bNividia\b/g,"Nvidia","品牌拼字修復：Nividia→Nvidia");
+ out=replaceSafe(out,/\bGooole\b/g,"Google","品牌拼字修復：Gooole→Google");
+ out=replaceSafe(out,/希亡/g,"希望","已驗證 OCR 字形：希亡→希望");
+ out=replaceSafe(out,/不搶風採/g,"不搶風采","已驗證 OCR 字形：風採→風采");
+ out=replaceSafe(out,/超高速針線/g,"超高速連線","領域搭配 OCR：針線→連線");
+ out=replaceSafe(out,/生態系統1/g,"生態系統","移除 OCR 尾碼");
+ out=replaceSafe(out,/晶上月|晶啼|晶刁|晶捕|晶嘔|晶丘|晶月/g,"晶片","半導體領域已驗證 OCR 修復");
+ out=replaceSafe(out,/傳統客製化晶哺/g,"傳統客製化晶片","半導體領域 OCR：晶哺→晶片");
+ out=replaceSafe(out,/ASIC\s*晶乒/g,"ASIC 晶片","半導體領域 OCR：晶乒→晶片");
+ out=replaceSafe(out,/ASIC\s*晶戶/g,"ASIC 晶片","半導體領域 OCR：晶戶→晶片");
+ out=replaceSafe(out,/幾千顆晶戶/g,"幾千顆晶片","半導體領域 OCR：晶戶→晶片");
+ out=replaceSafe(out,/網路交換晶戶/g,"網路交換晶片","半導體領域 OCR：晶戶→晶片");
+ out=replaceSafe(out,/非常蔡難/g,"非常艱難","中文 OCR：蔡難→艱難");
+ out=replaceSafe(out,/這恰違是\s*Nvidia\s*所需要的/g,"這恰恰是 Nvidia 所需要的","句法＋OCR：恰違→恰恰");
+ out=replaceSafe(out,/也要人確保/g,"也要確保","句法殘字：移除多餘『人』");
+ out=replaceSafe(out,/試圖證明\s*!\s*開放架構/g,"試圖證明，開放架構","OCR 半形驚嘆號誤置");
+ // 本次專案已由原圖確認的精確 hotfix；只匹配完整片段，不做一般化 degree sign 猜測。
+ out=replaceSafe(out,/但沒有博通 \(Broadcom\) °/g,"但沒有博通 (Broadcom)。","原圖已確認精確 hotfix：Broadcom 句尾 °→。並移除 OCR 多餘空格");
+ return out;
+}
+
+function contextAround(text,pos,len=1){return String(text).slice(Math.max(0,pos-85),Math.min(String(text).length,pos+len+110)).replace(/\n+/g," ");}
+function signature(x){return hash32(`${x.kind}|${x.raw}`);}
+function paragraphs(text){return String(text).split(/\n{2,}/).map(x=>x.trim()).filter(Boolean);}
+function scanPairs(text){
+ const specs=[["中文引號","「","」"],["全形括號","（","）"],["方括號","【","】"],["ASCII 括號","(",")"],["ASCII 方括號","[","]"]];
+ const out=[];
+ for(const [label,l,r] of specs){
+   let stack=[];
+   for(let i=0;i<text.length;i++){
+     const ch=text[i];
+     if(ch===l)stack.push(i);
+     else if(ch===r){
+       if(stack.length)stack.pop();
+       else out.push({kind:"pair",title:`未配對${label}`,raw:contextAround(text,i,1),reason:`出現沒有對應左側符號的「${r}」。`,pos:i});
+     }
+   }
+   for(const pos of stack)out.push({kind:"pair",title:`未閉合${label}`,raw:contextAround(text,pos,1),reason:`「${l}」缺少對應結尾「${r}」。`,pos});
+ }
+ return out;
+}
+function findIssues(text){
+ const s=String(text||""),out=[];
+ // 高風險字串與 replacement chars
+ const patterns=[
+   ["heavy-ocr","重度 OCR 殘留",/安奸立|元主徵息|申片到網中|具正出買|安容在伺服開峙|貫體成品/g,"命中歷史上已證實的重度 OCR 污染型態，不能靠猜。"],
+   ["known-residual","已知 OCR 殘詞",/一整權|傳統客製化晶哺|非常蔡難|這恰違|晶乒|晶戶|長\s*o|代工事\s*\n+\s*宜/g,"安全修復後仍殘留已知 OCR 型態。"],
+   ["brand","品牌／縮寫殘留",/\bNividia\b|\bAl(?=\s*(?:方面|領域|晶片|資料中心|發展前景))/g,"品牌或 AI 語境字形仍未修正。"],
+   ["replacement","Unicode replacement char",/�/g,"文字含 U+FFFD replacement character，代表原字元已遺失。"],
+   ["ocr-symbol","疑似 OCR box／pipe 殘符",/[¦丨]/g,"正文出現常見 OCR 線條／框線字元，需回原圖確認。"]
+ ];
+ for(const [kind,title,re,reason] of patterns){
+   re.lastIndex=0;let m;
+   while((m=re.exec(s))){out.push({kind,title,raw:paragraphContaining(s,m.index),reason,pos:m.index});if(!m[0].length)re.lastIndex++;}
+ }
+ // 孤立 degree sign：°C / °F / °K 或數字角度可合理保留，不自動阻擋；其餘視為可疑。
+ for(let i=0;i<s.length;i++){
+   if(s[i]!=="°")continue;
+   const before=s[i-1]||"",after=s[i+1]||"";
+   const likelyLegit=/[0-9]/.test(before)||/[CFKcfk]/.test(after);
+   if(!likelyLegit)out.push({kind:"degree",title:"孤立 degree sign「°」",raw:paragraphContaining(s,i),reason:"「°」不在常見溫度／角度格式中；本次專案曾證實這類符號可能是中文句號 OCR 誤判。",pos:i});
+ }
+ // 截斷段落：以連接詞或逗號／冒號結尾。
+ for(const p of paragraphs(s)){
+   if(/(?:和|與|及|或|但|而|並|以及|因為|所以|如果|當|的|在|為|是|、|，|,|：|:|；|;)\s*$/.test(p)){
+     const pos=s.indexOf(p);
+     out.push({kind:"truncated",title:"疑似截斷句／段落",raw:p,reason:"段落停在連接詞或延續性標點；需回原圖確認是否遺失後半句。",pos});
+   }
+ }
+ out.push(...scanPairs(s));
+ const dedup=new Map();
+ for(const x of out){
+   const sig=signature(x);
+   if(manualKeeps.has(sig))continue;
+   if(!dedup.has(sig))dedup.set(sig,x);
+ }
+ return [...dedup.values()].sort((a,b)=>(a.pos||0)-(b.pos||0));
+}
+function paragraphContaining(text,pos){
+ const s=String(text),before=s.lastIndexOf("\n\n",Math.max(0,pos-1)),after=s.indexOf("\n\n",pos);
+ return s.slice(before<0?0:before+2,after<0?s.length:after).trim();
+}
+
+function inheritedSubs(){
+ const a317=state&&state.structuralAnnotationsV317;
+ const a316=state&&state.structuralAnnotationsV316;
+ return unique([
+   ...(Array.isArray(a317&&a317.subheadings)?a317.subheadings:[]),
+   ...(Array.isArray(a316&&a316.subheadings)?a316.subheadings:[])
+ ]);
+}
+function structureWarnings(){
+ const warns=[];
+ for(const h of confirmedSubs){
+   const c=countExact(finalText,h);
+   if(c!==1)warns.push(`「${h}」在正文精確出現 ${c} 次；必須恰好 1 次。`);
+ }
+ return warns;
+}
+function residualAudit(text){
+ const s=String(text||""),hits=[];
+ const tests=[
+  ["safeRepairResiduals",/一整權|傳統客製化晶哺|非常蔡難|這恰違|晶乒|晶戶|長\s*o|代工事\s*\n+\s*宜/g],
+  ["ocrLexicalResiduals",/安奸立|元主徵息|申片到網中|具正出買|安容在伺服開峙|貫體成品/g],
+  ["brandTypos",/\bNividia\b|\bAl(?=\s*(?:方面|領域|晶片|資料中心|發展前景))/g],
+  ["replacementChars",/�/g]
+ ];
+ for(const [kind,re] of tests){re.lastIndex=0;let m;while((m=re.exec(s))){hits.push({kind,text:m[0],pos:m.index});if(!m[0].length)re.lastIndex++;}}
+ return hits;
+}
+function allGateZero(){return didRun&&manualIssues.length===0&&structureWarnings().length===0&&residualAudit(finalText).length===0;}
+
+function renderIssues(){
+ const w=$("issueList");w.innerHTML="";
+ if(!didRun){w.innerHTML='<div class="status">尚未執行。</div>';return;}
+ if(!manualIssues.length){w.innerHTML='<div class="status good">✅ 沒有未處理人工阻擋。</div>';return;}
+ manualIssues.forEach((x,i)=>{
+  const d=document.createElement("div");d.className="issue blocker";
+  d.innerHTML=`<div><span class="tag red">BLOCKING</span><span class="tag">${esc(x.kind)}</span></div>
+  <div class="title" style="margin-top:8px">${esc(x.title)}</div><div class="context">${esc(x.reason)}</div>
+  <div class="raw">${esc(x.raw)}</div>
+  <textarea id="manual-${i}">${esc(x.raw)}</textarea>
+  <div class="actions"><button class="primary" data-fix="${i}">依原圖套用人工校正</button><button class="secondary" data-keep="${i}">原圖確認保留</button></div>`;
+  w.appendChild(d);
+ });
+ w.querySelectorAll("[data-fix]").forEach(b=>b.addEventListener("click",()=>applyManual(Number(b.dataset.fix))));
+ w.querySelectorAll("[data-keep]").forEach(b=>b.addEventListener("click",()=>keepManual(Number(b.dataset.keep))));
+}
+function renderStructures(){
+ const w=$("structureList");w.innerHTML="";
+ if(!confirmedSubs.length){w.innerHTML='<div class="status">目前沒有已確認子標題。若原圖有子標題，請用上方欄位逐一加入。</div>';return;}
+ confirmedSubs.forEach((h,i)=>{
+   const c=didRun?countExact(finalText,h):countExact(String(state&&state.correctedText||""),h);
+   const d=document.createElement("div");d.className="issue structure";
+   d.innerHTML=`<div><span class="tag ${c===1?"green":"red"}">${c===1?"唯一錨點":"需處理"}</span></div>
+   <div class="raw">${esc(h)}</div><div class="context">正文精確出現 ${c} 次。</div>
+   <div class="actions"><button class="secondary" data-remove="${i}">移除此子標題標記</button><button class="secondary" disabled>不改正文文字</button></div>`;
+   w.appendChild(d);
+ });
+ w.querySelectorAll("[data-remove]").forEach(b=>b.addEventListener("click",async()=>{confirmedSubs.splice(Number(b.dataset.remove),1);await saveDraft();render();}));
+}
+function render(){
+ const hasSource=!!(state&&String(state.correctedText||"").trim());
+ $("runBtn").disabled=!hasSource;$("backupBtn").disabled=!hasSource;
+ if(!hasSource){$("status").className="status warn";$("status").textContent="⚠️ 找不到 correctedText。請先完成 OCR／校正階段，或匯入備份 JSON。";return;}
+ const shown=didRun?finalText:String(state.correctedText||"");
+ $("chars").textContent=String(shown.length);
+ $("fixes").textContent=didRun?String(repairs.length):"—";
+ $("issues").textContent=didRun?String(manualIssues.length):"—";
+ $("structures").textContent=didRun?String(structureWarnings().length):"—";
+ $("residuals").textContent=didRun?String(residualAudit(finalText).length):"—";
+ $("subheads").textContent=String(confirmedSubs.length);
+ if(!didRun){
+   $("status").className="status";
+   $("status").innerHTML=`已讀取 correctedText；尚未執行 v3.17。${imported?"（來源：匯入 JSON）":"（來源：本機 IndexedDB）"}`;
+   $("passBtn").disabled=true;$("quality").className="status";$("quality").textContent="尚未執行。";$("preview").textContent=shown;
+ }else{
+   const ok=allGateZero();
+   $("status").className=ok?"status good":"status warn";
+   $("status").innerHTML=ok?`✅ v3.17 全部 Gate 0，可 PASS。<br>正文 ${finalText.length}｜安全修復 ${repairs.length}｜人工阻擋 0｜結構警告 0`
+   :`⚠️ v3.17 尚未完成。<br>人工阻擋 ${manualIssues.length}｜結構警告 ${structureWarnings().length}｜殘留 ${residualAudit(finalText).length}`;
+   $("passBtn").disabled=!ok;
+   $("quality").className=ok?"status good":"status warn";
+   $("quality").innerHTML=ok?`✅ Universal Final Gate 0｜正文 ${finalText.length}｜子標題 ${confirmedSubs.length}`:`尚未歸零。`;
+   $("preview").textContent=finalText;
+ }
+ renderIssues();renderStructures();
+}
+async function saveDraft(){if(!db)return;await putSetting(DRAFT_KEY,{version:"3.17",sourceHash:hash32(sourceText),finalText,repairs,manualKeeps:[...manualKeeps],confirmedSubs,updatedAt:Date.now()});}
+async function runAudit(){
+ sourceText=String(state.correctedText||"");repairs=[];manualKeeps=new Set();
+ finalText=normalizeSafe(sourceText);confirmedSubs=unique(confirmedSubs.length?confirmedSubs:inheritedSubs());
+ manualIssues=findIssues(finalText);didRun=true;await saveDraft();render();
+}
+async function applyManual(i){
+ const issue=manualIssues[i],ta=$("manual-"+i);if(!issue||!ta)return;
+ const next=ta.value.trim();if(!next){alert("人工校正不能是空白。");return;}
+ const before=finalText;if(!before.includes(issue.raw)){alert("正文已變更，找不到原片段；請重新執行 Gate。");return;}
+ finalText=before.replace(issue.raw,next);addRepair(issue.raw,next,"v3.17 人工依原圖校正");
+ manualIssues=findIssues(finalText);await saveDraft();render();
+}
+async function keepManual(i){
+ const issue=manualIssues[i];if(!issue)return;
+ if(!confirm("只有你已回原圖確認這段確實應保留原樣時才使用。確定嗎？"))return;
+ manualKeeps.add(signature(issue));manualIssues=findIssues(finalText);await saveDraft();render();
+}
+async function addSubheading(){
+ const h=normalizeLine($("subheadingInput").value);if(!h)return;
+ const text=didRun?finalText:String(state.correctedText||"");
+ const c=countExact(text,h);
+ if(c!==1){alert(`這段文字在正文精確出現 ${c} 次；必須恰好 1 次才可作為安全子標題錨點。`);return;}
+ confirmedSubs=unique([...confirmedSubs,h]);$("subheadingInput").value="";await saveDraft();render();
+}
+async function saveAndPass(){
+ if(!allGateZero()){alert("v3.17 尚未全部 Gate 0。");return;}
+ const now=Date.now(),hash=hash32(finalText);
+ state.correctedText=finalText;
+ state.appliedCorrections=[...(Array.isArray(state.appliedCorrections)?state.appliedCorrections:[]),...repairs];
+ state.structuralAnnotationsV317={version:"3.17",subheadings:[...confirmedSubs],source:"user-verified-unique-exact-anchor",updatedAt:now};
+ state.finalSemanticAuditV317={
+   version:"3.17",
+   safeRepairResiduals:0,ocrLexicalResiduals:0,suspiciousSymbolResiduals:0,truncatedSentenceResiduals:0,
+   manualAmbiguities:0,structureWarnings:0,quoteBracketResiduals:0,brandTypos:0,
+   safeRepairsApplied:repairs.length,verifiedSubheadings:confirmedSubs.length,finalChars:finalText.length,contentHash:hash,passedAt:now
+ };
+ review={status:"pass",phase:"phase3cd",version:"phase3cd-v3.17-universal-final-gate",passedAt:now,contentHash:hash,
+  gate:{safeRepairResiduals:0,ocrLexicalResiduals:0,suspiciousSymbolResiduals:0,truncatedSentenceResiduals:0,manualAmbiguities:0,structureWarnings:0,quoteBracketResiduals:0,brandTypos:0}};
+ await putSetting(STATE_KEY,state);await putSetting(REVIEW_KEY,review);
+ for(const key of [PHASE3D_STATE_KEY,PHASE3D_REVIEW_KEY,...PHASE6_KEYS]){try{await deleteSetting(key);}catch(e){}}
+ await putSetting(DRAFT_KEY,{version:"3.17",passed:true,passedAt:now,finalText,repairs,manualKeeps:[...manualKeeps],confirmedSubs,contentHash:hash});
+ $("status").className="status good";$("status").innerHTML=`✅ Phase 3-C-D v3.17 已 PASS。<br>正文 ${finalText.length}｜子標題 ${confirmedSubs.length}｜所有最終 Gate 0。`;
+ $("passBtn").disabled=true;alert("Phase 3-C-D v3.17 PASS 已寫入。下一步請使用 Phase 3-D v2.4。");
+}
+function downloadBackup(){
+ if(!state)return;
+ const exportState={...state,correctedText:didRun?finalText:state.correctedText};
+ if(didRun)exportState.structuralAnnotationsV317={version:"3.17",subheadings:[...confirmedSubs]};
+ const payload={schema:"screenshot-report-phase3cd-v3.17-backup",exportedAt:Date.now(),state:exportState,review,draft:didRun?{repairs,manualKeeps:[...manualKeeps],confirmedSubs}:null};
+ const b=new Blob([JSON.stringify(payload,null,2)],{type:"application/json;charset=utf-8"}),a=document.createElement("a");
+ a.href=URL.createObjectURL(b);a.download=`phase3cd-v3.17-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+}
+async function load(){
+ db=await openDb();state=await getSetting(STATE_KEY);review=await getSetting(REVIEW_KEY);const draft=await getSetting(DRAFT_KEY);
+ if(state&&state.correctedText){
+   sourceText=String(state.correctedText);finalText=sourceText;confirmedSubs=inheritedSubs();
+   if(draft&&draft.version==="3.17"&&draft.sourceHash===hash32(sourceText)&&draft.finalText){
+     finalText=draft.finalText;repairs=Array.isArray(draft.repairs)?draft.repairs:[];manualKeeps=new Set(Array.isArray(draft.manualKeeps)?draft.manualKeeps:[]);
+     confirmedSubs=unique(Array.isArray(draft.confirmedSubs)?draft.confirmedSubs:confirmedSubs);manualIssues=findIssues(finalText);didRun=true;
+   }
+ }
+ render();
+}
+$("runBtn").addEventListener("click",()=>runAudit().catch(e=>alert(String(e&&e.message?e.message:e))));
+$("passBtn").addEventListener("click",()=>saveAndPass().catch(e=>alert(String(e&&e.message?e.message:e))));
+$("backupBtn").addEventListener("click",downloadBackup);
+$("addSubBtn").addEventListener("click",()=>addSubheading().catch(e=>alert(String(e&&e.message?e.message:e))));
+$("jsonImport").addEventListener("change",async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{const data=JSON.parse(await f.text());const st=data.state||data.sourceState||null,rv=data.review||data.sourceReview||null;if(!st){alert("找不到 state。");return;}state=st;review=rv||null;imported=true;sourceText=String(state.correctedText||"");finalText=sourceText;confirmedSubs=inheritedSubs();didRun=false;render();}catch(err){alert("JSON 讀取失敗："+(err.message||err));}});
+load().catch(e=>{$("status").className="status bad";$("status").textContent="❌ "+String(e&&e.message?e.message:e);});
+</script>
+</body>
+</html>

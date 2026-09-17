@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<title>Screenshot Report｜Phase 3-D v2.4</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;background:#f5f5f7;color:#1d1d1f;-webkit-font-smoothing:antialiased}.container{max-width:720px;margin:0 auto;padding:20px 14px 48px}.card{background:#fff;border-radius:18px;padding:20px;margin-bottom:14px;box-shadow:0 3px 16px rgba(0,0,0,.06)}h1{margin:0 0 8px;font-size:28px}h2{margin:0 0 12px;font-size:21px}p{margin:8px 0;line-height:1.65;color:#5f6368}.status{padding:14px;border-radius:13px;line-height:1.65;background:#f2f2f7}.good{background:#e8f5ec;color:#17663b}.warn{background:#fff3d6;color:#7a4b00}.bad{background:#ffe7e3;color:#9f241b}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.metric{background:#f7f7f9;border-radius:13px;padding:13px}.metric span{display:block;color:#666;font-size:13px}.metric strong{display:block;margin-top:4px;font-size:24px}label{display:block;margin-top:12px;font-size:14px;font-weight:700}input[type=text]{width:100%;margin-top:7px;border:1px solid #c9ccd2;border-radius:12px;padding:12px 13px;font:inherit;font-size:16px;background:#fff;color:#1d1d1f}button,.file-label,a.btn{display:block;width:100%;border:0;border-radius:13px;padding:15px 14px;margin-top:10px;font:inherit;font-size:16px;font-weight:800;text-align:center;cursor:pointer;text-decoration:none;background:#3478f6;color:#fff}button.secondary,.file-label.secondary,a.btn.secondary{background:#e9e9ee;color:#1d1d1f}button.success{background:#4f9155}button.dark{background:#536b7c}button:disabled,a.disabled{opacity:.38;pointer-events:none}.button-grid{display:grid;grid-template-columns:1fr;gap:0}.small{font-size:13px;color:#6f7277;line-height:1.55}.preview{overflow-wrap:anywhere;max-height:520px;overflow:auto;padding:14px;background:#f7f7f9;border-radius:12px;border:1px solid #e1e2e5;line-height:1.7}.preview .p{white-space:pre-wrap;margin:0 0 1.05em}.preview .subheading{font-size:18px;font-weight:800;line-height:1.45;margin:1.25em 0 .55em;padding:8px 10px;border-left:4px solid #3478f6;background:#eef4ff;border-radius:6px}.pill{display:inline-block;padding:5px 9px;border-radius:999px;background:#eef2ff;color:#4752a3;font-size:12px;font-weight:800}.hidden{display:none!important}.divider{height:1px;background:#e5e5e8;margin:16px 0}.gate-item{padding:10px 12px;border-radius:11px;background:#fff3d6;color:#7a4b00;margin-top:8px;line-height:1.55}.rule{padding:12px;border-radius:12px;background:#e8f5ec;color:#25663e;line-height:1.55;margin-top:10px}.structure-box{padding:12px;border-radius:12px;background:#eef4ff;color:#294f91;line-height:1.55;margin-top:10px}.structure-item{padding:10px 12px;border-radius:10px;background:#fff;border:1px solid #d9e4ff;margin-top:8px;font-weight:800;color:#1d1d1f}@media(min-width:640px){.button-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.button-grid button{margin-top:10px}}
+</style>
+</head>
+<body><main class="container">
+<section class="card">
+<div class="small"><a href="./phase3cd-v3.17.html">← 回 Phase 3-C-D v3.17</a></div>
+<h1>Phase 3-D v2.4</h1>
+<p>正式輸出與報告封裝。只接受 Phase 3-C-D v3.17 PASS；沿用使用者已確認的唯一子標題錨點，不再做語意猜測。所有 Markdown／TXT／Excel／JSON／HTML／PDF／AI package 都由同一份 reportState 產生。</p>
+<div id="sourceStatus" class="status">正在驗證 v3.17…</div>
+<div class="grid">
+<div class="metric"><span>校正後字元</span><strong id="charCount">0</strong></div>
+<div class="metric"><span>已確認子標題</span><strong id="subheadingCount">0</strong></div>
+<div class="metric"><span>可展示附註</span><strong id="chartCount">0</strong></div>
+<div class="metric"><span>隱藏稽核碎片</span><strong id="suppressedCount">0</strong></div>
+<div class="metric"><span>成品 Gate</span><strong id="gateCount">—</strong></div>
+<div class="metric"><span>結構警告</span><strong id="structureWarningCount">—</strong></div>
+</div>
+<label class="file-label secondary" for="jsonImport">若換裝置：匯入 Phase 3-C-D v3.17 JSON</label>
+<input id="jsonImport" class="hidden" type="file" accept="application/json,.json">
+</section>
+
+<section class="card">
+<h2>1. 建立正式報告</h2>
+<label>報告標題<input id="reportTitle" type="text" placeholder="請輸入報告標題"></label>
+<label>副標題／來源註記<input id="reportSubtitle" type="text" placeholder="可留空"></label>
+<div class="structure-box"><b>v2.4 結構契約：</b>直接讀取 structuralAnnotationsV317.subheadings；每一項只以完整字串精確且唯一出現作為安全錨點。結構切分只存在於輸出層，correctedText／TXT 不改字。</div>
+<div id="structureList"></div>
+<button id="buildButton" disabled>建立／更新 Phase 3-D v2.4 正式報告</button>
+<div id="buildStatus" class="status" style="margin-top:12px">尚未建立。</div>
+<div id="gateList"></div>
+</section>
+
+<section class="card">
+<h2>2. 正式內容預覽</h2>
+<div class="pill">MAIN ARTICLE</div><div id="articlePreview" class="preview" style="margin-top:10px">尚無內容。</div>
+<div class="divider"></div>
+<div class="pill">CHART / NOTES APPENDIX</div><div id="chartPreview" class="preview" style="margin-top:10px;max-height:280px">尚無內容。</div>
+<div class="rule"><b>成品規則：</b>Phase 3-D 只攔截確定性回歸；純符號圖表碎片只保留於 JSON 稽核，不顯示於閱讀版，也不計入成品 Gate。</div>
+</section>
+
+<section class="card">
+<h2>3. 下載輸出</h2>
+<div class="button-grid">
+<button id="markdownButton" class="dark" disabled>下載 Markdown</button>
+<button id="txtButton" class="dark" disabled>下載正文 TXT</button>
+<button id="excelButton" class="dark" disabled>下載 Excel / CSV</button>
+<button id="jsonButton" class="dark" disabled>下載報告 JSON</button>
+<button id="htmlButton" class="dark" disabled>下載可列印 HTML</button>
+<button id="pdfButton" class="dark" disabled>列印／儲存 PDF</button>
+<button id="aiButton" class="dark" disabled>下載 AI 分析輸入包</button>
+</div>
+</section>
+
+<section class="card">
+<h2>4. Phase 3-D v2.4 驗收</h2>
+<div id="reviewStatus" class="status">尚未驗收。</div>
+<button id="passButton" class="success" disabled>✓ v3.17 來源有效＋成品 Gate 0＋結構警告 0，標記 Phase 3-D v2.4 PASS</button>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+const DB_NAME="ScreenshotReportDB",DB_VERSION=2,STORE="settings";
+const SOURCE_STATE_KEY="phase3cCorrectionTriage:v1",SOURCE_REVIEW_KEY="phase3cCorrectionTriageReview:v1",REPORT_KEY="phase3dReport:v1",REPORT_REVIEW_KEY="phase3dReportReview:v1";
+const REPORT_VERSION="phase3d-output-report-v2.4-v317-final-contract",REVIEW_VERSION="phase3d-v2.4-v317-final-contract";
+let db=null,sourceState=null,sourceReview=null,reportState=null,reportReview=null,imported=false;
+const $=id=>document.getElementById(id);
+function hash32(s){let h=2166136261>>>0;for(let i=0;i<String(s).length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h.toString(16).padStart(8,"0");}
+function esc(s){return String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));}
+function openDb(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB_NAME,DB_VERSION);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:"key"});};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+function getSetting(key){return new Promise((resolve,reject)=>{const r=db.transaction(STORE,"readonly").objectStore(STORE).get(key);r.onsuccess=()=>resolve(r.result&&"value" in r.result?r.result.value:null);r.onerror=()=>reject(r.error);});}
+function putSetting(key,value){return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,"readwrite");tx.objectStore(STORE).put({key,value,updatedAt:Date.now()});tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
+function normalizeLine(s){return String(s||"").replace(/\u00a0/g," ").trim();}
+function verifiedSubs(){const a=sourceState&&sourceState.structuralAnnotationsV317;return [...new Set(Array.isArray(a&&a.subheadings)?a.subheadings.map(normalizeLine).filter(Boolean):[])];}
+function validSource(){
+ const a=sourceState&&sourceState.finalSemanticAuditV317;
+ if(!(sourceState&&sourceReview&&sourceReview.status==="pass"&&sourceReview.version==="phase3cd-v3.17-universal-final-gate"&&a&&a.version==="3.17"))return false;
+ const keys=["safeRepairResiduals","ocrLexicalResiduals","suspiciousSymbolResiduals","truncatedSentenceResiduals","manualAmbiguities","structureWarnings","quoteBracketResiduals","brandTypos"];
+ if(!keys.every(k=>Number(a[k]||0)===0))return false;
+ const text=String(sourceState.correctedText||""),h=hash32(text);
+ if(!text.trim()||a.contentHash!==h||Number(a.finalChars)!==text.length||sourceReview.contentHash!==h)return false;
+ if(Number(a.verifiedSubheadings)!==verifiedSubs().length)return false;
+ return true;
+}
+function sourceFingerprint(){return hash32(JSON.stringify({correctedText:sourceState&&sourceState.correctedText||"",chartItems:sourceState&&sourceState.chartItems||[],excludedItems:sourceState&&sourceState.excludedItems||[],appliedCorrections:sourceState&&sourceState.appliedCorrections||[],audit:sourceState&&sourceState.finalSemanticAuditV317||null,structure:sourceState&&sourceState.structuralAnnotationsV317||null,passedAt:sourceReview&&sourceReview.passedAt||0}));}
+function reportFingerprint(r=reportState){return r?hash32(JSON.stringify({version:r.version,sourceFingerprint:r.sourceFingerprint,title:r.title,subtitle:r.subtitle,article:r.article,articleStructure:r.articleStructure||[],chartNotes:r.chartNotes,qualityGate:r.qualityGate})):"";}
+function countExact(text,needle){let c=0,p=0;while((p=String(text).indexOf(needle,p))>=0){c++;p+=Math.max(1,needle.length);}return c;}
+function isNoise(item){const t=String(item&&item.text||"").trim(),reason=String(item&&item.reason||"");if(!t)return true;const semantic=t.replace(/[\s\-_=—–|¦丨:：·•.,，。!?！？「」『』【】()\[\]\/\\]+/g,"");if(/疑似圖表碎片/.test(reason)&&semantic.length<4)return true;if(/^[JＪ\s\-_=—–|¦丨:：·•.,，。!?！？「」『』【】()\[\]\/\\]+$/.test(t))return true;return false;}
+function splitCharts(){const all=Array.isArray(sourceState&&sourceState.chartItems)?sourceState.chartItems:[],visible=[],suppressed=[];for(const x of all)(isNoise(x)?suppressed:visible).push(x);return{visible,suppressed};}
+function chartText(items){if(!items.length)return"目前沒有需要展示的圖表／附註。";return items.map(x=>[`【${x.displayNumber?`第 ${x.displayNumber} 張`:"頁面未定位"}】`,x.text||"",x.reason?`原因：${x.reason}`:""].filter(Boolean).join("\n")).join("\n\n");}
+function scanArticle(text){
+ const s=String(text||""),issues=[];
+ const patterns=[
+  ["孤立 replacement char",/�/g],["品牌拼字殘留",/\bNividia\b|\bAl(?=\s*(?:方面|領域|晶片|資料中心|發展前景))/g],
+  ["歷史 OCR 殘詞",/安奸立|元主徵息|申片到網中|具正出買|安容在伺服開峙|貫體成品|一整權|傳統客製化晶哺|非常蔡難|這恰違|晶乒|晶戶/g],
+  ["OCR box／pipe 殘符",/[¦丨]/g]
+ ];
+ for(const [label,re] of patterns){re.lastIndex=0;let m;while((m=re.exec(s))){issues.push({label,text:m[0],pos:m.index,context:s.slice(Math.max(0,m.index-60),Math.min(s.length,m.index+m[0].length+80)).replace(/\n+/g," ")});if(!m[0].length)re.lastIndex++;}}
+ for(let i=0;i<s.length;i++){if(s[i]!=="°")continue;const b=s[i-1]||"",a=s[i+1]||"";if(!(/[0-9]/.test(b)||/[CFKcfk]/.test(a)))issues.push({label:"孤立 degree sign",text:"°",pos:i,context:s.slice(Math.max(0,i-60),Math.min(s.length,i+80)).replace(/\n+/g," ")});}
+ return issues.sort((a,b)=>a.pos-b.pos);
+}
+function buildStructure(text){
+ const raw=String(text||"").replace(/\r\n?/g,"\n"),expected=verifiedSubs(),nodes=[],found=[],warnings=[],locs=[];
+ for(const h of expected){const c=countExact(raw,h);if(c!==1)warnings.push(`已確認子標題「${h}」精確出現 ${c} 次。`);else locs.push({text:h,start:raw.indexOf(h),end:raw.indexOf(h)+h.length});}
+ locs.sort((a,b)=>a.start-b.start);for(let i=1;i<locs.length;i++)if(locs[i].start<locs[i-1].end)warnings.push("子標題定位重疊。");
+ const append=chunk=>String(chunk||"").split(/\n{2,}/).forEach(p=>{const t=p.trim();if(t)nodes.push({type:"paragraph",text:t});});
+ if(!warnings.length){let cursor=0;for(const loc of locs){append(raw.slice(cursor,loc.start));nodes.push({type:"subheading",level:3,text:loc.text,source:"v3.17-user-verified-unique-exact-anchor"});found.push(loc.text);cursor=loc.end;}append(raw.slice(cursor));const compact=s=>String(s||"").replace(/\s+/g,"");if(compact(nodes.map(n=>n.text).join(""))!==compact(raw))warnings.push("結構化重建後非空白字元不一致。");}
+ if(found.length!==expected.length)warnings.push(`子標題契約 ${expected.length}，安全套用 ${found.length}。`);
+ return{nodes,found,warnings};
+}
+function previewHtml(nodes){return nodes.map(n=>n.type==="subheading"?`<div class="subheading">${esc(n.text)}</div>`:`<div class="p">${esc(n.text)}</div>`).join("");}
+function mdNodes(nodes){return nodes.map(n=>n.type==="subheading"?`### ${n.text}`:n.text).join("\n\n");}
+function htmlNodes(nodes){return nodes.map(n=>n.type==="subheading"?`<h3>${esc(n.text)}</h3>`:`<p>${esc(n.text).replace(/\n/g,"<br>")}</p>`).join("\n");}
+function deriveTitle(text){const s=String(text||"").replace(/\s+/g," ").trim();const first=(s.match(/^(.{8,60}?[。！？])/u)||[])[1]||s.slice(0,54);return first.replace(/[。！？]+$/,"").trim()||"Screenshot Report";}
+function currentValid(){return !!(reportState&&reportState.version===REPORT_VERSION&&validSource()&&reportState.sourceFingerprint===sourceFingerprint()&&reportState.article===String(sourceState.correctedText||"")&&reportState.sourceContentHash===sourceState.finalSemanticAuditV317.contentHash&&Number(reportState.qualityGate&&reportState.qualityGate.articleResiduals)===0&&Number(reportState.qualityGate&&reportState.qualityGate.structureWarnings)===0);}
+function setOutputs(on){["markdownButton","txtButton","excelButton","jsonButton","htmlButton","pdfButton","aiButton","passButton"].forEach(id=>$(id).disabled=!on);}
+function render(){
+ const valid=validSource();
+ if(!valid){$("sourceStatus").className="status warn";$("sourceStatus").textContent="⚠️ 尚未取得有效 Phase 3-C-D v3.17 PASS。";$("buildButton").disabled=true;setOutputs(false);return;}
+ const article=String(sourceState.correctedText||""),gate=scanArticle(article),structure=buildStructure(article),charts=splitCharts();
+ $("charCount").textContent=String(article.length);$("subheadingCount").textContent=String(structure.found.length);$("chartCount").textContent=String(charts.visible.length);$("suppressedCount").textContent=String(charts.suppressed.length);$("gateCount").textContent=String(gate.length);$("structureWarningCount").textContent=String(structure.warnings.length);
+ $("sourceStatus").className=(gate.length||structure.warnings.length)?"status warn":"status good";
+ $("sourceStatus").innerHTML=(gate.length||structure.warnings.length)?`⚠️ v3.17 PASS 已讀取，但成品投影仍有 Gate ${gate.length}／結構警告 ${structure.warnings.length}。`:`✅ Phase 3-C-D v3.17 PASS 驗證完成；contentHash 一致，成品 Gate 0。`+(imported?"（匯入 JSON）":"（本機 IndexedDB）");
+ $("buildButton").disabled=gate.length>0||structure.warnings.length>0;
+ if(!$("reportTitle").value.trim())$("reportTitle").value=deriveTitle(article);
+ if(!$("reportSubtitle").value.trim())$("reportSubtitle").value="Phase 3-C-D v3.17 Universal Final Gate 後正式輸出";
+ const sl=$("structureList");sl.innerHTML=structure.found.length?`<div class="structure-box"><b>已套用子標題：</b>${structure.found.map(x=>`<div class="structure-item">${esc(x)}</div>`).join("")}</div>`:"";
+ const gl=$("gateList");gl.innerHTML=gate.slice(0,10).map(x=>`<div class="gate-item"><b>${esc(x.label)}</b><br>${esc(x.context)}</div>`).join("");
+ if(currentValid()){
+  $("articlePreview").innerHTML=previewHtml(reportState.articleStructure);$("chartPreview").textContent=reportState.chartNotes;$("buildStatus").className="status good";$("buildStatus").innerHTML=`✅ Phase 3-D v2.4 正式報告已建立。<br>reportFingerprint ${reportFingerprint()}`;setOutputs(true);
+ }else{
+  $("articlePreview").innerHTML=previewHtml(structure.nodes);$("chartPreview").textContent=chartText(charts.visible)+(charts.suppressed.length?`\n\n（${charts.suppressed.length} 個純符號碎片只留 JSON 稽核）`:"");$("buildStatus").className="status";$("buildStatus").textContent="尚未建立與目前 v3.17 PASS 一致的 v2.4 報告。";setOutputs(false);
+ }
+ if(reportReview&&reportReview.status==="pass"&&currentValid()&&reportReview.reportFingerprint===reportFingerprint()){$("reviewStatus").className="status good";$("reviewStatus").innerHTML=`✅ Phase 3-D v2.4 已 PASS。<br>驗收時間：${new Date(reportReview.passedAt).toLocaleString()}`;$("passButton").disabled=true;}
+}
+async function build(){
+ if(!validSource())return;const article=String(sourceState.correctedText||""),gate=scanArticle(article),structure=buildStructure(article);if(gate.length||structure.warnings.length){alert("成品 Gate 或結構警告尚未歸零。");return;}
+ const charts=splitCharts(),audit=sourceState.finalSemanticAuditV317;
+ reportState={version:REPORT_VERSION,sourceFingerprint:sourceFingerprint(),sourcePassedAt:sourceReview.passedAt||null,sourceContentHash:audit.contentHash,builtAt:Date.now(),title:$("reportTitle").value.trim()||deriveTitle(article),subtitle:$("reportSubtitle").value.trim(),article,articleStructure:structure.nodes,subheadings:structure.found,sourceStructuralAnnotations:sourceState.structuralAnnotationsV317,sourceFinalAudit:audit,sourceReviewVersion:sourceReview.version,chartNotes:chartText(charts.visible),chartItems:charts.visible,suppressedChartItems:charts.suppressed,excludedItems:Array.isArray(sourceState.excludedItems)?sourceState.excludedItems:[],appliedCorrections:Array.isArray(sourceState.appliedCorrections)?sourceState.appliedCorrections:[],qualityGate:{articleResiduals:0,structureWarnings:0,verifiedSubheadings:structure.found.length,visibleChartItems:charts.visible.length,suppressedChartItems:charts.suppressed.length,sourceAuditVersion:"3.17",sourceAllGatesZero:true,suppressedItemsCountTowardGate:false},counts:{finalChars:article.length,subheadings:structure.found.length,chartItems:charts.visible.length,suppressedChartItems:charts.suppressed.length}};
+ reportReview=null;await putSetting(REPORT_KEY,reportState);await putSetting(REPORT_REVIEW_KEY,null);render();
+}
+function safeName(){return String(reportState&&reportState.title||"phase3d-report").replace(/[\\/:*?"<>|]+/g,"-").slice(0,70)||"phase3d-report";}
+function download(name,content,type="text/plain;charset=utf-8"){const b=new Blob([content],{type}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);}
+function markdown(){return[`# ${reportState.title}`,reportState.subtitle?`> ${reportState.subtitle}`:"","",mdNodes(reportState.articleStructure),"","## 圖表／附註","",reportState.chartNotes].filter((x,i,a)=>!(x===""&&a[i-1]==="")).join("\n");}
+function html(){return`<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(reportState.title)}</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC",sans-serif;max-width:820px;margin:40px auto;padding:0 22px;line-height:1.75;color:#1d1d1f}h3{margin:1.5em 0 .45em}.meta{color:#666}.article p{margin:0 0 1.15em}</style></head><body><h1>${esc(reportState.title)}</h1><p class="meta">${esc(reportState.subtitle||"")}</p><div class="article">${htmlNodes(reportState.articleStructure)}</div><hr><h2>圖表／附註</h2><pre>${esc(reportState.chartNotes)}</pre></body></html>`;}
+async function markPass(){if(!currentValid())return;reportReview={status:"pass",version:REVIEW_VERSION,passedAt:Date.now(),sourceFingerprint:reportState.sourceFingerprint,sourceContentHash:reportState.sourceContentHash,reportFingerprint:reportFingerprint(),qualityGate:{sourceAuditVersion:"3.17",sourceAllGatesZero:true,articleResiduals:0,structureWarnings:0,verifiedSubheadings:reportState.subheadings.length,suppressedChartItems:reportState.suppressedChartItems.length}};await putSetting(REPORT_REVIEW_KEY,reportReview);render();}
+$("buildButton").addEventListener("click",()=>build().catch(e=>alert(e.message||e)));
+$("passButton").addEventListener("click",()=>markPass().catch(e=>alert(e.message||e)));
+$("markdownButton").addEventListener("click",()=>download(`${safeName()}.md`,markdown(),"text/markdown;charset=utf-8"));
+$("txtButton").addEventListener("click",()=>download(`${safeName()}.txt`,reportState.article));
+$("jsonButton").addEventListener("click",()=>download(`${safeName()}.json`,JSON.stringify({...reportState,reportFingerprint:reportFingerprint()},null,2),"application/json;charset=utf-8"));
+$("aiButton").addEventListener("click",()=>download(`${safeName()}-ai-package.json`,JSON.stringify({schema:"screenshot-report-ai-package-v2.4",title:reportState.title,subtitle:reportState.subtitle,article:reportState.article,articleStructure:reportState.articleStructure,subheadings:reportState.subheadings,visibleChartNotes:reportState.chartNotes,sourceFingerprint:reportState.sourceFingerprint,reportFingerprint:reportFingerprint(),qualityGate:reportState.qualityGate},null,2),"application/json;charset=utf-8"));
+$("htmlButton").addEventListener("click",()=>download(`${safeName()}.html`,html(),"text/html;charset=utf-8"));
+$("pdfButton").addEventListener("click",()=>{const w=window.open("","_blank");if(!w){alert("Safari 阻擋新視窗。");return;}w.document.write(html());w.document.close();setTimeout(()=>w.print(),350);});
+$("excelButton").addEventListener("click",()=>{if(window.XLSX){const wb=XLSX.utils.book_new(),ws1=XLSX.utils.aoa_to_sheet([["標題",reportState.title],["副標題",reportState.subtitle],["正文",reportState.article],["已確認子標題",reportState.subheadings.join("｜")]]),ws2=XLSX.utils.aoa_to_sheet([["type","text"],...reportState.articleStructure.map(n=>[n.type,n.text])]);XLSX.utils.book_append_sheet(wb,ws1,"Report");XLSX.utils.book_append_sheet(wb,ws2,"Structure");XLSX.writeFile(wb,`${safeName()}.xlsx`);}else download(`${safeName()}.csv`,"\ufefffield,value\narticle,\""+reportState.article.replace(/"/g,'""')+"\"","text/csv;charset=utf-8");});
+$("jsonImport").addEventListener("change",async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{const data=JSON.parse(await f.text());sourceState=data.state||data.sourceState||null;sourceReview=data.review||data.sourceReview||null;imported=true;render();}catch(err){alert("JSON 讀取失敗："+(err.message||err));}});
+(async()=>{db=await openDb();sourceState=await getSetting(SOURCE_STATE_KEY);sourceReview=await getSetting(SOURCE_REVIEW_KEY);reportState=await getSetting(REPORT_KEY);reportReview=await getSetting(REPORT_REVIEW_KEY);render();})().catch(e=>{$("sourceStatus").className="status bad";$("sourceStatus").textContent="❌ "+(e.message||e);});
+</script></body></html>
