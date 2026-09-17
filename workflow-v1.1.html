@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<title>Screenshot Report｜Stable Workflow v1.1</title>
+<style>
+:root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--muted:#6e6e73;--green:#2f7d4a;--green-bg:#e9f5ed;--amber:#8a5b00;--amber-bg:#fff3d6;--blue:#3478f6;--soft:#f2f2f7;--slate:#557083}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+main{max-width:760px;margin:auto;padding:20px 14px 56px}
+.card{background:#fff;border-radius:22px;padding:20px;margin-bottom:16px;box-shadow:0 4px 18px rgba(0,0,0,.055)}
+.eyebrow{font-size:13px;font-weight:900;color:#566473}
+h1{font-size:30px;margin:8px 0 10px}h2{font-size:21px}
+.status{border-radius:15px;padding:15px;line-height:1.6;background:var(--soft);margin-top:12px}
+.good{background:var(--green-bg);color:#20663c}.warn{background:var(--amber-bg);color:#7c5400}
+.step{border:1px solid #e5e5ea;border-radius:16px;padding:14px;margin-top:12px}
+.step b{font-size:18px}.meta{font-size:13px;color:var(--muted);line-height:1.55;margin-top:6px}
+a.btn,button,.file-label{display:block;width:100%;border:0;border-radius:14px;padding:15px;margin-top:10px;text-align:center;text-decoration:none;font:inherit;font-size:16px;font-weight:850;background:var(--blue);color:#fff;cursor:pointer}
+.secondary{background:#e9e9ee!important;color:#1d1d1f!important}.dark{background:var(--slate)!important}.hidden{display:none!important}
+.rule{padding:12px;border-radius:12px;background:#edf3ff;color:#284f93;line-height:1.6;margin-top:10px}
+.metric{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 0;border-top:1px solid #ececf0}.metric:first-child{border-top:0}
+.metric span{color:var(--muted)}.metric strong{font-weight:850;overflow-wrap:anywhere;text-align:right}
+.small{font-size:13px;color:var(--muted);line-height:1.6}
+</style>
+</head>
+<body><main>
+<section class="card">
+<div class="eyebrow">SCREENSHOT REPORT · STABLE WORKFLOW v1.1</div>
+<h1>穩定版總控台</h1>
+<p>導流、版本狀態、備份與還原。未來每篇文章在 OCR／人工校正完成後，從這裡進入三段式最終流程。</p>
+<div id="status" class="status">正在檢查本機狀態…</div>
+
+<button id="backupBtn" class="dark">下載「所有流程狀態」備份 JSON</button>
+<label class="file-label secondary" for="restoreFile">還原「所有流程狀態」備份 JSON</label>
+<input id="restoreFile" class="hidden" type="file" accept="application/json,.json">
+
+<div class="rule"><b>v1.1 備份改進：</b>不再只備份固定幾個版本 key，而是把 IndexedDB 的 <code>settings</code> store 全部匯出，因此目前已封存的 Phase 6 v2、未來 Phase 6 v3，以及其他流程狀態都會一起保留。</div>
+<div class="rule"><b>資料邊界：</b>這份 JSON 備份「不包含原始圖片 Blob」。原始截圖仍建議另外保存在照片 App／檔案 App。這樣不會誤把狀態備份說成完整圖片備份。</div>
+<div class="rule"><b>Safari：</b>IndexedDB 是裝置／瀏覽器本機資料。盡量使用同一台 iPhone 的一般 Safari，不要在私密瀏覽中切換流程。</div>
+</section>
+
+<section class="card">
+<h2>目前已封存成品</h2>
+<div id="legacyArchive" class="status">檢查中…</div>
+<div id="archiveMeta"></div>
+</section>
+
+<section class="card">
+<h2>最新穩定流程</h2>
+<div class="step">
+  <b>① Phase 3-C-D v3.17</b>
+  <div id="s317" class="meta">檢查中…</div>
+  <a class="btn" href="./phase3cd-v3.17.html">開啟 Universal Final Gate</a>
+</div>
+<div class="step">
+  <b>② Phase 3-D v2.4</b>
+  <div id="s324" class="meta">檢查中…</div>
+  <a class="btn" href="./phase3d-v2.4.html">開啟正式輸出封裝</a>
+</div>
+<div class="step">
+  <b>③ Phase 6 v3</b>
+  <div id="s6" class="meta">檢查中…</div>
+  <a class="btn" href="./phase6-v3.html">開啟最終封存</a>
+</div>
+</section>
+
+<section class="card">
+<h2>永久品質規則</h2>
+<div class="rule">孤立「°」、replacement char、OCR box／pipe 等疑似符號進人工阻擋，不再讓 Gate 0 漏過。</div>
+<div class="rule">子標題不要求原 OCR 已切成獨立行；使用「人工確認＋完整字串唯一錨點」。</div>
+<div class="rule">Phase 6 不硬編碼其他文章的 Fact Check／來源資料。</div>
+<div class="rule">Phase 3-D／Phase 6 使用 hash + fingerprint + PASS 簽章交叉驗證，舊成品不能誤混入新正文。</div>
+</section>
+</main>
+
+<script>
+const DB_NAME="ScreenshotReportDB",DB_VERSION=2,STORE="settings";
+let db=null;
+const $=id=>document.getElementById(id);
+
+function openDb(){
+  return new Promise((resolve,reject)=>{
+    const r=indexedDB.open(DB_NAME,DB_VERSION);
+    r.onupgradeneeded=()=>{
+      const d=r.result;
+      if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:"key"});
+    };
+    r.onsuccess=()=>resolve(r.result);
+    r.onerror=()=>reject(r.error);
+  });
+}
+function getSetting(k){
+  return new Promise((resolve,reject)=>{
+    const r=db.transaction(STORE,"readonly").objectStore(STORE).get(k);
+    r.onsuccess=()=>resolve(r.result&&"value" in r.result?r.result.value:null);
+    r.onerror=()=>reject(r.error);
+  });
+}
+function getAllSettingRows(){
+  return new Promise((resolve,reject)=>{
+    const r=db.transaction(STORE,"readonly").objectStore(STORE).getAll();
+    r.onsuccess=()=>resolve(Array.isArray(r.result)?r.result:[]);
+    r.onerror=()=>reject(r.error);
+  });
+}
+function putRawRow(row){
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE,"readwrite");
+    tx.objectStore(STORE).put(row);
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>reject(tx.error);
+  });
+}
+function download(name,text){
+  const b=new Blob([text],{type:"application/json;charset=utf-8"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(b);
+  a.download=name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+}
+async function snapshot(){
+  const rows=await getAllSettingRows();
+  return {
+    schema:"screenshot-report-settings-backup-v1.1",
+    exportedAt:Date.now(),
+    dbName:DB_NAME,
+    store:STORE,
+    includesOriginalImageBlobs:false,
+    rowCount:rows.length,
+    rows
+  };
+}
+function archiveHtml(label,state,review){
+  if(!(review&&review.status==="pass"))return "";
+  const fp=state&&state.publicationFingerprint||review.publicationFingerprint||"—";
+  const chars=state&&state.manifest&&state.manifest.finalChars;
+  const subs=state&&state.manifest&&state.manifest.verifiedSubheadings;
+  return `<div class="metric"><span>${label}</span><strong>PASS</strong></div>
+          <div class="metric"><span>正文</span><strong>${chars??"—"}</strong></div>
+          <div class="metric"><span>子標題</span><strong>${subs??"—"}</strong></div>
+          <div class="metric"><span>publicationFingerprint</span><strong>${fp}</strong></div>`;
+}
+async function render(){
+  const [
+    p3cdReview,p3dReview,p6v3Review,
+    p6v2,p6v2Review,p6v3,p6v3CurrentReview
+  ]=await Promise.all([
+    getSetting("phase3cCorrectionTriageReview:v1"),
+    getSetting("phase3dReportReview:v1"),
+    getSetting("phase6PublicationReview:v3"),
+    getSetting("phase6Publication:v2"),
+    getSetting("phase6PublicationReview:v2"),
+    getSetting("phase6Publication:v3"),
+    getSetting("phase6PublicationReview:v3")
+  ]);
+
+  $("s317").textContent=p3cdReview&&p3cdReview.version==="phase3cd-v3.17-universal-final-gate"&&p3cdReview.status==="pass"
+    ?"✅ v3.17 PASS":"尚未使用 v3.17 PASS";
+  $("s324").textContent=p3dReview&&p3dReview.version==="phase3d-v2.4-v317-final-contract"&&p3dReview.status==="pass"
+    ?"✅ v2.4 PASS":"尚未使用 v2.4 PASS";
+  $("s6").textContent=p6v3Review&&p6v3Review.version==="phase6-final-archive-v3"&&p6v3Review.status==="pass"
+    ?"✅ Phase 6 v3 PASS":"尚未使用 Phase 6 v3 PASS";
+
+  if(p6v3CurrentReview&&p6v3CurrentReview.status==="pass"){
+    $("legacyArchive").className="status good";
+    $("legacyArchive").textContent="✅ 目前有 Phase 6 v3 已驗收成品。";
+    $("archiveMeta").innerHTML=archiveHtml("Phase 6 v3",p6v3,p6v3CurrentReview);
+  }else if(p6v2Review&&p6v2Review.status==="pass"){
+    $("legacyArchive").className="status good";
+    $("legacyArchive").textContent="✅ 目前的已封存成品仍安全保留：Phase 6 v2 PASS。這與『尚未使用新穩定流程』不衝突。";
+    $("archiveMeta").innerHTML=archiveHtml("Phase 6 v2",p6v2,p6v2Review);
+  }else{
+    $("legacyArchive").className="status warn";
+    $("legacyArchive").textContent="目前沒有偵測到 Phase 6 v2／v3 PASS 簽章。";
+    $("archiveMeta").innerHTML="";
+  }
+
+  const rows=await getAllSettingRows();
+  $("status").className="status good";
+  $("status").textContent=`✅ 穩定版總控台 v1.1 已就緒；目前 settings store 共 ${rows.length} 筆流程狀態。`;
+}
+
+$("backupBtn").addEventListener("click",async()=>{
+  const data=await snapshot();
+  download(`screenshot-report-settings-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify(data,null,2));
+});
+
+$("restoreFile").addEventListener("change",async e=>{
+  const f=e.target.files&&e.target.files[0];
+  if(!f)return;
+  try{
+    const data=JSON.parse(await f.text());
+    if(data.schema!=="screenshot-report-settings-backup-v1.1"||!Array.isArray(data.rows))throw new Error("備份格式不符");
+    if(!confirm(`即將把 ${data.rows.length} 筆流程狀態寫回本機 settings store。確定要還原嗎？`))return;
+    for(const row of data.rows){
+      if(!row||typeof row.key!=="string"||!("value" in row))continue;
+      await putRawRow({key:row.key,value:row.value,updatedAt:row.updatedAt||Date.now()});
+    }
+    alert("流程狀態已還原。原始圖片 Blob 不在這份 JSON 內。");
+    await render();
+  }catch(err){
+    alert("還原失敗："+(err&&err.message?err.message:err));
+  }
+});
+
+(async()=>{
+  db=await openDb();
+  await render();
+})().catch(e=>{
+  $("status").className="status warn";
+  $("status").textContent="⚠️ "+(e&&e.message?e.message:e);
+});
+</script>
+</body>
+</html>
